@@ -1,10 +1,16 @@
-module.exports.getTemperature = () =>
+const Rx = require("rxjs");
+const log = require("./log");
+
+module.exports = function()
 {
-	const time = (Date.now() / (1000 * 60 * 60));
+	return Rx.Observable
+		.interval(1000)
+		.map(t =>
+		{
+			const temperature = Math.sin(t - 10) * 10;
 
-	const pos = (Math.sin(time) + 1) / 2;
+			log("seeding - " + temperature);
 
-	const temperature = pos * 30;
-
-	return temperature - (temperature % 0.5);
+			return temperature;
+		});
 };

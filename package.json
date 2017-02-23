@@ -9,6 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "moment": "^2.17.1",
     "sqlite3": "https://github.com/mapbox/node-sqlite3/tarball/master"
+  },
+  "devDependencies": {
+    "rxjs": "^5.2.0"
   }
 }

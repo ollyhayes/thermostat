@@ -1,58 +1,39 @@
-const sqlite3 = require("sqlite3");
-const fs = require("fs");
+const Database = require("./database");
 const getTemperature = require("./thermometer");
-const fileName = "./database.db";
+const process = require("process");	
+const log = require("./log");
+const Rx = require("rxjs");
 
-class Database
-{
-	open()
+//new Database()
+//	.open()
+//	.then(database => 
+//	{
+//		const subscription = getTemperature()
+//			.subscribe(
+//				temperature => database.insert(temperature),
+//				error => console.log("temp error: ", error),
+//				complete => console.log("complete: ", complete));
+//	})
+//	.catch(error => console.log("database error: ", error));
+
+const database = new Database();
+
+const subscription = Rx.Observable.concat(
+		Rx.Observable.fromPromise(database.open()),
+		getTemperature)
+	.subscribe(
+		temperature => database.insert(temperature),
+		error => log("temperature error: " + error),
+		complete => log("complete: " + complete)
+	);
+
+new Promise(resolve => process.on("exit", () => resolve()))
+	.then(() =>
 	{
-		const newDatabase = fs.existsSync(fileName);
-		this.db = new sqlite3.Database(fileName);
-
-		return new Promise((resolve, reject) =>
-		{
-			if (newDatabase)
-				return this._run("create table temperatures (date integer, temperature real)");
-			else
-				return Promise.resolve();
-		});
-	}
-
-	run()
-	{
-		this.timerId = setInterval(() =>
-			getTemperature()
-				.then(temperature =>
-					this._run(
-						"insert into temperatures (date, temperature) values ($date, $temperature);"
-						{
-							date: Date.now(),
-							temperature = temperature
-						})),
-			1000);
-	}
-
-	close()
-	{
-		this.clearInterval(this.timerId);
-		this.db.close();
-	}
-
-	_run(sql, params)
-	{
-		return new Promise((resolve, reject) =>
-		{
-			this.db.run(
-				sql,
-				params,
-				err =>
-				{
-					if (err)
-						reject();
-					else
-						resolve();
-				});
-		});
-	}
-}
+		log("process exited - unsubscribing");
+		subscription.unsubscribe();
+		log("closing database");
+		return database.close();
+	})
+	.then(() => log("database closed"))
+	.catch(error => log(error));
