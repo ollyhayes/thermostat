@@ -1,27 +1,27 @@
-const sqlite3 = require("sqlite3");
+const sqlite = require("sqlite");
 const fs = require("fs");
 const log = require("./log");
 const fileName = "./database.db";
 
 class Database
 {
-	open()
+	async open()
 	{
 		const newDatabase = !fs.existsSync(fileName);
-		this.db = new sqlite3.Database(fileName);
+		this.db = await sqlite.open(fileName);
 
 		log("opening database. is new: " + newDatabase);
 
 		return newDatabase
-			? this._run("create table temperatures (date integer, temperature real)")
-			: Promise.resolve(this);
+			? this.db.run("create table temperatures (date integer, temperature real)")
+			: Promise.resolve();
 	}
 
 	insert(temperature)
 	{
 		log("inserting data - " + temperature);
 
-		return this._run(
+		return this.db.run(
 			"insert into temperatures (date, temperature) values ($date, $temperature);",
 			{
 				$date: Date.now(),
@@ -31,26 +31,7 @@ class Database
 
 	close()
 	{
-		return new Promise((resolve, reject) =>
-		{
-			this.db.close(error => error
-				? reject(error)
-				: resolve());
-		});
-	}
-
-	_run(sql, params)
-	{
-		return new Promise((resolve, reject) =>
-		{
-			this.db.run(
-				sql,
-				params,
-				error => error
-					? reject(error)
-					: resolve()
-			);
-		});
+		return this.db.close();
 	}
 }
 

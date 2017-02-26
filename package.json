@@ -11,7 +11,7 @@
   "dependencies": {
     "colors": "^1.1.2",
     "moment": "^2.17.1",
-    "sqlite3": "https://github.com/mapbox/node-sqlite3/tarball/master"
+    "sqlite": "^2.3.0"
   },
   "devDependencies": {
     "rxjs": "^5.2.0"
