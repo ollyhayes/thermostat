@@ -5,44 +5,34 @@ const log = require("./log");
 const Rx = require("rxjs");
 const readline = require("readline");
 
-let subscription;
-
-const database = new Database();
-database
-	.open()
-	.then(() => 
-	{
-		subscription = getTemperature()
-			.subscribe(
-				temperature => database
-					.insert(temperature)
-					.catch(error => log("db error: " + error)),
-				error => log("temperature error: " + error));
-	})
-	.catch(error => console.log("database error: ", error));
-
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-});
-
-rl.on("line", line =>
+async function run()
 {
-	if (line === "exit")
+	const database = new Database();
+	await database.open();
+
+	const subscription = getTemperature()
+		.subscribe(
+			temperature => database.insert(temperature),
+			error => log("temperature error: " + error));
+
+	const rl = readline.createInterface({
+		input: process.stdin,
+		output: process.stdout
+	});
+
+	rl.on("line", async line =>
 	{
-		log("process exited - unsubscribing");
-		subscription.unsubscribe();
-		log("closing database");
-		database.close()
-			.then(() =>
-			{
-				log("database closed");
-				process.exit();
-			})
-			.catch(error =>
-			{
-				log(error);
-				process.exit();
-			});
-	}
-});
+		if (line === "exit")
+		{
+			log("process exited - unsubscribing");
+			subscription.unsubscribe();
+			log("closing database");
+			await database.close()
+				.catch(error => log(error));
+			log("database closed");
+			process.exit();
+		}
+	});
+}
+
+run().catch(error => log(error));
