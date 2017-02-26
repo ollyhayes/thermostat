@@ -3,37 +3,46 @@ const getTemperature = require("./thermometer");
 const process = require("process");	
 const log = require("./log");
 const Rx = require("rxjs");
+const readline = require("readline");
 
-//new Database()
-//	.open()
-//	.then(database => 
-//	{
-//		const subscription = getTemperature()
-//			.subscribe(
-//				temperature => database.insert(temperature),
-//				error => console.log("temp error: ", error),
-//				complete => console.log("complete: ", complete));
-//	})
-//	.catch(error => console.log("database error: ", error));
+let subscription;
 
 const database = new Database();
+database
+	.open()
+	.then(() => 
+	{
+		subscription = getTemperature()
+			.subscribe(
+				temperature => database
+					.insert(temperature)
+					.catch(error => log("db error: " + error)),
+				error => log("temperature error: " + error));
+	})
+	.catch(error => console.log("database error: ", error));
 
-const subscription = Rx.Observable.concat(
-		Rx.Observable.fromPromise(database.open()),
-		getTemperature)
-	.subscribe(
-		temperature => database.insert(temperature),
-		error => log("temperature error: " + error),
-		complete => log("complete: " + complete)
-	);
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+});
 
-new Promise(resolve => process.on("exit", () => resolve()))
-	.then(() =>
+rl.on("line", line =>
+{
+	if (line === "exit")
 	{
 		log("process exited - unsubscribing");
 		subscription.unsubscribe();
 		log("closing database");
-		return database.close();
-	})
-	.then(() => log("database closed"))
-	.catch(error => log(error));
+		database.close()
+			.then(() =>
+			{
+				log("database closed");
+				process.exit();
+			})
+			.catch(error =>
+			{
+				log(error);
+				process.exit();
+			});
+	}
+});

@@ -24,8 +24,8 @@ class Database
 		return this._run(
 			"insert into temperatures (date, temperature) values ($date, $temperature);",
 			{
-				date: Date.now(),
-				temperature: temperature
+				$date: Date.now(),
+				$temperature: temperature
 			});
 	}
 
