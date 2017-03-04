@@ -21,10 +21,12 @@ class Database
 	{
 		log("inserting data - " + temperature, "green");
 
+		const date = Math.round(Date.now() / 1000);
+
 		return this.db.run(
 			"insert into temperatures (date, temperature) values ($date, $temperature);",
 			{
-				$date: Date.now(),
+				$date: date,
 				$temperature: temperature
 			});
 	}
