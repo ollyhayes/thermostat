@@ -19,7 +19,7 @@ class Database
 
 	insert(temperature)
 	{
-		log("inserting data - " + temperature);
+		log("inserting data - " + temperature, "green");
 
 		return this.db.run(
 			"insert into temperatures (date, temperature) values ($date, $temperature);",
