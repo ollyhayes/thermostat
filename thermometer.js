@@ -1,16 +1,18 @@
 const Rx = require("rxjs");
 const log = require("./log");
+let i = 0;
 
 module.exports = function()
 {
-	return Rx.Observable
-		.interval(1000)
-		.map(t =>
+	return new Promise(resolve =>
+	{
+		const temp = Math.floor(i++ / 2);
+		log(`getting temperature: ${temp}`);
+		setTimeout(() =>
 		{
-			const temperature = Math.sin(t - 10) * 10;
-
-			log("seeding - " + temperature);
-
-			return temperature;
-		});
+			log(`got temperature: ${temp}`);
+			resolve(temp);
+		},
+		Math.random() * 1000 + 250);
+	});
 };
