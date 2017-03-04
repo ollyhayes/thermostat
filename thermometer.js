@@ -1,18 +1,31 @@
 const Rx = require("rxjs");
 const log = require("./log");
-let i = 0;
+const fs = require("fs");
+
+const temp = "/sys/bus/w1/devices/28-0000092348ee/w1_slave";
+//const temp = "/sys/bus/w1/devices/28-000007a0024d/w1_slave";
+const regex = /t=(\d*)/;
+
+let count = 0;
 
 module.exports = function()
 {
-	return new Promise(resolve =>
+	const index = count++;
+	log(`getting temperature. index: ${index}`);
+
+	return new Promise((resolve, reject) =>
 	{
-		const temp = Math.floor(i++ / 2);
-		log(`getting temperature: ${temp}`);
-		setTimeout(() =>
+		fs.readFile(temp, "utf8", (error, data) =>
 		{
-			log(`got temperature: ${temp}`);
-			resolve(temp);
-		},
-		Math.random() * 1000 + 250);
+			if (error)
+				reject(error);
+			
+			const t = regex.exec(data)[1];
+			const temperature = t / 1000;
+			
+			log(`got temperature: ${temperature} degrees. index: ${index}`);
+
+			resolve(temperature);
+		});
 	});
 };
