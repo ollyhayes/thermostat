@@ -1,5 +1,4 @@
-const Rx = require("rxjs");
-const log = require("./log");
+const log = require("../log");
 const fs = require("fs");
 
 const temp = "/sys/bus/w1/devices/28-0000092348ee/w1_slave";

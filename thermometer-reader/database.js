@@ -1,6 +1,6 @@
 const sqlite = require("sqlite");
 const fs = require("fs");
-const log = require("./log");
+const log = require("../log");
 const fileName = "./database.db";
 
 class Database
