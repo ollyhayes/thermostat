@@ -10,10 +10,16 @@
   "license": "ISC",
   "dependencies": {
     "colors": "^1.1.2",
+    "css-loader": "^0.28.4",
+    "d3": "^4.9.1",
     "koa": "^2.2.0",
     "koa-static": "^3.0.0",
+    "less": "^2.7.2",
+    "less-loader": "^4.0.4",
     "moment": "^2.17.1",
-    "sqlite": "^2.3.0"
+    "sqlite": "^2.3.0",
+    "style-loader": "^0.18.2",
+    "webpack": "^2.6.1"
   },
   "devDependencies": {
     "rxjs": "^5.2.0"
