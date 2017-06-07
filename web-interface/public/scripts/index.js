@@ -2,21 +2,22 @@ import { select } from "d3-selection";
 import { scaleTime, scaleLinear } from "d3-scale";
 import { line } from "d3-shape";
 import { extent } from "d3-array";
+import { axisBottom, axisLeft } from "d3-axis";
 import "../less/page.less"; // this should be moved up to an entry point
 
 document.addEventListener("DOMContentLoaded", () =>
 {
 	const box = {
 		x0: 0,
-		x1: 1000,
+		x1: 1200,
 		y0: 0,
-		y1: 1000
+		y1: 600
 	};
 	const margin = {
-		left: 20,
+		left: 50,
 		right: 20,
 		top: 20,
-		bottom: 20
+		bottom: 30
 	};
 	box.width = box.x1 - box.x0;
 	box.height = box.y1 - box.y0;
@@ -39,10 +40,19 @@ document.addEventListener("DOMContentLoaded", () =>
 	const yScale = scaleLinear()
 		.domain(extent(data, d => d.value))
 		.rangeRound([height, 0]);
-		
+
 	const lineGenerator = line()
 		.x(d => xScale(d.date))
 		.y(d => yScale(d.value));
+
+	g.append("g")
+		.classed("axis", true)
+		.attr("transform", `translate(0, ${height})`)
+		.call(axisBottom(xScale));
+
+	g.append("g")
+		.classed("axis", true)
+		.call(axisLeft(yScale));
 
 	g.append("path")
 		.datum(data)
