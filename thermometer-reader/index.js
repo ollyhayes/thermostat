@@ -1,8 +1,7 @@
-const Database = require("./database");
+const Database = require("../common/database");
 const getTemperature = require("./thermometer");
 const process = require("process");	
 const log = require("../log");
-const Rx = require("rxjs");
 const readline = require("readline");
 const looper = require("../timeout-looper");
 

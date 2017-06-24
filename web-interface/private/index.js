@@ -1,8 +1,14 @@
 const Koa = require("koa");
-const app = new Koa();
+const Router = require("koa-router");
 const serve = require("koa-static");
+const app = new Koa();
+const router = new Router();
+const data = require("./data");
+
+router.get("/data", data);
 
 app.use(serve("public"));
+app.use(router.routes());
 
 app.listen(8080);
 

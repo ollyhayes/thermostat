@@ -3,6 +3,8 @@ const fs = require("fs");
 const log = require("../log");
 const fileName = "./database.db";
 
+const toUnix = date => Math.Round(date.getTime() / 1000);
+
 class Database
 {
 	async open()
@@ -21,13 +23,23 @@ class Database
 	{
 		log("inserting data - " + temperature, "green");
 
-		const date = Math.round(Date.now() / 1000);
+		const date = toUnix(new Date());
 
 		return this.db.run(
 			"insert into temperatures (date, temperature) values ($date, $temperature);",
 			{
 				$date: date,
 				$temperature: temperature
+			});
+	}
+
+	read(minDate, maxDate)
+	{
+		return this.db.all(
+			"select date, temperature from temparetures where date between $minDate and $maxDate",
+			{
+				$minDate: toUnix(minDate),
+				$maxDate: toUnix(maxDate)
 			});
 	}
 

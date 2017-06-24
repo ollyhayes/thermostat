@@ -3,9 +3,8 @@ import { scaleTime, scaleLinear } from "d3-scale";
 import { line } from "d3-shape";
 import { extent } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
-import "../less/page.less"; // this should be moved up to an entry point
 
-document.addEventListener("DOMContentLoaded", () =>
+export default function drawChart(element)
 {
 	const box = {
 		x0: 0,
@@ -19,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () =>
 		top: 20,
 		bottom: 30
 	};
+
 	box.width = box.x1 - box.x0;
 	box.height = box.y1 - box.y0;
 	const width = box.width - margin.left - margin.right;
@@ -28,7 +28,8 @@ document.addEventListener("DOMContentLoaded", () =>
 	dates.forEach((date, index) => date.setMonth(index + 2));
 	const data = dates.map(date => ({date: date, value: Math.random()}));
 
-	const g = select("svg")
+	const g = select(element)
+		.append("svg")
 		.attr("viewBox", `${box.x0} ${box.y0} ${box.width} ${box.height}`)
 		.append("g")
 			.attr("transform", `translate(${margin.left}, ${margin.top})`);
@@ -62,8 +63,4 @@ document.addEventListener("DOMContentLoaded", () =>
 		.attr("stroke-linecap", "round")
 		.attr("stroke-width", 1.5)
 		.attr("d", lineGenerator);
-
-	// g.append("line")
-	// 	.attr("x2", box.width)
-	// 	.attr("y2", box.height);
-});
+}

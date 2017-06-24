@@ -1,7 +1,7 @@
 module.exports = {
-	entry: "./public/scripts/index.js",
+	entry: "./public/scripts/entry.js",
 	output: {
-		filename: "index.js",
+		filename: "bundle.js",
 		path: __dirname + "/public/scripts/bundles",
 		publicPath: "/scripts/bundles/"
 	},
@@ -11,5 +11,6 @@ module.exports = {
 			//{ test: /\.jsx$/, exclude: /node_modules/, loader: "babel-loader" },
 			{ test: /\.less$/, exclude: /node_modules/, loader: "style-loader!css-loader!less-loader" }
 		]
-	}
+	},
+	watchOptions: { poll: true }
 };
