@@ -3,6 +3,7 @@ const fs = require("fs");
 const log = require("../log");
 
 const toUnix = date => Math.round(date.getTime() / 1000);
+const fromUnix = unix => new Date(unix * 1000);
 
 class Database
 {
@@ -37,14 +38,20 @@ class Database
 			});
 	}
 
-	read(minDate, maxDate)
+	async read(minDate, maxDate)
 	{
-		return this.db.all(
+		const data = await this.db.all(
 			"select date, temperature from temperatures where date between $minDate and $maxDate",
 			{
 				$minDate: toUnix(minDate),
 				$maxDate: toUnix(maxDate)
 			});
+
+		return data
+			.map(dataPoint => ({
+				date: fromUnix(dataPoint.date),
+				temperature: dataPoint.temperature
+			}));
 	}
 
 	close()
