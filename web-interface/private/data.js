@@ -1,13 +1,17 @@
-const db = require("../../common/database.js");
+const Database = require("../../common/database.js");
 
-module.export = async function getData(context)
+async function getData(context)
 {
 	const query = context.request.query;
 
-	const minDate = new Date(query.minDate);
-	const maxDate = new Date(query.maxDate);
+	const minDate = new Date(Number(query.minDate));
+	const maxDate = new Date(Number(query.maxDate));
+
+	const db = new Database("../database.db");
+	await db.open();
 
 	const data = await db.read(minDate, maxDate);
-
 	context.body = data;
-};
+}
+
+module.exports = getData;

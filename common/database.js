@@ -1,14 +1,20 @@
 const sqlite = require("sqlite");
 const fs = require("fs");
 const log = require("../log");
-const fileName = "./database.db";
+
+const toUnix = date => Math.round(date.getTime() / 1000);
 
 class Database
 {
+	constructor(filename)
+	{
+		this.filename = filename || "./database.db";
+	}
+
 	async open()
 	{
-		const newDatabase = !fs.existsSync(fileName);
-		this.db = await sqlite.open(fileName);
+		const newDatabase = !fs.existsSync(this.filename);
+		this.db = await sqlite.open(this.filename);
 
 		log("opening database. is new: " + newDatabase);
 
@@ -21,13 +27,23 @@ class Database
 	{
 		log("inserting data - " + temperature, "green");
 
-		const date = Math.round(Date.now() / 1000);
+		const date = toUnix(new Date());
 
 		return this.db.run(
 			"insert into temperatures (date, temperature) values ($date, $temperature);",
 			{
 				$date: date,
 				$temperature: temperature
+			});
+	}
+
+	read(minDate, maxDate)
+	{
+		return this.db.all(
+			"select date, temperature from temperatures where date between $minDate and $maxDate",
+			{
+				$minDate: toUnix(minDate),
+				$maxDate: toUnix(maxDate)
 			});
 	}
 
