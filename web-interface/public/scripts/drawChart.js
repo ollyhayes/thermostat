@@ -3,8 +3,9 @@ import { scaleTime, scaleLinear } from "d3-scale";
 import { line } from "d3-shape";
 import { extent } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
+import getTemperature from "./data-repository";
 
-export default function drawChart(element)
+export default async function drawChart(element)
 {
 	const box = {
 		x0: 0,
@@ -23,10 +24,8 @@ export default function drawChart(element)
 	box.height = box.y1 - box.y0;
 	const width = box.width - margin.left - margin.right;
 	const height = box.height - margin.top - margin.bottom;
-
-	const dates = [new Date(), new Date(), new Date(), new Date()];
-	dates.forEach((date, index) => date.setMonth(index + 2));
-	const data = dates.map(date => ({date: date, value: Math.random()}));
+	
+	const data = await getTemperature(new Date(2017, 5, 26), new Date(2017, 5, 27));
 
 	const g = select(element)
 		.append("svg")
@@ -39,12 +38,12 @@ export default function drawChart(element)
 		.rangeRound([0, width]);
 
 	const yScale = scaleLinear()
-		.domain(extent(data, d => d.value))
+		.domain(extent(data, d => d.temperature))
 		.rangeRound([height, 0]);
 
 	const lineGenerator = line()
 		.x(d => xScale(d.date))
-		.y(d => yScale(d.value));
+		.y(d => yScale(d.temperature));
 
 	g.append("g")
 		.classed("axis", true)
@@ -59,8 +58,5 @@ export default function drawChart(element)
 		.datum(data)
 		.attr("fill", "none")
 		.attr("stroke", "steelblue")
-		.attr("stroke-linejoin", "round")
-		.attr("stroke-linecap", "round")
-		.attr("stroke-width", 1.5)
 		.attr("d", lineGenerator);
 }

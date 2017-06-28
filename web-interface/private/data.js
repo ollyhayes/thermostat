@@ -11,6 +11,8 @@ async function getData(context)
 	await db.open();
 
 	const data = await db.read(minDate, maxDate);
+
+	await db.close();
 	context.body = data;
 }
 
