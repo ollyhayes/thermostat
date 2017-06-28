@@ -1,9 +1,9 @@
 const Database = require("../common/database");
 const getTemperature = require("./thermometer");
 const process = require("process");	
-const log = require("../log");
+const log = require("../common/log");
 const readline = require("readline");
-const looper = require("../timeout-looper");
+const looper = require("./timeout-looper");
 
 async function run()
 {

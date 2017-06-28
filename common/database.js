@@ -1,6 +1,6 @@
 const sqlite = require("sqlite");
 const fs = require("fs");
-const log = require("../log");
+const log = require("./log");
 
 const toUnix = date => Math.round(date.getTime() / 1000);
 const fromUnix = unix => new Date(unix * 1000);
