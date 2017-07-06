@@ -3,7 +3,9 @@ import { scaleTime, scaleLinear } from "d3-scale";
 import { line } from "d3-shape";
 import { extent, range } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
+
 import getTemperature from "./data-repository";
+import multiFormat from "./time-format";
 
 export default async function drawChart(element)
 {
@@ -88,7 +90,8 @@ export default async function drawChart(element)
 	g.append("g")
 		.classed("axis", true)
 		.attr("transform", `translate(0, ${height})`)
-		.call(axisBottom(xScale));
+		.call(axisBottom(xScale)
+			.tickFormat(multiFormat));
 
 	g.append("g")
 		.classed("axis", true)
