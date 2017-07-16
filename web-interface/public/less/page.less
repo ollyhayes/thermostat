@@ -1,32 +1,37 @@
-body,div.root,svg
-{
-	background: black;
-	height: 100%;
-	width: 100%;
-	margin: 0;
-	overflow: hidden;
-}
+@background: #252525;
+@border: #525252;
+@foreground: #cccccc;
 
 body
 {
-	display: flex;
+	background: @background;
 }
 
 div.root
 {
-	flex-grow: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: 100%;
 }
 
+svg
+{
+	border: 1px @border solid;
+	max-width: 1000px;
+	flex-grow: 1;
+}
 
 .axis
 {
 	path, line
 	{
-		stroke: white;
+		stroke: @border;
 	}
 
 	text
 	{
-		fill: white;
+		fill: @foreground
 	}
 }
