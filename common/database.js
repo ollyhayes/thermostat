@@ -56,6 +56,7 @@ class Database
 
 	close()
 	{
+		log("closing database");
 		return this.db.close();
 	}
 }
