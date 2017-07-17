@@ -5,6 +5,12 @@ const log = require("./log");
 const toUnix = date => Math.round(date.getTime() / 1000);
 const fromUnix = unix => new Date(unix * 1000);
 
+const createDatabaseSql = `
+	create table temperatures (
+	date integer not null,
+	temperature real not null,
+	precision integer not null)`;
+
 class Database
 {
 	constructor(filename)
@@ -20,7 +26,7 @@ class Database
 		log("opening database. is new: " + newDatabase);
 
 		return newDatabase
-			? this.db.run("create table temperatures (date integer, temperature real)")
+			? this.db.run(createDatabaseSql)
 			: Promise.resolve();
 	}
 
