@@ -81,31 +81,27 @@ class Database
 			await connection.run(
 				insertSql,
 				{
-					date: windowEndUnixTime - precision / 2,
-					temperature: average,
-					precision: precision
+					$date: windowEndUnixTime - precision / 2,
+					$temperature: average,
+					$precision: precision
 				});
 
-			log(`inserted average: ${average} as at ${moment(windowEndUnixTime).format("DD/MM/YYYY HH:mm:ss")}`);
+			log(`inserted average: ${average} as at ${moment(fromUnix(windowEndUnixTime)).format("DD/MM/YYYY HH:mm:ss")}`);
 		};
 		
 		const perRow = async row =>
 		{
-			log(JSON.stringify(row));
+			if (!windowEndUnixTime)
+				windowEndUnixTime = row.date - (row.date % precision) + precision;
 
-			await new Promise(resolve => setTimeout(resolve, 1000));
-
-			// if (!windowEndUnixTime)
-			// 	windowEndUnixTime = perRow.date - (perRow.date % precision) + precision;
-
-			// if (row.date < windowEndUnixTime)
-			// 	currentWindow.push(row);
-			// else
-			// {
-			// 	await perAveragingWindow(currentWindow);
-			// 	currentWindow = [];
-			// 	windowEndUnixTime += precision;
-			// }
+			if (row.date < windowEndUnixTime)
+				currentWindow.push(row);
+			else
+			{
+				await perAveragingWindow(currentWindow);
+				currentWindow = [row];
+				windowEndUnixTime += precision;
+			}
 		};
 
 		await connection.exec("begin immediate");
@@ -116,7 +112,7 @@ class Database
 			toUnix(maxDate),
 			perRow);
 
-		//await perAveragingWindow(currentWindow);
+		await perAveragingWindow(currentWindow);
 
 		await connection.exec("commit");
 		await connection.close;

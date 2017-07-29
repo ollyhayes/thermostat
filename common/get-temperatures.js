@@ -9,7 +9,7 @@ module.exports = async function(connection, minDateUnixTime, maxDateUnixTime, ca
 		and date between $minDate and $maxDate
 		limit $limit offset $offset;`;
 
-	const limit = 5;
+	const limit = 1000;
 	let offset = 0;
 
 	const parameters = {
