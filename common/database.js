@@ -2,6 +2,7 @@ const sqlite = require("sqlite");
 const fs = require("fs");
 const moment = require("moment");
 const log = require("./log");
+const betterEach = require("./sqlite3-better-each");
 
 const toUnix = date => Math.round(date.getTime() / 1000);
 const fromUnix = unix => new Date(unix * 1000);
@@ -70,7 +71,7 @@ class Database
 			select date, temperature, precision
 			from temperatures
 			where precision = 0
-			and date between $minDate and $maxDate;`
+			and date between $minDate and $maxDate`;
 
 		const insertSql = `
 			insert into temperatures (date, temperature, precision)
@@ -79,14 +80,14 @@ class Database
 		let currentWindow = [];
 		let windowEndUnixTime = null;
 
-		const perAveragingWindow = aync averagingWindow =>
+		const perAveragingWindow = async averagingWindow =>
 		{
 			const average = averagingWindow.reduce((sum, next) => sum + next.temperature, 0) / averagingWindow.length;
 
 			await connection.run(
 				insertSql,
 				{
-					date: windowEndUnixTime - percision / 2,
+					date: windowEndUnixTime - precision / 2,
 					temperature: average,
 					precision: precision
 				});
@@ -96,31 +97,36 @@ class Database
 		
 		const perRow = async row =>
 		{
-			if (!windowEndUnixTime)
-				windowEndUnixTime = perRow.date - (perRow.date % precision) + precision;
+			log(JSON.stringify(row));
 
-			if (row.date < windowEndDate)
-				currentWindow.push(row);
-			else
-			{
-				await perAveragingWindow(currentWindow);
-				currentWindow = [];
-				windowEndDate += precision;
-			}
-		}
+			await new Promise(resolve => setTimeout(resolve, 1000));
+
+			// if (!windowEndUnixTime)
+			// 	windowEndUnixTime = perRow.date - (perRow.date % precision) + precision;
+
+			// if (row.date < windowEndUnixTime)
+			// 	currentWindow.push(row);
+			// else
+			// {
+			// 	await perAveragingWindow(currentWindow);
+			// 	currentWindow = [];
+			// 	windowEndUnixTime += precision;
+			// }
+		};
 
 		await connection.exec("begin immediate");
 
-		// assuming this returns a promise when all the rows are consumed
-		const perRow = await connection.each(
+		await betterEach(
+			connection,
 			getSql,
 			{
 				$minDate: toUnix(minDate),
 				$maxDate: toUnix(maxDate)
 			},
-			perRow);
+			perRow,
+			5);
 
-		perAveragingWindow(currentWindow);
+		//await perAveragingWindow(currentWindow);
 
 		await connection.exec("commit");
 		await connection.close;
