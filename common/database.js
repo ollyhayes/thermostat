@@ -2,7 +2,7 @@ const sqlite = require("sqlite");
 const fs = require("fs");
 const moment = require("moment");
 const log = require("./log");
-const betterEach = require("./sqlite3-better-each");
+const getTemperatures = require("./get-temperatures");
 
 const toUnix = date => Math.round(date.getTime() / 1000);
 const fromUnix = unix => new Date(unix * 1000);
@@ -67,12 +67,6 @@ class Database
 		// start a new connection so the transaction is isolated: https://github.com/mapbox/node-sqlite3/issues/304
 		const connection = await sqlite.open(this.filename);
 
-		const getSql = `
-			select date, temperature, precision
-			from temperatures
-			where precision = 0
-			and date between $minDate and $maxDate`;
-
 		const insertSql = `
 			insert into temperatures (date, temperature, precision)
 			values ($date, $temperature, $precision);`;
@@ -116,15 +110,11 @@ class Database
 
 		await connection.exec("begin immediate");
 
-		await betterEach(
+		await getTemperatures(
 			connection,
-			getSql,
-			{
-				$minDate: toUnix(minDate),
-				$maxDate: toUnix(maxDate)
-			},
-			perRow,
-			5);
+			toUnix(minDate),
+			toUnix(maxDate),
+			perRow);
 
 		//await perAveragingWindow(currentWindow);
 
