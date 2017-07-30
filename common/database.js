@@ -71,8 +71,8 @@ class Database
 			insert into temperatures (date, temperature, precision)
 			values ($date, $temperature, $precision);`;
 
-		let currentWindow = [];
-		let windowEndUnixTime = null;
+		const getWindowStartDate = date => date - date % precision;
+		const getWindowEndDate = date => date - date % precision + precision - 1;
 
 		const perAveragingWindow = async averagingWindow =>
 		{
@@ -81,27 +81,77 @@ class Database
 			await connection.run(
 				insertSql,
 				{
-					$date: windowEndUnixTime - precision / 2,
+					$date: windowEndDate - precision / 2,
 					$temperature: average,
 					$precision: precision
 				});
 
-			log(`inserted average: ${average} as at ${moment(fromUnix(windowEndUnixTime)).format("DD/MM/YYYY HH:mm:ss")}`);
+			const windowEndDate = getWindowEndDate(averagingWindow[0].startDate);
+			log(`inserted average: ${average} as at ${moment(fromUnix(windowEndDate)).format("DD/MM/YYYY HH:mm:ss")}`);
 		};
-		
-		const perRow = async row =>
-		{
-			if (!windowEndUnixTime)
-				windowEndUnixTime = row.date - (row.date % precision) + precision;
 
-			if (row.date < windowEndUnixTime)
-				currentWindow.push(row);
+		let windowEndDate = null;
+		let currentWindow = [];
+		const perTemperatureSpan = async temperatureSpan =>
+		{
+			if (!windowEndDate)
+				windowEndDate = getWindowEndDate(temperatureSpan.startDate);
+			
+			if (temperatureSpan.endDate < windowEndDate)
+			{
+				currentWindow.push(temperatureSpan);
+			}
+			else if (temperatureSpan.endDate == windowEndDate)
+			{
+				currentWindow.push(temperatureSpan);
+				await perAveragingWindow(currentWindow);
+				currentWindow = [];
+				windowEndDate += precision;
+			}
 			else
 			{
+				currentWindow.push({
+					startDate: temperatureSpan.startDate,
+					endDate: windowEndDate,
+					temperature: temperatureSpan.temperature
+				});
 				await perAveragingWindow(currentWindow);
-				currentWindow = [row];
-				windowEndUnixTime += precision;
+
+				const missedWindowCount = (getWindowEndDate(temperatureSpan.endDate) - windowEndDate) / precision - 1;
+				const windowStartDate = getWindowStartDate(windowEndDate);
+
+				// could convert this to run all at the same time
+				for (let i = 0; i < missedWindowCount; i++)
+				{
+					await perAveragingWindow({
+						startDate: windowStartDate + (i + 1) * precision,
+						endDate: windowEndDate + (i + 1) * precision,
+						temperature: temperatureSpan.temperature
+					});
+				}
+
+				currentWindow = [];
+				windowEndDate = getWindowEndDate(temperatureSpan.endDate);
+
+				currentWindow.push({
+					startDate: getWindowStartDate(temperatureSpan.endDate),
+					endDate: temperatureSpan.endDate,
+					temperature: temperatureSpan.temperature
+				});
 			}
+		};
+		
+		let previousRow = null;
+		const perRow = async row =>
+		{
+			if (previousRow)
+				perTemperatureSpan({
+					startDate: previousRow.date,
+					endDate: row.date - 1,
+					temperature: previousRow.temperature
+				});
+				
+			previousRow = row;
 		};
 
 		await connection.exec("begin immediate");
