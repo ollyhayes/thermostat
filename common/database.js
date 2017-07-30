@@ -1,8 +1,11 @@
 const sqlite = require("sqlite");
 const fs = require("fs");
-const moment = require("moment");
 const log = require("./log");
 const getTemperatures = require("./get-temperatures");
+
+const RowToSpan = require("./transformers/row-to-span");
+const SpanToWindow = require("./transformers/span-to-window");
+const WindowInserter = require("./transformers/window-inserter");
 
 const toUnix = date => Math.round(date.getTime() / 1000);
 const fromUnix = unix => new Date(unix * 1000);
@@ -67,92 +70,9 @@ class Database
 		// start a new connection so the transaction is isolated: https://github.com/mapbox/node-sqlite3/issues/304
 		const connection = await sqlite.open(this.filename);
 
-		const insertSql = `
-			insert into temperatures (date, temperature, precision)
-			values ($date, $temperature, $precision);`;
-
-		const getWindowStartDate = date => date - date % precision;
-		const getWindowEndDate = date => date - date % precision + precision - 1;
-
-		const perAveragingWindow = async averagingWindow =>
-		{
-			const average = averagingWindow.reduce((sum, next) => sum + next.temperature, 0) / averagingWindow.length;
-
-			await connection.run(
-				insertSql,
-				{
-					$date: windowEndDate - precision / 2,
-					$temperature: average,
-					$precision: precision
-				});
-
-			const windowEndDate = getWindowEndDate(averagingWindow[0].startDate);
-			log(`inserted average: ${average} as at ${moment(fromUnix(windowEndDate)).format("DD/MM/YYYY HH:mm:ss")}`);
-		};
-
-		let windowEndDate = null;
-		let currentWindow = [];
-		const perTemperatureSpan = async temperatureSpan =>
-		{
-			if (!windowEndDate)
-				windowEndDate = getWindowEndDate(temperatureSpan.startDate);
-			
-			if (temperatureSpan.endDate < windowEndDate)
-			{
-				currentWindow.push(temperatureSpan);
-			}
-			else if (temperatureSpan.endDate == windowEndDate)
-			{
-				currentWindow.push(temperatureSpan);
-				await perAveragingWindow(currentWindow);
-				currentWindow = [];
-				windowEndDate += precision;
-			}
-			else
-			{
-				currentWindow.push({
-					startDate: temperatureSpan.startDate,
-					endDate: windowEndDate,
-					temperature: temperatureSpan.temperature
-				});
-				await perAveragingWindow(currentWindow);
-
-				const missedWindowCount = (getWindowEndDate(temperatureSpan.endDate) - windowEndDate) / precision - 1;
-				const windowStartDate = getWindowStartDate(windowEndDate);
-
-				// could convert this to run all at the same time
-				for (let i = 0; i < missedWindowCount; i++)
-				{
-					await perAveragingWindow({
-						startDate: windowStartDate + (i + 1) * precision,
-						endDate: windowEndDate + (i + 1) * precision,
-						temperature: temperatureSpan.temperature
-					});
-				}
-
-				currentWindow = [];
-				windowEndDate = getWindowEndDate(temperatureSpan.endDate);
-
-				currentWindow.push({
-					startDate: getWindowStartDate(temperatureSpan.endDate),
-					endDate: temperatureSpan.endDate,
-					temperature: temperatureSpan.temperature
-				});
-			}
-		};
-		
-		let previousRow = null;
-		const perRow = async row =>
-		{
-			if (previousRow)
-				perTemperatureSpan({
-					startDate: previousRow.date,
-					endDate: row.date - 1,
-					temperature: previousRow.temperature
-				});
-				
-			previousRow = row;
-		};
+		const rowToSpan = new RowToSpan();
+		const spanToWindow = new SpanToWindow(precision);
+		const windowInserter = new WindowInserter(precision);
 
 		await connection.exec("begin immediate");
 
@@ -160,9 +80,15 @@ class Database
 			connection,
 			toUnix(minDate),
 			toUnix(maxDate),
-			perRow);
+			row => rowToSpan.transform(
+				row,
+				span => spanToWindow.transform(
+					span,
+					window => windowInserter.insert(window))));
 
-		await perAveragingWindow(currentWindow);
+
+		// ah, what about this?
+		//await perAveragingWindow(currentWindow);
 
 		await connection.exec("commit");
 		await connection.close;
