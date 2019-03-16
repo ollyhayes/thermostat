@@ -1,8 +1,15 @@
 const log = require("../common/log");
 const fs = require("fs");
 
-const temp = "/sys/bus/w1/devices/28-0000092348ee/w1_slave";
-//const temp = "/sys/bus/w1/devices/28-000007a0024d/w1_slave";
+const thermometers = {
+	chip1: "28-0000092348ee",
+	chip2: "28-000007a0024d",
+	yellow: "28-030897799788",
+	red: "28-030897791ed8",
+	yellowRed: "28-03079779a1b8"
+}
+
+const temp = `/sys/bus/w1/devices/${thermometers.yellow}/w1_slave`;
 const regex = /t=(\d*)/;
 
 let count = 0;
