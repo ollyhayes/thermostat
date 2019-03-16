@@ -27,7 +27,6 @@ async function run()
 		{
 			log("process exited - unsubscribing");
 			subscription.unsubscribe();
-			log("closing database");
 			await database.close()
 				.catch(error => log(error));
 			log("database closed");
