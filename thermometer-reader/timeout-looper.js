@@ -1,4 +1,4 @@
-const log = require("./log");
+const log = require("../common/log");
 const Rx = require("rxjs");
 
 module.exports = function(timeout, action)
