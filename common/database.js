@@ -54,7 +54,7 @@ class Database
 	read(minDate, maxDate)
 	{
 		if (!this.readCommand)
-			this.readCommand = this.db.prepare("select date, temperature from temperatures where date between @minDate and @maxDate")
+			this.readCommand = this.db.prepare("select date, temperature from temperatures where date between @minDate and @maxDate order by date;")
 
 		const data = this.readCommand.all({
 			minDate: toUnix(minDate),
