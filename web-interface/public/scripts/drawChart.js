@@ -27,47 +27,47 @@ export default async function drawChart(element)
 	const width = box.width - margin.left - margin.right;
 	const height = box.height - margin.top - margin.bottom;
 	
-	const startDate = new Date(2017, 5, 26);
-	const endDate = new Date(2017, 5, 27);
+	const startDate = new Date(2019, 0, 26, 12);
+	const endDate = new Date(2019, 5, 27, 15);
 	// const startDate = new Date(2017, 5, 26, 17, 0);
 	// const endDate = new Date(2017, 5, 26, 18, 0);
 	const data = await getTemperature(startDate, endDate);
 
-	const getTemperatureForDate = time =>
-	{
-		let currentTemperature = data[0].temperature;
-		for (let i = 0; i < data.length; i++)
-		{
-			if (data[i].date.getTime() / 1000 > time)
-				break;
+	// const getTemperatureForDate = time =>
+	// {
+	// 	let currentTemperature = data[0].temperature;
+	// 	for (let i = 0; i < data.length; i++)
+	// 	{
+	// 		if (data[i].date.getTime() / 1000 > time)
+	// 			break;
 
-			currentTemperature = data[i].temperature;
-		}
+	// 		currentTemperature = data[i].temperature;
+	// 	}
 
-		return currentTemperature;
-	};
+	// 	return currentTemperature;
+	// };
 
-	const spreadData = range(startDate.getTime() / 1000, endDate.getTime() / 1000)
-		.map(time => ({
-			date: new Date(time * 1000),
-			temperature: getTemperatureForDate(time)
-		}));
+	// const spreadData = range(startDate.getTime() / 1000, endDate.getTime() / 1000)
+	// 	.map(time => ({
+	// 		date: new Date(time * 1000),
+	// 		temperature: getTemperatureForDate(time)
+	// 	}));
 
-	const search = 60;
-	const averagedData = spreadData.map((dataPoint, index) =>
-	{
-		const min = Math.max(index - search, 0);
-		const max = Math.min(index + search, spreadData.length - 1);
+	// const search = 60;
+	// const averagedData = spreadData.map((dataPoint, index) =>
+	// {
+	// 	const min = Math.max(index - search, 0);
+	// 	const max = Math.min(index + search, spreadData.length - 1);
 
-		let sum = 0;
-		for (let i = min; i < max; i++)
-			sum += spreadData[i].temperature;
+	// 	let sum = 0;
+	// 	for (let i = min; i < max; i++)
+	// 		sum += spreadData[i].temperature;
 
-		return {
-			date: dataPoint.date,
-			temperature: sum / (max - min)
-		};
-	});
+	// 	return {
+	// 		date: dataPoint.date,
+	// 		temperature: sum / (max - min)
+	// 	};
+	// });
 
 	const g = select(element)
 		.append("svg")
@@ -110,7 +110,8 @@ export default async function drawChart(element)
 	// 	.attr("d", lineGenerator);
 
 	g.append("path")
-		.datum(averagedData)
+		// .datum(averagedData)
+		.datum(data)
 		.attr("fill", "none")
 		.attr("stroke", "yellow")
 		.attr("d", lineGenerator);
