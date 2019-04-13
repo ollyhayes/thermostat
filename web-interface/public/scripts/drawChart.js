@@ -28,10 +28,14 @@ export default async function drawChart(element)
 	const height = box.height - margin.top - margin.bottom;
 	
 	const startDate = new Date(2019, 2, 27, 12);
-	const endDate = new Date(2019, 2, 27, 15);
-	// const startDate = new Date(2017, 5, 26, 17, 0);
-	// const endDate = new Date(2017, 5, 26, 18, 0);
+	const endDate = new Date(2019, 2, 27, 15, 30);
+
 	const data = await getTemperature(startDate, endDate);
+
+	// const indexed = data.reduce((map, next, i) => {
+	// 	map[new Date(next.date).getTime() / 1000] = i;
+	// 	return map;
+	// }, {});
 
 	// const getTemperatureForDate = time =>
 	// {
@@ -46,28 +50,62 @@ export default async function drawChart(element)
 
 	// 	return currentTemperature;
 	// };
+	
+	// function* nextTime(startDate, endDate, step = 1) {
+	// 	let currentPosition = 0;
+	// 	for (let date = startDate; startDate < endDate; startDate += step) {
+	// 		for (let currentIndex = currentPosition; currentIndex < data.length; currentIndex++) {
+
+	// 			if (data[currentIndex].date.getTime() / 1000 > date)
+	// 				yield data[currentIndex];
+
+	// 		}
+	// 	}
+	// }
+
+	// const indexed = new Map();
+	const spread = [];
+	{
+		let start = startDate.getTime() / 1000;
+		let end =  endDate.getTime() / 1000;
+		let currentIndex = 0;
+		let step = 1; // vary this based on window size
+
+		for (let date = start; date < end; date += step) {
+			for (; currentIndex < data.length; currentIndex++) {
+
+				if (data[currentIndex].date.getTime() / 1000 > date) {
+					// indexed.set(date, data[currentIndex]);
+					spread.push(data[currentIndex]);
+					break;
+				}
+					
+			}
+		}
+	}
 
 	// const spreadData = range(startDate.getTime() / 1000, endDate.getTime() / 1000)
+	// 	// .filter(time => time % 10 === 0)
 	// 	.map(time => ({
 	// 		date: new Date(time * 1000),
-	// 		temperature: getTemperatureForDate(time)
+	// 		temperature: indexed[time]
 	// 	}));
 
-	// const search = 60;
-	// const averagedData = spreadData.map((dataPoint, index) =>
-	// {
-	// 	const min = Math.max(index - search, 0);
-	// 	const max = Math.min(index + search, spreadData.length - 1);
+	const search = 6;
+	const averagedData = spread.map((dataPoint, index) =>
+	{
+		const min = Math.max(index - search, 0);
+		const max = Math.min(index + search, spread.length - 1);
 
-	// 	let sum = 0;
-	// 	for (let i = min; i < max; i++)
-	// 		sum += spreadData[i].temperature;
+		let sum = 0;
+		for (let i = min; i < max; i++)
+			sum += spread[i].temperature;
 
-	// 	return {
-	// 		date: dataPoint.date,
-	// 		temperature: sum / (max - min)
-	// 	};
-	// });
+		return {
+			date: dataPoint.date,
+			temperature: sum / (max - min)
+		};
+	});
 
 	const g = select(element)
 		.append("svg")
@@ -97,22 +135,15 @@ export default async function drawChart(element)
 		.classed("axis", true)
 		.call(axisLeft(yScale));
 
-	// g.append("path")
-	// 	.datum(data)
-	// 	.attr("fill", "none")
-	// 	.attr("stroke", "steelblue")
-	// 	.attr("d", lineGenerator);
-
-	// g.append("path")
-	// 	.datum(spreadData)
-	// 	.attr("fill", "none")
-	// 	.attr("stroke", "red")
-	// 	.attr("d", lineGenerator);
-
 	g.append("path")
-		// .datum(averagedData)
 		.datum(data)
 		.attr("fill", "none")
-		.attr("stroke", "yellow")
+		.attr("stroke", "black")
+		.attr("d", lineGenerator);
+
+	g.append("path")
+		.datum(averagedData)
+		.attr("fill", "none")
+		.attr("stroke", "white")
 		.attr("d", lineGenerator);
 }

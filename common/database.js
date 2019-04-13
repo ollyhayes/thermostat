@@ -30,7 +30,7 @@ class Database
 		const isNewDatabase = !fs.existsSync(this.filename);
 		this.db = new Sqlite(this.filename);
 
-		log("opening database. is new: " + isNewDatabase);
+		log("opening database" + isNewDatabase ? " (creating new)" : null);
 
 		if (isNewDatabase)
 			this.db.exec(createDatabaseSql);
