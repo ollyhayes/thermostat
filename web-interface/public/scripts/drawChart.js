@@ -38,8 +38,8 @@ export default async function drawChart(element)
 		.append("svg")
 		.attr("viewBox", `${box.x0} ${box.y0} ${box.width} ${box.height}`)
 		.append("g")
-			.attr("transform", `translate(${margin.left}, ${margin.top})`);
-
+		.attr("transform", `translate(${margin.left}, ${margin.top})`);
+	
 	const xScale = scaleTime()
 		.domain(extent(data, d => d.date))
 		.rangeRound([0, width]);

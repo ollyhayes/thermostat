@@ -10,6 +10,13 @@
 			"name": "web-interface",
 			"program": "${workspaceFolder}/web-interface/private/index.js",
 			"cwd": "${workspaceFolder}/web-interface"
-		}
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "thermometer-reader",
+			"program": "${workspaceFolder}/thermometer-reader/index.js",
+			"cwd": "${workspaceFolder}/thermometer-reader"
+		},
 	]
 }

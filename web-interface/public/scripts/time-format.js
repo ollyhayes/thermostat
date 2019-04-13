@@ -7,7 +7,7 @@ import {
 	timeWeek,
 	timeMonth,
 	timeYear
-	} from "d3-time";
+} from "d3-time";
 
 timeFormatDefaultLocale({
 	"dateTime": "%a %e %b %X %Y",
@@ -32,11 +32,9 @@ export default function(date)
 {
 	return (timeSecond(date) < date ? formatMillisecond
 		: timeMinute(date) < date ? formatSecond
-		: timeHour(date) < date ? formatMinute
-		: timeDay(date) < date ? formatMinute
-		: timeMonth(date) < date ? (timeWeek(date) < date ? formatDay : formatWeek)
-		: timeYear(date) < date ? formatMonth
-		: formatYear)(date);
+			: timeHour(date) < date ? formatMinute
+				: timeDay(date) < date ? formatMinute
+					: timeMonth(date) < date ? (timeWeek(date) < date ? formatDay : formatWeek)
+						: timeYear(date) < date ? formatMonth
+							: formatYear)(date);
 }
-
-//export { multiFormat };

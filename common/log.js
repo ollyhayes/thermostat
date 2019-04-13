@@ -1,8 +1,7 @@
 const moment = require("moment");
-const colors = require("colors");
+require("colors");
 
-module.exports = function(message, colour)
-{
+function log(message, colour) {
 	const time = moment().format("HH:mm:ss").magenta;
 	const colouredMessage = colour
 		? message[colour]
@@ -10,3 +9,5 @@ module.exports = function(message, colour)
 
 	console.log(`${time} - ${colouredMessage}`);
 }
+
+module.exports = log;

@@ -27,7 +27,7 @@ function run()
 		{
 			log("process exited - unsubscribing");
 			subscription.unsubscribe();
-			database.close()
+			database.close();
 			log("database closed");
 			process.exit();
 		}
