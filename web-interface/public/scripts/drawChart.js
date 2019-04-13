@@ -32,8 +32,8 @@ export default async function drawChart(element)
 	const startDate = new Date(2019, 2, 27, 12);
 	const endDate = new Date(2019, 2, 27, 12, 30);
 
-	const data = await getTemperature(startDate, endDate);
-	const averagedData = calculateAverage(data, 10); // vary step by zoom
+	let data = await getTemperature(startDate, endDate);
+	let averagedData = calculateAverage(data, 10); // vary step by zoom
 
 	const xScale = scaleTime()
 		.domain(extent(data, d => d.date))
@@ -90,16 +90,38 @@ export default async function drawChart(element)
 	// 	.attr("stroke", "black")
 	// 	.attr("d", lineGenerator);
 
-	chartArea.append("path")
+	const path = chartArea.append("path")
 		.datum(averagedData)
 		.attr("fill", "none")
-		.attr("stroke", "white")
+		.attr("stroke", "yellow")
 		.attr("d", lineGenerator);
+
+	let zoomedScale = xScale;
 
 	function zoomed() {
 		const t = d3Event.transform;
 		chartArea.attr("transform", `translate(${t.x} 0) scale(${t.k}, 1)`);
-		gX.call(xAxis.scale(t.rescaleX(xScale))); // think we need to reset xScale too!
+		zoomedScale = t.rescaleX(xScale);
+		gX.call(xAxis.scale(zoomedScale)); // think we need to reset xScale too!
 		// gY.call(yAxis.scale(t.rescaleY(yScale)));
 	}
+
+	document.addEventListener("keydown", async e => {
+		if (e.key === "Enter") {
+			const [startDate, endDate] = zoomedScale.domain();
+
+			let data = await getTemperature(startDate, endDate);
+			let averagedData = calculateAverage(data, 10); // vary step by zoom
+
+			path.datum(averagedData)
+				.attr("d", lineGenerator);
+		}
+	});
 }
+
+// todo:
+// tidy
+// adjust the step-size and spread
+// update the y-scale on data load
+// make the averaging deterministic
+// make it load as you scroll
