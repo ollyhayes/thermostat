@@ -8,11 +8,11 @@ async function getData(context)
 	const maxDate = new Date(Number(query.maxDate));
 
 	const db = new Database("../database.db");
-	await db.open();
+	db.open();
 
-	const data = await db.read(minDate, maxDate);
+	const data = db.read(minDate, maxDate);
 
-	await db.close();
+	db.close();
 	context.body = data;
 }
 

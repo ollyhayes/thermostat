@@ -1,4 +1,4 @@
-const sqlite = require("sqlite");
+const Sqlite = require("better-sqlite3");
 const fs = require("fs");
 const log = require("./log");
 const getTemperatures = require("./get-temperatures");
@@ -21,48 +21,50 @@ class Database
 	constructor(filename)
 	{
 		this.filename = filename || "./database.db";
+		this.insertCommand = null;
+		this.readCommand = null;
 	}
 
-	async open()
+	open()
 	{
-		const newDatabase = !fs.existsSync(this.filename);
-		this.db = await sqlite.open(this.filename);
+		const isNewDatabase = !fs.existsSync(this.filename);
+		this.db = new Sqlite(this.filename);
 
-		log("opening database. is new: " + newDatabase);
+		log("opening database. is new: " + isNewDatabase);
 
-		return newDatabase
-			? this.db.run(createDatabaseSql)
-			: Promise.resolve();
+		if (isNewDatabase)
+			this.db.exec(createDatabaseSql);
 	}
 
 	insert(temperature)
 	{
+		if (!this.insertCommand)
+			this.insertCommand = this.db.prepare("insert into temperatures (date, temperature) values (date, temperature);");
+
 		log("inserting data - " + temperature, "green");
 
 		const date = toUnix(new Date());
 
-		return this.db.run(
-			"insert into temperatures (date, temperature) values ($date, $temperature);",
-			{
-				$date: date,
-				$temperature: temperature
-			});
+		return this.insertCommand.run({
+			date: date,
+			temperature: temperature
+		});
 	}
 
-	async read(minDate, maxDate)
+	read(minDate, maxDate)
 	{
-		const data = await this.db.all(
-			"select date, temperature from temperatures where date between $minDate and $maxDate",
-			{
-				$minDate: toUnix(minDate),
-				$maxDate: toUnix(maxDate)
-			});
+		if (!this.readCommand)
+			this.readCommand = this.db.prepare("select date, temperature from temperatures where date between @minDate and @maxDate")
 
-		return data
-			.map(dataPoint => ({
-				date: fromUnix(dataPoint.date),
-				temperature: dataPoint.temperature
-			}));
+		const data = this.readCommand.all({
+			minDate: toUnix(minDate),
+			maxDate: toUnix(maxDate)
+		});
+
+		return data.map(dataPoint => ({
+			date: fromUnix(dataPoint.date),
+			temperature: dataPoint.temperature
+		}));
 	}
 
 	async calculatePrecisions(minDate, maxDate, precision)
