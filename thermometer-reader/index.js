@@ -21,7 +21,6 @@ function run()
 		database.close();
 		log("database closed");
 	});
-
 }
 
 run();
