@@ -27,8 +27,8 @@ export default async function drawChart(element)
 	const width = box.width - margin.left - margin.right;
 	const height = box.height - margin.top - margin.bottom;
 	
-	const startDate = new Date(2019, 0, 26, 12);
-	const endDate = new Date(2019, 5, 27, 15);
+	const startDate = new Date(2019, 2, 27, 12);
+	const endDate = new Date(2019, 2, 27, 15);
 	// const startDate = new Date(2017, 5, 26, 17, 0);
 	// const endDate = new Date(2017, 5, 26, 18, 0);
 	const data = await getTemperature(startDate, endDate);
