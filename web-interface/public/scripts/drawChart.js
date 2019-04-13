@@ -28,7 +28,7 @@ export default async function drawChart(element)
 	box.height = box.y1 - box.y0;
 	const width = box.width - margin.left - margin.right;
 	const height = box.height - margin.top - margin.bottom;
-	
+
 	const startDate = new Date(2019, 2, 27, 12);
 	const endDate = new Date(2019, 2, 27, 12, 30);
 
@@ -43,9 +43,15 @@ export default async function drawChart(element)
 		.domain(extent(data, d => d.temperature))
 		.rangeRound([height, 0]);
 
+	const worldExtent = [[new Date(2019, 2, 20), 20], [new Date(2019, 2, 30), 10]];
+	const translatedWorldExtent = [
+		[xScale(worldExtent[0][0]), yScale(worldExtent[0][1])],
+		[xScale(worldExtent[1][0]), yScale(worldExtent[1][1])]
+	];
+	
 	const zoomer = zoom()
 		// .scaleExtent([1, Infinity])
-		// .translateExtent([0,0], [width, height])
+		.translateExtent(translatedWorldExtent)
 		.on("zoom", zoomed);
 
 	const lineGenerator = line()
@@ -92,8 +98,8 @@ export default async function drawChart(element)
 
 	function zoomed() {
 		const t = d3Event.transform;
-		chartArea.attr("transform", t);
+		chartArea.attr("transform", `translate(${t.x} 0) scale(${t.k}, 1)`);
 		gX.call(xAxis.scale(t.rescaleX(xScale))); // think we need to reset xScale too!
-		gY.call(yAxis.scale(t.rescaleY(yScale)));
+		// gY.call(yAxis.scale(t.rescaleY(yScale)));
 	}
 }
