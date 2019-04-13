@@ -19,20 +19,19 @@ module.exports = function()
 	const index = count++;
 	log(`getting temperature. index: ${index}`);
 
-	return Promise.resolve(12);
-	// return new Promise((resolve, reject) =>
-	// {
-	// 	fs.readFile(temp, "utf8", (error, data) =>
-	// 	{
-	// 		if (error)
-	// 			reject(error);
+	return new Promise((resolve, reject) =>
+	{
+		fs.readFile(temp, "utf8", (error, data) =>
+		{
+			if (error)
+				reject(error);
 			
-	// 		const t = regex.exec(data)[1];
-	// 		const temperature = t / 1000;
+			const t = regex.exec(data)[1];
+			const temperature = t / 1000;
 			
-	// 		log(`got temperature: ${temperature} degrees. index: ${index}`);
+			log(`got temperature: ${temperature} degrees. index: ${index}`);
 
-	// 		resolve(temperature);
-	// 	});
-	// });
+			resolve(temperature);
+		});
+	});
 };
