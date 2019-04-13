@@ -39,7 +39,7 @@ class Database
 	insert(temperature)
 	{
 		if (!this.insertCommand)
-			this.insertCommand = this.db.prepare("insert into temperatures (date, temperature) values (date, temperature);");
+			this.insertCommand = this.db.prepare("insert into temperatures (date, temperature) values (@date, @temperature);");
 
 		log("inserting data - " + temperature, "green");
 

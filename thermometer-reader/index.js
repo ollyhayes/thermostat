@@ -34,4 +34,4 @@ function run()
 	});
 }
 
-run().catch(error => log(error));
+run()
