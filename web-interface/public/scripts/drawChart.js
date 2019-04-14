@@ -8,6 +8,8 @@ import { zoom } from "d3-zoom";
 import multiFormat from "./time-format";
 import getTemperature from "./data-repository";
 
+const autoRefresh = false;
+
 export default async function drawChart(element)
 {
 	const box = {
@@ -98,25 +100,26 @@ export default async function drawChart(element)
 		// gY.call(yAxis.scale(t.rescaleY(yScale)));
 	}
 
+	async function reload(startDate, endDate) {
+		const data = await getTemperature(startDate, endDate);
+
+		yScale.domain(getYAxisExtent(data));
+		gY.call(yAxis);
+
+		path.datum(data)
+			.attr("d", lineGenerator);
+	}
+
 	document.addEventListener("keydown", async e => {
 		if (e.key === "Enter") {
 			const [startDate, endDate] = zoomedScale.domain();
 
-			const data = await getTemperature(startDate, endDate);
-
-			yScale.domain(getYAxisExtent(data));
-			gY.call(yAxis);
-
-			path.datum(data)
-				.attr("d", lineGenerator);
+			await reload(startDate, endDate);
 		}
 	});
 
-	setInterval(() => {
-		const endDate = new Date(Date.now() + 30000);
-
-		reload(startDate, endDate);
-	}, 2000);
+	if (autoRefresh)
+		setInterval(() => reload(startDate, new Date(Date.now() + 30000)) , 2000);
 
 	function getYAxisExtent(data) {
 		const [minTemperature, maxTemperature] = extent(data, d => d.temperature);
