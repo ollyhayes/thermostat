@@ -7,6 +7,7 @@ import { zoom } from "d3-zoom";
 
 import { getData } from "./utils";
 import multiFormat from "./time-format";
+import { relativeTimeRounding } from "moment";
 
 const showRawData = false;
 
@@ -30,8 +31,10 @@ export default async function drawChart(element)
 	const width = box.width - margin.left - margin.right;
 	const height = box.height - margin.top - margin.bottom;
 
-	const startDate = new Date(2019, 2, 27, 12);
-	const endDate = new Date(2019, 2, 27, 12, 30);
+	// const startDate = new Date(2019, 2, 27, 12);
+	// const endDate = new Date(2019, 2, 27, 12, 30);
+	const startDate = new Date(Date.now() - 30000);
+	const endDate = new Date(Date.now() + 30000);
 
 	const {data, rawData} = await getData(startDate, endDate);
 
@@ -106,23 +109,34 @@ export default async function drawChart(element)
 		// gY.call(yAxis.scale(t.rescaleY(yScale)));
 	}
 
+	async function reload(startDate, endDate) {
+		const {data, rawData} = await getData(startDate, endDate);
+
+		yScale.domain(getYAxisExtent(data));
+		gY.call(yAxis);
+
+		path.datum(data)
+			.attr("d", lineGenerator);
+
+		if (showRawData)
+			rawPath.datum(rawData)
+				.attr("d", lineGenerator);
+	}
+
 	document.addEventListener("keydown", async e => {
 		if (e.key === "Enter") {
 			const [startDate, endDate] = zoomedScale.domain();
 
-			const {data, rawData} = await getData(startDate, endDate);
-
-			yScale.domain(getYAxisExtent(data));
-			gY.call(yAxis);
-
-			path.datum(data)
-				.attr("d", lineGenerator);
-
-			if (showRawData)
-				rawPath.datum(rawData)
-					.attr("d", lineGenerator);
+			await reload(startDate, endDate);
 		}
 	});
+
+	setInterval(() => {
+		const startDate = new Date(Date.now() - 30000);
+		const endDate = new Date(Date.now() + 30000);
+
+		reload(startDate, endDate);
+	}, 1000);
 
 	function getYAxisExtent(data) {
 		const [minTemperature, maxTemperature] = extent(data, d => d.temperature);
@@ -137,7 +151,5 @@ export default async function drawChart(element)
 }
 
 // todo:
-// update the y-scale on data load
-// make the averaging deterministic
 // make it load as you scroll
 // fix the end
