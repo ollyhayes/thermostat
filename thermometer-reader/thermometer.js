@@ -19,7 +19,6 @@ module.exports = function()
 	const index = count++;
 	log(`getting temperature. index: ${index}`);
 
-	return Promise.resolve(12);
 	return new Promise((resolve, reject) =>
 	{
 		fs.readFile(temp, "utf8", (error, data) =>
