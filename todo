@@ -1,0 +1,7 @@
+switch to area so the scaling doesn't screw up the line (or rescale on reload)
+averages for minutes and hours
+multiple sensors
+integers for temperatures
+refresh on scroll
+autorefresh
+animation on y-scale change
