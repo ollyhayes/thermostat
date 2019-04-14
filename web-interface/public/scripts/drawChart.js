@@ -31,7 +31,7 @@ export default async function drawChart(element)
 	const height = box.height - margin.top - margin.bottom;
 
 	const [startDate, endDate] = autoRefresh
-		? [new Date(Date.now() - 30000), new Date(Date.now() - 30000)]
+		? [new Date(Date.now() - 30000), new Date(Date.now() + 30000)]
 		: [new Date(2019, 2, 27, 12), new Date(2019, 2, 27, 12, 30)];
 
 	const data = await getTemperature(startDate, endDate);
