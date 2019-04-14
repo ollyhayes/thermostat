@@ -5,10 +5,8 @@ import { extent } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { zoom } from "d3-zoom";
 
-import { getData } from "./utils";
 import multiFormat from "./time-format";
-
-const showRawData = false;
+import getTemperature from "./data-repository";
 
 export default async function drawChart(element)
 {
@@ -35,7 +33,7 @@ export default async function drawChart(element)
 	// const startDate = new Date(Date.now() - 30000);
 	// const endDate = new Date(Date.now() + 30000);
 
-	const {data, rawData} = await getData(startDate, endDate);
+	const data = await getTemperature(startDate, endDate);
 
 	const xScale = scaleTime()
 		.domain(extent(data, d => d.date))
@@ -84,14 +82,6 @@ export default async function drawChart(element)
 			// .translateExtent(translatedWorldExtent)
 			.on("zoom", zoomed));
 
-	const rawPath = showRawData
-		? chartArea.append("path")
-			.datum(rawData)
-			.attr("fill", "none")
-			.attr("stroke", "black")
-			.attr("d", lineGenerator)
-		: null;
-
 	const path = chartArea.append("path")
 		.datum(data)
 		.attr("fill", "none")
@@ -112,17 +102,13 @@ export default async function drawChart(element)
 		if (e.key === "Enter") {
 			const [startDate, endDate] = zoomedScale.domain();
 
-			const {data, rawData} = await getData(startDate, endDate);
+			const data = await getTemperature(startDate, endDate);
 
 			yScale.domain(getYAxisExtent(data));
 			gY.call(yAxis);
 
 			path.datum(data)
 				.attr("d", lineGenerator);
-
-			if (showRawData)
-				rawPath.datum(rawData)
-					.attr("d", lineGenerator);
 		}
 	});
 
@@ -137,9 +123,3 @@ export default async function drawChart(element)
 		return [minTemperature, maxTemperature];
 	}
 }
-
-// todo:
-// update the y-scale on data load
-// make the averaging deterministic
-// make it load as you scroll
-// fix the end
