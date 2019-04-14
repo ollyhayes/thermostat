@@ -1,19 +1,14 @@
-const Database = require("../../common/database.js");
+function createDataRouter(db) {
+	return async function(context)
+	{
+		const query = context.request.query;
 
-async function getData(context)
-{
-	const query = context.request.query;
+		const minDate = new Date(Number(query.minDate));
+		const maxDate = new Date(Number(query.maxDate));
 
-	const minDate = new Date(Number(query.minDate));
-	const maxDate = new Date(Number(query.maxDate));
-
-	const db = new Database("../database.db");
-	db.open();
-
-	const data = db.read(minDate, maxDate);
-
-	db.close();
-	context.body = data;
+		const data = db.read(minDate, maxDate);
+		context.body = data;
+	};
 }
 
-module.exports = getData;
+module.exports = createDataRouter;

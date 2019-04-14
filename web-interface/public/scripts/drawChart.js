@@ -32,6 +32,8 @@ export default async function drawChart(element)
 
 	const startDate = new Date(2019, 2, 27, 12);
 	const endDate = new Date(2019, 2, 27, 12, 30);
+	// const startDate = new Date(Date.now() - 30000);
+	// const endDate = new Date(Date.now() + 30000);
 
 	const {data, rawData} = await getData(startDate, endDate);
 

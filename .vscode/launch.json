@@ -8,7 +8,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "web-interface",
-			"program": "${workspaceFolder}/web-interface/private/index.js",
+			"program": "${workspaceFolder}/web-interface/private/app.js",
 			"cwd": "${workspaceFolder}/web-interface"
 		},
 		{
