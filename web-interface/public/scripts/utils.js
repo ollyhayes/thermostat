@@ -2,9 +2,8 @@ import { range } from "d3-array";
 import getTemperature from "./data-repository";
 
 const search = 20;//20; // pick a constant
-const resolution = 100; // number of x-data points on screen
+const resolution = 200; // number of x-data points on screen
 
-// move to web worker?
 export function calculateAverage(data, step) {
 	const startDate = data[0].date.getTime() / 1000;
 	const endDate = data[data.length - 1].date.getTime() / 1000;
@@ -36,12 +35,13 @@ export function calculateAverage(data, step) {
 
 export async function getData(startDate, endDate) {
 	const data = await getTemperature(startDate, endDate);
-	const step = (endDate.getTime() - startDate.getTime()) / (1000 * resolution); // 1000 (seconds) * 1000 (resolution on screen)
+	const rawStep = (endDate.getTime() - startDate.getTime()) / (1000 * resolution); // 1000 (seconds) * 1000 (resolution on screen)
 
+	const step = Math.min(Math.max(Math.round(rawStep), 1), 60);
 	console.log(step);
 
 	return {
-		data: calculateAverage(data, Math.max(Math.round(step), 1)),
+		data: calculateAverage(data, step),
 		rawData: data
 	};
 }

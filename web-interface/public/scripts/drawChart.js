@@ -40,7 +40,7 @@ export default async function drawChart(element)
 		.rangeRound([0, width]);
 
 	const yScale = scaleLinear()
-		.domain(extent(data, d => d.temperature))
+		.domain(getYAxisExtent(data))
 		.rangeRound([height, 0]);
 
 	const worldExtent = [[new Date(2019, 2, 20), 20], [new Date(2019, 2, 30), 10]];
@@ -112,6 +112,9 @@ export default async function drawChart(element)
 
 			const {data, rawData} = await getData(startDate, endDate);
 
+			yScale.domain(getYAxisExtent(data));
+			gY.call(yAxis);
+
 			path.datum(data)
 				.attr("d", lineGenerator);
 
@@ -120,9 +123,21 @@ export default async function drawChart(element)
 					.attr("d", lineGenerator);
 		}
 	});
+
+	function getYAxisExtent(data) {
+		const [minTemperature, maxTemperature] = extent(data, d => d.temperature);
+
+		if (maxTemperature - minTemperature < 1) {
+			const midPoint = (maxTemperature + minTemperature) / 2;
+			return [midPoint - 0.5, midPoint + 0.5];
+		}
+
+		return [minTemperature, maxTemperature];
+	}
 }
 
 // todo:
 // update the y-scale on data load
 // make the averaging deterministic
 // make it load as you scroll
+// fix the end
