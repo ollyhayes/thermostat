@@ -10,7 +10,7 @@ const thermometers = {
 };
 
 const temp = `/sys/bus/w1/devices/${thermometers.yellow}/w1_slave`;
-const regex = /t=(\d*)/;
+const regex = /t=(-?\d*)/;
 
 let count = 0;
 
