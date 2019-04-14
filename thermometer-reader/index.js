@@ -10,7 +10,7 @@ function run()
 	database.open();
 
 	const subscription = looper(1000, () => getTemperature())
-		.distinctUntilChanged()
+		// .distinctUntilChanged()
 		.subscribe(
 			temperature => database.insert(temperature),
 			error => log("temperature error: " + error));
