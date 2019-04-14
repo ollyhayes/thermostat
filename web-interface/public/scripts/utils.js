@@ -1,7 +1,7 @@
 import { range } from "d3-array";
 import getTemperature from "./data-repository";
 
-const search = 20;//20; // pick a constant
+const search = 20; // pick a constant
 const resolution = 200; // number of x-data points on screen
 
 export function calculateAverage(data, step) {

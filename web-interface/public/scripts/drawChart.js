@@ -46,11 +46,11 @@ export default async function drawChart(element)
 		.domain(getYAxisExtent(data))
 		.rangeRound([height, 0]);
 
-	const worldExtent = [[new Date(2019, 2, 20), 20], [new Date(2019, 2, 30), 10]];
-	const translatedWorldExtent = [
-		[xScale(worldExtent[0][0]), yScale(worldExtent[0][1])],
-		[xScale(worldExtent[1][0]), yScale(worldExtent[1][1])]
-	];
+	// const worldExtent = [[new Date(2019, 2, 20), 20], [new Date(2019, 2, 30), 10]];
+	// const translatedWorldExtent = [
+	// 	[xScale(worldExtent[0][0]), yScale(worldExtent[0][1])],
+	// 	[xScale(worldExtent[1][0]), yScale(worldExtent[1][1])]
+	// ];
 	
 	const lineGenerator = line()
 		.x(d => xScale(d.date))
