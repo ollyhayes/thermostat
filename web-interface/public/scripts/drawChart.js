@@ -32,8 +32,8 @@ export default async function drawChart(element)
 	const startDate = new Date(2019, 2, 27, 12);
 	const endDate = new Date(2019, 2, 27, 12, 30);
 
-	let data = await getTemperature(startDate, endDate);
-	let averagedData = calculateAverage(data, 10); // vary step by zoom
+	const data = await getTemperature(startDate, endDate);
+	const averagedData = calculateAverage(data, 10); // vary step by zoom
 
 	const xScale = scaleTime()
 		.domain(extent(data, d => d.date))
@@ -49,11 +49,6 @@ export default async function drawChart(element)
 		[xScale(worldExtent[1][0]), yScale(worldExtent[1][1])]
 	];
 	
-	const zoomer = zoom()
-		// .scaleExtent([1, Infinity])
-		.translateExtent(translatedWorldExtent)
-		.on("zoom", zoomed);
-
 	const lineGenerator = line()
 		.x(d => xScale(d.date))
 		.y(d => yScale(d.temperature));
@@ -82,7 +77,10 @@ export default async function drawChart(element)
 		.attr("width", width)
 		.attr("height", height)
 		.attr("opacity", "0")
-		.call(zoomer);
+		.call(zoom()
+			// .scaleExtent([1, Infinity])
+			.translateExtent(translatedWorldExtent)
+			.on("zoom", zoomed));
 
 	// g.append("path")
 	// 	.datum(data)
@@ -110,8 +108,8 @@ export default async function drawChart(element)
 		if (e.key === "Enter") {
 			const [startDate, endDate] = zoomedScale.domain();
 
-			let data = await getTemperature(startDate, endDate);
-			let averagedData = calculateAverage(data, 10); // vary step by zoom
+			const data = await getTemperature(startDate, endDate);
+			const averagedData = calculateAverage(data, 10); // vary step by zoom
 
 			path.datum(averagedData)
 				.attr("d", lineGenerator);
@@ -120,7 +118,6 @@ export default async function drawChart(element)
 }
 
 // todo:
-// tidy
 // adjust the step-size and spread
 // update the y-scale on data load
 // make the averaging deterministic
