@@ -5,9 +5,10 @@ import { extent } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { zoom } from "d3-zoom";
 
-import { calculateAverage } from "./utils";
-import getTemperature from "./data-repository";
+import { getData } from "./utils";
 import multiFormat from "./time-format";
+
+const showRawData = false;
 
 export default async function drawChart(element)
 {
@@ -32,8 +33,7 @@ export default async function drawChart(element)
 	const startDate = new Date(2019, 2, 27, 12);
 	const endDate = new Date(2019, 2, 27, 12, 30);
 
-	const data = await getTemperature(startDate, endDate);
-	const averagedData = calculateAverage(data, 10); // vary step by zoom
+	const {data, rawData} = await getData(startDate, endDate);
 
 	const xScale = scaleTime()
 		.domain(extent(data, d => d.date))
@@ -79,17 +79,19 @@ export default async function drawChart(element)
 		.attr("opacity", "0")
 		.call(zoom()
 			// .scaleExtent([1, Infinity])
-			.translateExtent(translatedWorldExtent)
+			// .translateExtent(translatedWorldExtent)
 			.on("zoom", zoomed));
 
-	// g.append("path")
-	// 	.datum(data)
-	// 	.attr("fill", "none")
-	// 	.attr("stroke", "black")
-	// 	.attr("d", lineGenerator);
+	const rawPath = showRawData
+		? chartArea.append("path")
+			.datum(rawData)
+			.attr("fill", "none")
+			.attr("stroke", "black")
+			.attr("d", lineGenerator)
+		: null;
 
 	const path = chartArea.append("path")
-		.datum(averagedData)
+		.datum(data)
 		.attr("fill", "none")
 		.attr("stroke", "yellow")
 		.attr("d", lineGenerator);
@@ -100,7 +102,7 @@ export default async function drawChart(element)
 		const t = d3Event.transform;
 		chartArea.attr("transform", `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
-		gX.call(xAxis.scale(zoomedScale)); // think we need to reset xScale too!
+		gX.call(xAxis.scale(zoomedScale));
 		// gY.call(yAxis.scale(t.rescaleY(yScale)));
 	}
 
@@ -108,17 +110,19 @@ export default async function drawChart(element)
 		if (e.key === "Enter") {
 			const [startDate, endDate] = zoomedScale.domain();
 
-			const data = await getTemperature(startDate, endDate);
-			const averagedData = calculateAverage(data, 10); // vary step by zoom
+			const {data, rawData} = await getData(startDate, endDate);
 
-			path.datum(averagedData)
+			path.datum(data)
 				.attr("d", lineGenerator);
+
+			if (showRawData)
+				rawPath.datum(rawData)
+					.attr("d", lineGenerator);
 		}
 	});
 }
 
 // todo:
-// adjust the step-size and spread
 // update the y-scale on data load
 // make the averaging deterministic
 // make it load as you scroll

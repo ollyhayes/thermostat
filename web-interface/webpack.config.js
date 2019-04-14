@@ -1,4 +1,4 @@
-module.exports = function(env)
+module.exports = function()
 {
 	const config = {
 		mode: "development",
@@ -8,7 +8,6 @@ module.exports = function(env)
 			path: __dirname + "/public/scripts/bundles",
 			publicPath: "/scripts/bundles/"
 		},
-		devtool: "#source-map",
 		module: {
 			rules: [
 				//{ test: /\.jsx$/, exclude: /node_modules/, loader: "babel-loader" },
