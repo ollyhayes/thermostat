@@ -112,12 +112,19 @@ export default async function drawChart(element)
 		}
 	});
 
+	setInterval(() => {
+		const endDate = new Date(Date.now() + 30000);
+
+		reload(startDate, endDate);
+	}, 2000);
+
 	function getYAxisExtent(data) {
 		const [minTemperature, maxTemperature] = extent(data, d => d.temperature);
+		const minWidth = 10;
 
-		if (maxTemperature - minTemperature < 1) {
+		if (maxTemperature - minTemperature < minWidth) {
 			const midPoint = (maxTemperature + minTemperature) / 2;
-			return [midPoint - 0.5, midPoint + 0.5];
+			return [midPoint - minWidth / 2, midPoint + minWidth / 2];
 		}
 
 		return [minTemperature, maxTemperature];
