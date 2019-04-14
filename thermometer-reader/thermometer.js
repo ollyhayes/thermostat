@@ -7,7 +7,7 @@ const thermometers = {
 	yellow: "28-030897799788",
 	red: "28-030897791ed8",
 	yellowRed: "28-03079779a1b8"
-}
+};
 
 const temp = `/sys/bus/w1/devices/${thermometers.yellow}/w1_slave`;
 const regex = /t=(\d*)/;
