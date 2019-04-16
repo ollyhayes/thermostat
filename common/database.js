@@ -13,7 +13,8 @@ const fromUnix = unix => new Date(unix * 1000);
 const createDatabaseSql = `
 	create table temperatures (
 	date integer not null,
-	temperature real not null)`;
+	temperature real not null,
+	precisionLevel integer not null)`;
 
 class Database
 {
@@ -35,20 +36,21 @@ class Database
 			this.db.exec(createDatabaseSql);
 	}
 
-	insert(temperature)
+	insert(temperature, precisionLevel = 0)
 	{
 		if (!this.insertCommand)
 			this.insertCommand = this.db.prepare(
-				`insert into temperatures (date, temperature)
-				values (@date, @temperature);`);
+				`insert into temperatures (date, temperature, precisionLevel)
+				values (@date, @temperature, @precisionLevel);`);
 
 		log("inserting data - " + temperature, "green");
 
 		const date = toUnix(new Date());
 
 		return this.insertCommand.run({
-			date: date,
-			temperature: temperature
+			date,
+			temperature,
+			precisionLevel
 		});
 	}
 

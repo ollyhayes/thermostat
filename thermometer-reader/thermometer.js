@@ -19,6 +19,8 @@ module.exports = function()
 	const index = count++;
 	log(`getting temperature. index: ${index}`);
 
+	// return Promise.resolve(Math.sin(Date.now() / 10000) * 5 + 15);
+
 	return new Promise((resolve, reject) =>
 	{
 		fs.readFile(temp, "utf8", (error, data) =>
