@@ -2,9 +2,17 @@ const getTemperature = require("./thermometer");
 const log = require("../common/log");
 const looper = require("./timeout-looper");
 const Rx = require("rxjs");
+const thermometers = require("../common/config.json");
 
 function start(database) {
-	const temperatures = looper(1000, () => getTemperature())
+	const temperatures = looper(1000, () =>
+		Promise.all(
+			thermometers
+				.filter(thermometer => !thermometer.disabled)
+				.map(async thermometer => ({
+				...thermometer,
+				temperature: await getTemperature(thermometer.serial),
+			}))))
 		.publishReplay(1)
 		.refCount();
 
@@ -13,16 +21,16 @@ function start(database) {
 	subscriptions.push(
 		temperatures
 			.subscribe(
-				temperature => database.insert(temperature),
+				temperatures => database.insert(temperatures),
 				error => log("temperature error: " + error)));
 
-	subscriptions.push(
-		averageOver(60 * 1000, temperatures)
-			.subscribe(temperature => database.insert(temperature, 1)));
+	// subscriptions.push(
+	// 	averageOver(60 * 1000, temperatures)
+	// 		.subscribe(temperature => database.insert(temperature, 1)));
 
-	subscriptions.push(
-		averageOver(3600 * 1000, temperatures)
-			.subscribe(temperature => database.insert(temperature, 2)));
+	// subscriptions.push(
+	// 	averageOver(3600 * 1000, temperatures)
+	// 		.subscribe(temperature => database.insert(temperature, 2)));
 
 	return () => subscriptions.forEach(subscription => subscription.unsubscribe());
 }

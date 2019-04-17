@@ -1,7 +1,29 @@
-switch to area so the scaling doesn't screw up the line (or rescale on reload)
-averages for minutes and hours
+*averages for minutes and hours
 multiple sensors
+	reenable logging of averages
 integers for temperatures
+config - autoRefresh and mockThermometers
+switch to area so the scaling doesn't screw up the line (or rescale on reload)
 refresh on scroll
 autorefresh
 animation on y-scale change
+
+
+normalised
+	+way more data in database
+	+way more data in json transfer (maybe okay because of averaging)
+	-more reads from the database
+
+denormalised
+	+less data
+	+faster in general
+	-need specific database
+
+
+
+config
+	store in database
+		have to write to db with config?
+		or it writes on create
+	store in config file
+		have to keep config with db

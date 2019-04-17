@@ -15,7 +15,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "thermometer-reader",
-			"program": "${workspaceFolder}/thermometer-reader/index.js",
+			"program": "${workspaceFolder}/thermometer-reader/app.js",
 			"cwd": "${workspaceFolder}/thermometer-reader"
 		},
 	]

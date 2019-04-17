@@ -14,7 +14,8 @@ const createDatabaseSql = `
 	create table temperatures (
 	date integer not null,
 	temperature real not null,
-	precisionLevel integer not null)`;
+	precisionLevel integer not null,
+	thermometerId integer not null)`;
 
 class Database
 {
@@ -36,31 +37,33 @@ class Database
 			this.db.exec(createDatabaseSql);
 	}
 
-	insert(temperature, precisionLevel = 0)
+	insert(temperatures, precisionLevel = 0)
 	{
 		if (!this.insertCommand)
 			this.insertCommand = this.db.prepare(
-				`insert into temperatures (date, temperature, precisionLevel)
-				values (@date, @temperature, @precisionLevel);`);
+				`insert into temperatures (date, temperature, precisionLevel, thermometerId)
+				values (@date, @temperature, @precisionLevel, @thermometerId);`);
 
-		log("inserting data - " + temperature, "green");
+		log("inserting data - " + temperatures.map(t => t.temperature), "green");
 
 		const date = toUnix(new Date());
 
-		return this.insertCommand.run({
-			date,
-			temperature,
-			precisionLevel
-		});
+		temperatures.forEach(({temperature, id}) =>
+			this.insertCommand.run({
+				date,
+				temperature,
+				precisionLevel,
+				thermometerId: id
+			}));
 	}
 
 	read(minDate, maxDate)
 	{
 		if (!this.readCommand)
 			this.readCommand = this.db.prepare(
-				`select date, temperature
+				`select date, temperature, thermometerId
 				from temperatures
-				where date between @minDate and @maxDate
+				where date between @minDate and @maxDate and precisionLevel = 0
 				order by date;`);
 
 		const data = this.readCommand.all({
@@ -70,7 +73,8 @@ class Database
 
 		return data.map(dataPoint => ({
 			date: fromUnix(dataPoint.date),
-			temperature: dataPoint.temperature
+			temperature: dataPoint.temperature,
+			id: dataPoint.thermometerId
 		}));
 	}
 
