@@ -4,7 +4,12 @@ const looper = require("./timeout-looper");
 const Rx = require("rxjs");
 
 function start(database) {
-	const temperatures = looper(1000, () => getTemperature())
+	const temperatures = looper(1000, () =>
+		Promise.all([
+			getTemperature(),
+			getTemperature("red"),
+			getTemperature("chip1"),
+		]))
 		.publishReplay(1)
 		.refCount();
 
@@ -13,16 +18,19 @@ function start(database) {
 	subscriptions.push(
 		temperatures
 			.subscribe(
-				temperature => database.insert(temperature),
+				temperature => {
+					console.log("got: ", temperature);
+					database.insert(temperature[0]);
+				},
 				error => log("temperature error: " + error)));
 
-	subscriptions.push(
-		averageOver(60 * 1000, temperatures)
-			.subscribe(temperature => database.insert(temperature, 1)));
+	// subscriptions.push(
+	// 	averageOver(60 * 1000, temperatures)
+	// 		.subscribe(temperature => database.insert(temperature, 1)));
 
-	subscriptions.push(
-		averageOver(3600 * 1000, temperatures)
-			.subscribe(temperature => database.insert(temperature, 2)));
+	// subscriptions.push(
+	// 	averageOver(3600 * 1000, temperatures)
+	// 		.subscribe(temperature => database.insert(temperature, 2)));
 
 	return () => subscriptions.forEach(subscription => subscription.unsubscribe());
 }

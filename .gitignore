@@ -1,5 +1,4 @@
 /node_modules
-/database.db
+/*.db
 bundles
-/backup.db
 /package-lock.json

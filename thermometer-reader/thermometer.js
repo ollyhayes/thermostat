@@ -9,12 +9,12 @@ const thermometers = {
 	yellowRed: "28-03079779a1b8"
 };
 
-const temp = `/sys/bus/w1/devices/${thermometers.yellow}/w1_slave`;
+const getFile = thermometerName => `/sys/bus/w1/devices/${thermometers[thermometerName]}/w1_slave`;
 const regex = /t=(-?\d*)/;
 
 let count = 0;
 
-module.exports = function()
+module.exports = function(thermometerName = "yellow")
 {
 	const index = count++;
 	log(`getting temperature. index: ${index}`);
@@ -23,7 +23,7 @@ module.exports = function()
 
 	return new Promise((resolve, reject) =>
 	{
-		fs.readFile(temp, "utf8", (error, data) =>
+		fs.readFile(getFile(thermometerName), "utf8", (error, data) =>
 		{
 			if (error)
 				reject(error);

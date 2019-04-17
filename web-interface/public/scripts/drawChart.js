@@ -8,7 +8,7 @@ import { zoom } from "d3-zoom";
 import multiFormat from "./time-format";
 import getTemperature from "./data-repository";
 
-const autoRefresh = false;
+const autoRefresh = true;
 
 export default async function drawChart(element)
 {
