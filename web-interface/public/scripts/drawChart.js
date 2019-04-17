@@ -13,9 +13,9 @@ import config from "../../../common/config.json";
 const thermometerColours = config.reduce((colours, {colour, id}) => ({
 	...colours,
 	[id]: colour
-}));
+}),{});
 
-const autoRefresh = false;
+const autoRefresh = true;
 
 export default async function drawChart(element)
 {
