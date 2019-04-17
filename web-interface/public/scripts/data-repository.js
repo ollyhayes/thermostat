@@ -8,7 +8,7 @@ export default async function getTemperature(minDate, maxDate)
 	const data = await ajax(`/data?minDate=${min}&maxDate=${max}`);
 	
 	return data.map(dataPoint => ({
+		...dataPoint,
 		date: new Date(dataPoint.date),
-		temperature: dataPoint.temperature
 	}));
 }

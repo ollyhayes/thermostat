@@ -2,13 +2,20 @@ import { select, event as d3Event} from "d3-selection";
 import { scaleTime, scaleLinear } from "d3-scale";
 import { line } from "d3-shape";
 import { extent } from "d3-array";
+import { nest as d3Nest } from "d3-collection";
 import { axisBottom, axisLeft } from "d3-axis";
 import { zoom } from "d3-zoom";
 
 import multiFormat from "./time-format";
 import getTemperature from "./data-repository";
+import config from "../../../common/config.json";
 
-const autoRefresh = true;
+const thermometerColours = config.reduce((colours, {colour, id}) => ({
+	...colours,
+	[id]: colour
+}));
+
+const autoRefresh = false;
 
 export default async function drawChart(element)
 {
@@ -32,12 +39,15 @@ export default async function drawChart(element)
 
 	const [startDate, endDate] = autoRefresh
 		? [new Date(Date.now() - 30000), new Date(Date.now() + 30000)]
-		: [new Date(2019, 2, 27, 12), new Date(2019, 2, 27, 12, 30)];
+		: [new Date(2019, 3, 17, 20, 10), new Date(2019, 3, 17, 20, 11)];
 
 	const data = await getTemperature(startDate, endDate);
 
+	const nest = d3Nest()
+		.key(d => d.id);
+
 	const xScale = scaleTime()
-		.domain(extent(data, d => d.date))
+		.domain([startDate, endDate])
 		.rangeRound([0, width]);
 
 	const yScale = scaleLinear()
@@ -76,11 +86,22 @@ export default async function drawChart(element)
 			.scaleExtent([1e-5, 100])
 			.on("zoom", zoomed));
 
-	const path = chartArea.append("path")
-		.datum(data)
+	// this should be a function so it can be used later
+	// or maybe move it to data-repository.js +1
+	const dataProcessed = nest.entries(data)
+		.map(({key, values}) => ({
+			key,
+			colour: thermometerColours[key],
+			values
+		}));
+
+	const paths = chartArea
+		.selectAll("path")
+		.data(dataProcessed, d => d.key)
+		.join("path")
 		.attr("fill", "none")
-		.attr("stroke", "yellow")
-		.attr("d", lineGenerator);
+		.attr("stroke", d => d.colour)
+		.attr("d", d => lineGenerator(d.values));
 
 	let zoomedScale = xScale;
 
@@ -99,8 +120,16 @@ export default async function drawChart(element)
 		yScale.domain(getYAxisExtent(data));
 		gY.call(yAxis);
 
-		path.datum(data)
-			.attr("d", lineGenerator);
+		const dataProcessed = nest.entries(data)
+			.map(({key, values}) => ({
+				key,
+				colour: thermometerColours[key],
+				values
+			}));
+
+		paths
+			.data(dataProcessed, d => d.key)
+			.attr("d", d => lineGenerator(d.values));
 	}
 
 	document.addEventListener("keydown", async e => {

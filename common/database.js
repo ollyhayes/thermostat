@@ -61,9 +61,9 @@ class Database
 	{
 		if (!this.readCommand)
 			this.readCommand = this.db.prepare(
-				`select date, temperature
+				`select date, temperature, thermometerId
 				from temperatures
-				where date between @minDate and @maxDate
+				where date between @minDate and @maxDate and precisionLevel = 0
 				order by date;`);
 
 		const data = this.readCommand.all({
@@ -73,7 +73,8 @@ class Database
 
 		return data.map(dataPoint => ({
 			date: fromUnix(dataPoint.date),
-			temperature: dataPoint.temperature
+			temperature: dataPoint.temperature,
+			id: dataPoint.thermometerId
 		}));
 	}
 

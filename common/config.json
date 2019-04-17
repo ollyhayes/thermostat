@@ -3,30 +3,35 @@
 		"name": "chip-1",
 		"serial": "28-0000092348ee",
 		"id": 4,
-		"disabled": false
+		"disabled": false,
+		"colour": "purple"
 	},
 	{
 		"name": "chip-2",
 		"serial": "28-000007a0024d",
 		"id": 5,
-		"disabled": true
+		"disabled": true,
+		"colour": "teal"
 	},
 	{
 		"name": "yellow",
 		"serial": "28-030897799788",
 		"id": 1,
-		"disabled": false
+		"disabled": false,
+		"colour": "yellow"
 	},
 	{
 		"name": "red",
 		"serial": "28-030897791ed8",
 		"id": 2,
-		"disabled": false
+		"disabled": false,
+		"colour": "red"
 	},
 	{
 		"name": "yellow-red",
 		"serial": "28-03079779a1b8",
 		"id": 3,
-		"disabled": true
+		"disabled": true,
+		"colour": "orange"
 	}
 ]
