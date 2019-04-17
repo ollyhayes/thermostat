@@ -7,7 +7,9 @@ const thermometers = require("../common/config.json");
 function start(database) {
 	const temperatures = looper(1000, () =>
 		Promise.all(
-			thermometers.map(async thermometer => ({
+			thermometers
+				.filter(thermometer => !thermometer.disabled)
+				.map(async thermometer => ({
 				...thermometer,
 				temperature: await getTemperature(thermometer.serial),
 			}))))
