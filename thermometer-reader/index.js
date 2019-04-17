@@ -9,7 +9,7 @@ function start(database) {
 		Promise.all(
 			thermometers.map(async thermometer => ({
 				...thermometer,
-				temperature: await getTemperature(thermometer.tag),
+				temperature: await getTemperature(thermometer.serial),
 			}))))
 		.publishReplay(1)
 		.refCount();

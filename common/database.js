@@ -15,7 +15,7 @@ const createDatabaseSql = `
 	date integer not null,
 	temperature real not null,
 	precisionLevel integer not null,
-	thermometer integer not null)`;
+	thermometerId integer not null)`;
 
 class Database
 {
@@ -41,10 +41,10 @@ class Database
 	{
 		if (!this.insertCommand)
 			this.insertCommand = this.db.prepare(
-				`insert into temperatures (date, temperature, precisionLevel, thermometer)
-				values (@date, @temperature, @precisionLevel, @thermometer);`);
+				`insert into temperatures (date, temperature, precisionLevel, thermometerId)
+				values (@date, @temperature, @precisionLevel, @thermometerId);`);
 
-		log("inserting data - " + temperatures, "green");
+		log("inserting data - " + temperatures.map(t => t.temperature), "green");
 
 		const date = toUnix(new Date());
 
@@ -53,7 +53,7 @@ class Database
 				date,
 				temperature,
 				precisionLevel,
-				id
+				thermometerId: id
 			}));
 	}
 
