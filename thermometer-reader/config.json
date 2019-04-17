@@ -1,0 +1,32 @@
+[
+	{
+		"name": "chip-1",
+		"serial": "28-0000092348ee",
+		"id": 4,
+		"disabled": false
+	},
+	{
+		"name": "chip-2",
+		"serial": "28-000007a0024d",
+		"id": 5,
+		"disabled": true
+	},
+	{
+		"name": "yellow",
+		"serial": "28-030897799788",
+		"id": 1,
+		"disabled": false
+	},
+	{
+		"name": "red",
+		"serial": "28-030897791ed8",
+		"id": 2,
+		"disabled": false
+	},
+	{
+		"name": "yellow-red",
+		"serial": "28-03079779a1b8",
+		"id": 3,
+		"disabled": true
+	}
+]

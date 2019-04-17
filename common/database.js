@@ -14,7 +14,8 @@ const createDatabaseSql = `
 	create table temperatures (
 	date integer not null,
 	temperature real not null,
-	precisionLevel integer not null)`;
+	precisionLevel integer not null,
+	thermometer integer not null)`;
 
 class Database
 {
@@ -36,22 +37,24 @@ class Database
 			this.db.exec(createDatabaseSql);
 	}
 
-	insert(temperature, precisionLevel = 0)
+	insert(temperatures, precisionLevel = 0)
 	{
 		if (!this.insertCommand)
 			this.insertCommand = this.db.prepare(
-				`insert into temperatures (date, temperature, precisionLevel)
-				values (@date, @temperature, @precisionLevel);`);
+				`insert into temperatures (date, temperature, precisionLevel, thermometer)
+				values (@date, @temperature, @precisionLevel, @thermometer);`);
 
-		log("inserting data - " + temperature, "green");
+		log("inserting data - " + temperatures, "green");
 
 		const date = toUnix(new Date());
 
-		return this.insertCommand.run({
-			date,
-			temperature,
-			precisionLevel
-		});
+		temperatures.forEach(({temperature, id}) =>
+			this.insertCommand.run({
+				date,
+				temperature,
+				precisionLevel,
+				id
+			}));
 	}
 
 	read(minDate, maxDate)

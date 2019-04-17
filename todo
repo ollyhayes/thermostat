@@ -5,3 +5,16 @@ integers for temperatures
 refresh on scroll
 autorefresh
 animation on y-scale change
+
+
+normalised
+	+way more data in database
+	+way more data in json transfer (maybe okay because of averaging)
+	-more reads from the database
+
+denormalised
+	+less data
+	+faster in general
+	-need specific database
+
+
