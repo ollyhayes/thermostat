@@ -76,14 +76,16 @@ export default async function drawChart(element)
 			.scaleExtent([1e-5, 100])
 			.on("zoom", zoomed));
 
+	function setPaths(data) {
+		chartArea
+			.selectAll("path")
+			.data(data, d => d.key)
+			.join(
+				enter => enter.append("path").attr("fill", "none").attr("stroke", d => d.colour).attr("d", d => lineGenerator(d.values)),
+				update => update.attr("d", d => lineGenerator(d.values)));
+	}
 
-	const paths = chartArea
-		.selectAll("path")
-		.data(data, d => d.key)
-		.join("path")
-		.attr("fill", "none")
-		.attr("stroke", d => d.colour)
-		.attr("d", d => lineGenerator(d.values));
+	setPaths(data);
 
 	let zoomedScale = xScale;
 
@@ -102,9 +104,7 @@ export default async function drawChart(element)
 		yScale.domain(getYAxisExtent(data));
 		gY.call(yAxis);
 
-		paths
-			.data(data, d => d.key)
-			.attr("d", d => lineGenerator(d.values));
+		setPaths(data);
 	}
 
 	document.addEventListener("keydown", async e => {
@@ -119,7 +119,9 @@ export default async function drawChart(element)
 		setInterval(() => reload(startDate, new Date(Date.now() + 30000)) , 2000);
 
 	function getYAxisExtent(data) {
-		const [minTemperature, maxTemperature] = extent(data, d => d.temperature);
+		const [minTemperature, maxTemperature] = extent(
+			data.reduce((flat, next) => [...flat, ...next.values], []),
+			d => d.temperature);
 		const minWidth = 10;
 
 		if (maxTemperature - minTemperature < minWidth) {
