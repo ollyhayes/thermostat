@@ -3,6 +3,7 @@ multiple sensors
 	reenable logging of averages
 integers for temperatures
 config - autoRefresh and mockThermometers
+one request at a time
 switch to area so the scaling doesn't screw up the line (or rescale on reload)
 refresh on scroll
 autorefresh

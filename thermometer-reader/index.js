@@ -10,8 +10,8 @@ function start(database) {
 			thermometers
 				.filter(thermometer => !thermometer.disabled)
 				.map(async thermometer => ({
-				...thermometer,
-				temperature: await getTemperature(thermometer.serial),
+					...thermometer,
+					temperature: await getTemperature(thermometer.serial),
 			}))))
 		.publishReplay(1)
 		.refCount();
@@ -24,9 +24,9 @@ function start(database) {
 				temperatures => database.insert(temperatures),
 				error => log("temperature error: " + error)));
 
-	// subscriptions.push(
-	// 	averageOver(60 * 1000, temperatures)
-	// 		.subscribe(temperature => database.insert(temperature, 1)));
+	subscriptions.push(
+		averageOver(5 * 1000, temperatures)
+			.subscribe(temperature => database.insert(temperature, 1)));
 
 	// subscriptions.push(
 	// 	averageOver(3600 * 1000, temperatures)
@@ -41,9 +41,22 @@ function averageOver(time, temperatures) {
 	return temperatures
 		.windowTime(time)
 		.switchMap(window => 
-			Rx.Observable.combineLatest(
-				window.reduce((sum, next) => sum + next, 0),
-				window.count()
-			))
-		.map(([sum, count]) => sum / count)
+			averageOverInner(
+				window
+					.map(windowArray => windowArray[0].temperature))
+			.withLatestFrom(window
+				.map(windowArray => windowArray[0]))
+			.map(([average, latest]) =>
+				({
+				...latest,
+				temperature: average
+			})));
+}
+
+function averageOverInner(temperatures) {
+	return Rx.Observable.combineLatest(
+			temperatures.reduce((sum, next) => sum + next, 0),
+			temperatures.count()
+		)
+		.map(([sum, count]) => sum / count);
 }
