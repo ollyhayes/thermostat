@@ -44,8 +44,6 @@ class Database
 				`insert into temperatures (date, temperature, precisionLevel, thermometerId)
 				values (@date, @temperature, @precisionLevel, @thermometerId);`);
 
-		if (temperatures.length === undefined)
-			return console.log(temperatures);
 		log("inserting data - " + temperatures.map(t => t.temperature), "green");
 
 		const date = toUnix(new Date());

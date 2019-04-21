@@ -10,7 +10,7 @@ module.exports = function(serial)
 	const index = count++;
 	log(`getting temperature. index: ${index}`);
 
-	return Promise.resolve(Math.sin((Date.now() / 10000) + serial.charCodeAt(13)) * 5 + 15);
+	// return Promise.resolve(Math.sin((Date.now() / 10000) + serial.charCodeAt(13)) * 5 + 15);
 
 	return new Promise((resolve, reject) =>
 	{
