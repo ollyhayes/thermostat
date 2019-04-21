@@ -10,10 +10,13 @@ const log = require("./log");
 const toUnix = date => Math.round(date.getTime() / 1000);
 const fromUnix = unix => new Date(unix * 1000);
 
+const toDbTemp = temperature => Math.round((temperature - 15) / 0.0625);
+const toTemp = dbTemp => dbTemp * 0.0625 + 15;
+
 const createDatabaseSql = `
 	create table temperatures (
 	date integer not null,
-	temperature real not null,
+	temperature integer not null,
 	precisionLevel integer not null,
 	thermometerId integer not null)`;
 
@@ -51,7 +54,7 @@ class Database
 		temperatures.forEach(({temperature, id}) =>
 			this.insertCommand.run({
 				date,
-				temperature,
+				temperature: toDbTemp(temperature),
 				precisionLevel,
 				thermometerId: id
 			}));
@@ -73,7 +76,7 @@ class Database
 
 		return data.map(dataPoint => ({
 			date: fromUnix(dataPoint.date),
-			temperature: dataPoint.temperature,
+			temperature: toTemp(dataPoint.temperature),
 			id: dataPoint.thermometerId
 		}));
 	}
