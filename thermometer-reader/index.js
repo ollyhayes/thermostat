@@ -2,17 +2,17 @@ const getTemperature = require("./thermometer");
 const log = require("../common/log");
 const looper = require("./timeout-looper");
 const Rx = require("rxjs");
-const thermometers = require("../common/config.json")
-	.filter(thermometer => !thermometer.disabled);
+const thermometers = require("../common/config.json");
 
 function start(database) {
 	const temperatures = looper(1000, () =>
 		Promise.all(
 			thermometers
+				.filter(thermometer => !thermometer.disabled)
 				.map(async thermometer => ({
 					...thermometer,
 					temperature: await getTemperature(thermometer.serial),
-			}))))
+				}))))
 		.publishReplay(1)
 		.refCount();
 
@@ -25,11 +25,11 @@ function start(database) {
 				error => log("temperature error: " + error)));
 
 	subscriptions.push(
-		averageOverMultiple(60 * 1000, temperatures)
+		averageOver(60 * 1000, temperatures)
 			.subscribe(temperature => database.insert(temperature, 1)));
 
 	subscriptions.push(
-		averageOverMultiple(3600 * 1000, temperatures)
+		averageOver(3600 * 1000, temperatures)
 			.subscribe(temperature => database.insert(temperature, 2)));
 
 	return () => subscriptions.forEach(subscription => subscription.unsubscribe());
@@ -37,28 +37,13 @@ function start(database) {
 
 module.exports = {start};
 
-function averageOverMultiple(time, temperatures) {
+function averageOver(time, temperatures) {
 	return temperatures
 		.windowTime(time)
 		.switchMap(window => 
 			Rx.Observable.combineLatest(
-				...thermometers.map((_, index) =>
-					averageOver(
-						window
-							.map(windowArray => windowArray[index].temperature))
-					.withLatestFrom(window
-						.map(windowArray => windowArray[index]))
-					.map(([average, latest]) =>
-						({
-						...latest,
-						temperature: average
-					})))));
-}
-
-function averageOver(temperatures) {
-	return Rx.Observable.combineLatest(
-			temperatures.reduce((sum, next) => sum + next, 0),
-			temperatures.count()
-		)
+				window.reduce((sum, next) => sum + next, 0),
+				window.count()
+			))
 		.map(([sum, count]) => sum / count);
 }

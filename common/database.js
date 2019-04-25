@@ -60,18 +60,19 @@ class Database
 			}));
 	}
 
-	read(minDate, maxDate)
+	read(minDate, maxDate, precisionLevel)
 	{
 		if (!this.readCommand)
 			this.readCommand = this.db.prepare(
 				`select date, temperature, thermometerId
 				from temperatures
-				where date between @minDate and @maxDate and precisionLevel = 0
+				where date between @minDate and @maxDate and precisionLevel = @precisionLevel
 				order by date;`);
 
 		const data = this.readCommand.all({
 			minDate: toUnix(minDate),
-			maxDate: toUnix(maxDate)
+			maxDate: toUnix(maxDate),
+			precisionLevel
 		});
 
 		return data.map(dataPoint => ({

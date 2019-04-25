@@ -1,11 +1,17 @@
 *averages for minutes and hours
-multiple sensors
-	reenable logging of averages
-integers for temperatures
+*multiple sensors
+	*reenable logging of averages
+*integers for temperatures
+
+load from averages
+start from limit of database
+
 config - autoRefresh and mockThermometers
 one request at a time
 switch to area so the scaling doesn't screw up the line (or rescale on reload)
 refresh on scroll
+better axes maybe with gridlines
+gzip
 autorefresh
 animation on y-scale change
 

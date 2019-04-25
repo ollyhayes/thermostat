@@ -6,7 +6,7 @@ function createDataRouter(db) {
 		const minDate = new Date(Number(query.minDate));
 		const maxDate = new Date(Number(query.maxDate));
 
-		const data = db.read(minDate, maxDate);
+		const data = db.read(minDate, maxDate, query.precisionLevel);
 		context.body = data;
 	};
 }
