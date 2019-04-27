@@ -68,11 +68,15 @@ class Database
 				where date between @minDate and @maxDate and precisionLevel = @precisionLevel
 				order by date;`);
 
+		const time = Date.now();
+
 		const data = this.readCommand.all({
 			minDate: toUnix(minDate),
 			maxDate: toUnix(maxDate),
 			precisionLevel
 		});
+
+		log(`reading temp - ${data.length} values in ${Date.now() - time}ms`, 'cyan');
 
 		return data.map(dataPoint => ({
 			date: fromUnix(dataPoint.date),
