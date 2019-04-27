@@ -1,18 +1,18 @@
-const Database = require("../common/database");
-const process = require("process");	
-const log = require("../common/log");
-const {start} = require("./index");
+const Database = require('../common/database');
+const process = require('process');	
+const log = require('../common/log');
+const {start} = require('./index');
 
-const database = new Database("../database.db");
+const database = new Database('../database.db');
 database.open();
 
 const end = start(database);
 
-process.on("exit", () => {
-	log("process exited - unsubscribing");
+process.on('exit', () => {
+	log('process exited - unsubscribing');
 	end();
 	database.close();
-	log("database closed");
+	log('database closed');
 });
 
-process.on("SIGINT", () => process.exit(0));
+process.on('SIGINT', () => process.exit(0));

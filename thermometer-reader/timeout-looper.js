@@ -1,5 +1,5 @@
-const log = require("../common/log");
-const Rx = require("rxjs");
+const log = require('../common/log');
+const Rx = require('rxjs');
 
 module.exports = function(timeout, action)
 {
@@ -14,7 +14,7 @@ module.exports = function(timeout, action)
 
 			var timeTillNextTrigger = timeout - (Date.now() - time);
 
-			//console.log("iteration over - time till next: ", timeTillNextTrigger);
+			//console.log('iteration over - time till next: ', timeTillNextTrigger);
 
 			if (timeTillNextTrigger > 0)
 				await new Promise(resolve => setTimeout(() => resolve(), timeTillNextTrigger));
@@ -29,6 +29,6 @@ module.exports = function(timeout, action)
 
 		loop(observer, options);
 
-		return () => {options.stopped = true; log("stopped timeout looper!");};
+		return () => {options.stopped = true; log('stopped timeout looper!');};
 	});
 };

@@ -1,8 +1,8 @@
-import "../less/page.less";
-import drawChart from "./drawChart";
+import '../less/page.less';
+import drawChart from './drawChart';
 
-document.addEventListener("DOMContentLoaded", () =>
+document.addEventListener('DOMContentLoaded', () =>
 {
-	const root = document.querySelector(".root");
+	const root = document.querySelector('.root');
 	drawChart(root);
 });

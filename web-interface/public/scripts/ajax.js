@@ -12,7 +12,7 @@ export default function ajax(url, method, json)
 			{
 				if (request.status == 200)
 				{
-					const response = request.responseText !== ""
+					const response = request.responseText !== ''
 						? JSON.parse(request.responseText)
 						: undefined;
 
@@ -23,13 +23,13 @@ export default function ajax(url, method, json)
 			}
 		};
 
-		method = method || "GET";
+		method = method || 'GET';
 		request.open(method, url, true);
 
 		if (json)
 		{
 			json = JSON.stringify(json);
-			request.setRequestHeader("Content-type", "application/json");
+			request.setRequestHeader('Content-type', 'application/json');
 		}
 
 		request.send(json);

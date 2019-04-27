@@ -1,8 +1,8 @@
-const getTemperature = require("./thermometer");
-const log = require("../common/log");
-const looper = require("./timeout-looper");
-const Rx = require("rxjs");
-const thermometers = require("../common/config.json");
+const getTemperature = require('./thermometer');
+const log = require('../common/log');
+const looper = require('./timeout-looper');
+const Rx = require('rxjs');
+const thermometers = require('../common/config.json');
 
 function start(database) {
 	const temperatures = looper(1000, () =>
@@ -22,7 +22,7 @@ function start(database) {
 		temperatures
 			.subscribe(
 				temperatures => database.insert(temperatures),
-				error => log("temperature error: " + error)));
+				error => log('temperature error: ' + error)));
 
 	subscriptions.push(
 		averageOver(60 * 1000, temperatures)

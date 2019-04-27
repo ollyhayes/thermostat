@@ -1,14 +1,14 @@
-import { select, event as d3Event} from "d3-selection";
-import { scaleTime, scaleLinear } from "d3-scale";
-import { line } from "d3-shape";
-import { extent } from "d3-array";
-import { axisBottom, axisLeft } from "d3-axis";
-import { zoom } from "d3-zoom";
+import { select, event as d3Event} from 'd3-selection';
+import { scaleTime, scaleLinear } from 'd3-scale';
+import { line } from 'd3-shape';
+import { extent } from 'd3-array';
+import { axisBottom, axisLeft } from 'd3-axis';
+import { zoom } from 'd3-zoom';
 
-import multiFormat from "./time-format";
-import getTemperature from "./data-repository";
+import multiFormat from './time-format';
+import getTemperature from './data-repository';
 
-const autoRefresh = false;
+const autoRefresh = true;
 
 export default async function drawChart(element)
 {
@@ -49,40 +49,40 @@ export default async function drawChart(element)
 		.y(d => yScale(d.temperature));
 
 	const g = select(element)
-		.append("svg")
-		.attr("viewBox", `${box.x0} ${box.y0} ${box.width} ${box.height}`)
-		.append("g")
-		.attr("transform", `translate(${margin.left}, ${margin.top})`);
+		.append('svg')
+		.attr('viewBox', `${box.x0} ${box.y0} ${box.width} ${box.height}`)
+		.append('g')
+		.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
 	const xAxis = axisBottom(xScale)
 		.tickFormat(multiFormat);
-	const gX = g.append("g")
-		.classed("axis", true)
-		.attr("transform", `translate(0, ${height})`)
+	const gX = g.append('g')
+		.classed('axis', true)
+		.attr('transform', `translate(0, ${height})`)
 		.call(xAxis);
 
 	const yAxis = axisLeft(yScale);
-	const gY = g.append("g")
-		.classed("axis", true)
+	const gY = g.append('g')
+		.classed('axis', true)
 		.call(yAxis);
 
-	const chartArea = g.append("g");
+	const chartArea = g.append('g');
 
-	g.append("rect")
-		.attr("width", width)
-		.attr("height", height)
-		.attr("opacity", "0")
+	g.append('rect')
+		.attr('width', width)
+		.attr('height', height)
+		.attr('opacity', '0')
 		.call(zoom()
 			.scaleExtent([1e-5, 100])
-			.on("zoom", zoomed));
+			.on('zoom', zoomed));
 
 	function setPaths(data) {
 		chartArea
-			.selectAll("path")
+			.selectAll('path')
 			.data(data, d => d.key)
 			.join(
-				enter => enter.append("path").attr("fill", "none").attr("stroke", d => d.colour).attr("d", d => lineGenerator(d.values)),
-				update => update.attr("d", d => lineGenerator(d.values)));
+				enter => enter.append('path').attr('fill', 'none').attr('stroke', d => d.colour).attr('d', d => lineGenerator(d.values)),
+				update => update.attr('d', d => lineGenerator(d.values)));
 	}
 
 	setPaths(data);
@@ -92,7 +92,7 @@ export default async function drawChart(element)
 	function zoomed() {
 		const t = d3Event.transform;
 		console.log(t.k);
-		chartArea.attr("transform", `translate(${t.x} 0) scale(${t.k}, 1)`);
+		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
 		gX.call(xAxis.scale(zoomedScale));
 		// gY.call(yAxis.scale(t.rescaleY(yScale)));
@@ -107,8 +107,8 @@ export default async function drawChart(element)
 		setPaths(data);
 	}
 
-	document.addEventListener("keydown", async e => {
-		if (e.key === "Enter") {
+	document.addEventListener('keydown', async e => {
+		if (e.key === 'Enter') {
 			const [startDate, endDate] = zoomedScale.domain();
 
 			await reload(startDate, endDate);

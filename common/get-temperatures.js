@@ -1,4 +1,4 @@
-const log = require("./log");
+const log = require('./log');
 
 module.exports = async function(connection, minDateUnixTime, maxDateUnixTime, callback)
 {
@@ -25,7 +25,7 @@ module.exports = async function(connection, minDateUnixTime, maxDateUnixTime, ca
 	{
 		parameters.$offset = offset;
 
-		log(`reading temperatures - limit: ${limit}, offset: ${offset}`, "green");
+		log(`reading temperatures - limit: ${limit}, offset: ${offset}`, 'green');
 		rows = await connection.all(sql, parameters);
 
 		for (let row of rows)

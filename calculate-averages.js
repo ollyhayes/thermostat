@@ -1,5 +1,5 @@
-const Database = require("./common/database");
-const log = require("./common/log");
+const Database = require('./common/database');
+const log = require('./common/log');
 
 async function run()
 {
@@ -9,7 +9,7 @@ async function run()
 		new Date(2017, 6, 1, 1),
 		10);
 
-	log("finished!");
+	log('finished!');
 }
 
 run().catch(error => log(error));

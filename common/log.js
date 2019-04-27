@@ -1,8 +1,8 @@
-const moment = require("moment");
-require("colors");
+const moment = require('moment');
+require('colors');
 
 function log(message, colour) {
-	const time = moment().format("HH:mm:ss").magenta;
+	const time = moment().format('HH:mm:ss').magenta;
 	const colouredMessage = colour
 		? message[colour]
 		: message;

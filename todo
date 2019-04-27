@@ -3,7 +3,7 @@
 	*reenable logging of averages
 *integers for temperatures
 
-load from averages
+*load from averages
 start from limit of database
 
 config - autoRefresh and mockThermometers
