@@ -6,9 +6,9 @@ import { axisBottom, axisLeft } from 'd3-axis';
 import { zoom } from 'd3-zoom';
 
 import multiFormat from './time-format';
-import getTemperature from './data-repository';
+import getTemperature, { getLimits } from './data-repository';
 
-const autoRefresh = true;
+const autoRefresh = false;
 
 export default async function drawChart(element)
 {
@@ -30,14 +30,15 @@ export default async function drawChart(element)
 	const width = box.width - margin.left - margin.right;
 	const height = box.height - margin.top - margin.bottom;
 
-	const [startDate, endDate] = autoRefresh
-		? [new Date(Date.now() - 30000), new Date(Date.now() + 30000)]
-		: [new Date(2019, 3, 17, 20, 10), new Date(2019, 3, 17, 20, 11)];
 
-	const data = await getTemperature(startDate, endDate);
+	const {minDate, maxDate} = autoRefresh
+		? {minDate: new Date(Date.now() - 30000), maxDate: new Date(Date.now() + 30000)}
+		: (await getLimits());
+
+	const data = await getTemperature(minDate, maxDate);
 
 	const xScale = scaleTime()
-		.domain([startDate, endDate])
+		.domain([minDate, maxDate])
 		.rangeRound([0, width]);
 
 	const yScale = scaleLinear()
@@ -116,7 +117,7 @@ export default async function drawChart(element)
 	});
 
 	if (autoRefresh)
-		setInterval(() => reload(startDate, new Date(Date.now() + 30000)) , 2000);
+		setInterval(() => reload(minDate, new Date(Date.now() + 30000)) , 2000);
 
 	function getYAxisExtent(data) {
 		const [minTemperature, maxTemperature] = extent(

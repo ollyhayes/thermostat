@@ -1,4 +1,4 @@
-function createDataRouter(db) {
+function data(db) {
 	return async function(context)
 	{
 		const query = context.request.query;
@@ -11,4 +11,15 @@ function createDataRouter(db) {
 	};
 }
 
-module.exports = createDataRouter;
+function limits(db) {
+	return async function(context)
+	{
+		const data = db.getLimits();
+		context.body = data;
+	};
+}
+
+module.exports = {
+	data,
+	limits
+};

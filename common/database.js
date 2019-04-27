@@ -20,8 +20,6 @@ class Database
 	constructor(filename)
 	{
 		this.filename = filename || './database.db';
-		this.insertCommand = null;
-		this.readCommand = null;
 	}
 
 	open()
@@ -75,6 +73,18 @@ class Database
 			temperature: toTemp(dataPoint.temperature),
 			id: dataPoint.thermometerId
 		}));
+	}
+
+	getLimits() {
+		if (!this.limitCommand)
+			this.limitCommand = this.db.prepare('select min(date) as minDate, max(date) as maxDate from temperatures;');
+
+		const {minDate, maxDate} = this.limitCommand.get();
+
+		return {
+			minDate: fromUnix(minDate),
+			maxDate: fromUnix(maxDate)
+		};
 	}
 
 	close()

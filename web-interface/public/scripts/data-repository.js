@@ -36,3 +36,12 @@ export default async function getTemperature(minDate, maxDate)
 
 	return nestedData;
 }
+
+export async function getLimits() {
+	const {minDate, maxDate} = await ajax('/limits');
+
+	return {
+		minDate: new Date(minDate),
+		maxDate: new Date(maxDate)
+	};
+}
