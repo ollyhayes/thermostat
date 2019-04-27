@@ -7,8 +7,7 @@ import { zoom } from 'd3-zoom';
 
 import multiFormat from './time-format';
 import getTemperature, { getLimits } from './data-repository';
-
-const autoRefresh = false;
+import {autoRefresh} from '../../../common/config.json';
 
 export default async function drawChart(element)
 {

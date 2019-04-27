@@ -3,6 +3,7 @@ const log = require('../common/log');
 const looper = require('./timeout-looper');
 const Rx = require('rxjs');
 const thermometers = require('../common/config.json')
+	.thermometers
 	.filter(thermometer => !thermometer.disabled);
 
 function start(database) {

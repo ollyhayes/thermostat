@@ -1,8 +1,8 @@
 import ajax from './ajax';
-import config from '../../../common/config.json';
+import {thermometers} from '../../../common/config.json';
 import { nest as d3Nest } from 'd3-collection';
 
-const thermometerColours = config.reduce((colours, {colour, id}) => ({
+const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
 	[id]: colour
 }),{});
