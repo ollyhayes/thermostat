@@ -35,20 +35,24 @@ class Database
 
 	insert(temperatures, precisionLevel = 0)
 	{
-		if (!this.insertCommand)
-			this.insertCommand = this.db.prepare(
+		if (!this.insertCommand) {
+			const singleInsert = this.db.prepare(
 				`insert into temperatures (date, temperature, precisionLevel, thermometerId)
 				values (@date, @temperature, @precisionLevel, @thermometerId);`);
 
+			this.insertCommand = this.db.transaction(temperatures =>
+				temperatures.forEach(({temperature, id}) =>
+					singleInsert.run({
+						date: toUnix(date),
+						temperature: toDbTemp(temperature),
+						precisionLevel,
+						thermometerId: id
+					})));
+		}
+
 		const date = new Date();
 
-		temperatures.forEach(({temperature, id}) =>
-			this.insertCommand.run({
-				date: toUnix(date),
-				temperature: toDbTemp(temperature),
-				precisionLevel,
-				thermometerId: id
-			}));
+		this.insertCommand(temperatures);
 
 		const duration = Date.now() - date.getTime();
 
