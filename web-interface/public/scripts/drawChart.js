@@ -2,12 +2,13 @@ import { select, event as d3Event} from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
 import { axisBottom, axisLeft } from 'd3-axis';
-import { zoom } from 'd3-zoom';
+import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 
 import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
 import throttler from './throttler';
 import {autoRefresh} from '../../../common/config.json';
+import { gzip } from 'zlib';
 
 const getTemperature = throttler(getTemperatureRaw);
 
@@ -61,12 +62,13 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.call(yAxis);
 
 	const chartArea = g.append('g');
+	const zoom = d3Zoom();
 
-	g.append('rect')
+	const zoomRect = g.append('rect')
 		.attr('width', width)
 		.attr('height', height)
 		.attr('opacity', '0')
-		.call(zoom()
+		.call(zoom
 			.scaleExtent([1e-5, 100])
 			.on('zoom', handleZoom));
 
@@ -74,7 +76,8 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		lineGenerator,
 		xScale, gX, xAxis,
 		yScale, gY, yAxis,
-		chartArea
+		chartArea,
+		zoom, zoomRect
 	};
 }
 
@@ -87,7 +90,8 @@ export default async function drawChart(element) {
 		lineGenerator,
 		xScale, gX, xAxis,
 		yScale, gY, yAxis,
-		chartArea
+		chartArea,
+		zoom, zoomRect
 	} = initialise(element, minDate, maxDate, handleZoom);
 
 	reload(minDate, maxDate);
@@ -104,9 +108,22 @@ export default async function drawChart(element) {
 	async function reload(startDate, endDate) {
 		const data = await getTemperature(startDate, endDate);
 
+		// reset the y-scale
 		yScale.domain(getTemperatureExtent(data));
 		gY.call(yAxis);
 
+		// reset the zoom (without zooming)
+		zoom.on('zoom', null);
+		zoomRect.call(zoom.transform, zoomIdentity);
+		zoom.on('zoom', handleZoom);
+
+		// reset the graph position
+		xScale.domain(zoomedScale.domain());
+		zoomedScale = xScale;
+		chartArea.attr('transform', null);
+		gX.call(xAxis.scale(xScale));
+
+		// set the paths
 		chartArea
 			.selectAll('path')
 			.data(data, d => d.key)
