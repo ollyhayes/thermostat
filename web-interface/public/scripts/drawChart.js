@@ -1,19 +1,17 @@
 import { select, event as d3Event} from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
-import { extent } from 'd3-array';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { zoom } from 'd3-zoom';
 
 import multiFormat from './time-format';
-import getTemperatureRaw, { getLimits } from './data-repository';
+import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
 import throttler from './throttler';
 import {autoRefresh} from '../../../common/config.json';
 
 const getTemperature = throttler(getTemperatureRaw);
 
-export default async function drawChart(element)
-{
+function initialise(element, minDate, maxDate, handleZoom) {
 	const box = {
 		x0: 0,
 		x1: 1200,
@@ -32,19 +30,12 @@ export default async function drawChart(element)
 	const width = box.width - margin.left - margin.right;
 	const height = box.height - margin.top - margin.bottom;
 
-
-	const {minDate, maxDate} = autoRefresh
-		? {minDate: new Date(Date.now() - 30000), maxDate: new Date(Date.now() + 30000)}
-		: (await getLimits());
-
-	const data = await getTemperature(minDate, maxDate);
-
 	const xScale = scaleTime()
 		.domain([minDate, maxDate])
 		.rangeRound([0, width]);
 
 	const yScale = scaleLinear()
-		.domain(getYAxisExtent(data))
+		.domain([10, 20])
 		.rangeRound([height, 0]);
 
 	const lineGenerator = line()
@@ -77,37 +68,51 @@ export default async function drawChart(element)
 		.attr('opacity', '0')
 		.call(zoom()
 			.scaleExtent([1e-5, 100])
-			.on('zoom', zoomed));
+			.on('zoom', handleZoom));
 
-	function setPaths(data) {
+	return {
+		lineGenerator,
+		xScale, gX, xAxis,
+		yScale, gY, yAxis,
+		chartArea
+	};
+}
+
+export default async function drawChart(element) {
+	const {minDate, maxDate} = autoRefresh
+		? {minDate: new Date(Date.now() - 30000), maxDate: new Date(Date.now() + 30000)}
+		: (await getLimits());
+
+	const {
+		lineGenerator,
+		xScale, gX, xAxis,
+		yScale, gY, yAxis,
+		chartArea
+	} = initialise(element, minDate, maxDate, handleZoom);
+
+	reload(minDate, maxDate);
+
+	let zoomedScale = xScale;
+
+	function handleZoom() {
+		const t = d3Event.transform;
+		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
+		zoomedScale = t.rescaleX(xScale);
+		gX.call(xAxis.scale(zoomedScale));
+	}
+
+	async function reload(startDate, endDate) {
+		const data = await getTemperature(startDate, endDate);
+
+		yScale.domain(getTemperatureExtent(data));
+		gY.call(yAxis);
+
 		chartArea
 			.selectAll('path')
 			.data(data, d => d.key)
 			.join(
 				enter => enter.append('path').attr('fill', 'none').attr('stroke', d => d.colour).attr('d', d => lineGenerator(d.values)),
 				update => update.attr('d', d => lineGenerator(d.values)));
-	}
-
-	setPaths(data);
-
-	let zoomedScale = xScale;
-
-	function zoomed() {
-		const t = d3Event.transform;
-		console.log(t.k);
-		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
-		zoomedScale = t.rescaleX(xScale);
-		gX.call(xAxis.scale(zoomedScale));
-		// gY.call(yAxis.scale(t.rescaleY(yScale)));
-	}
-
-	async function reload(startDate, endDate) {
-		const data = await getTemperature(startDate, endDate);
-
-		yScale.domain(getYAxisExtent(data));
-		gY.call(yAxis);
-
-		setPaths(data);
 	}
 
 	document.addEventListener('keydown', async e => {
@@ -120,18 +125,4 @@ export default async function drawChart(element)
 
 	if (autoRefresh)
 		setInterval(() => reload(minDate, new Date(Date.now() + 30000)) , 2000);
-
-	function getYAxisExtent(data) {
-		const [minTemperature, maxTemperature] = extent(
-			data.reduce((flat, next) => [...flat, ...next.values], []),
-			d => d.temperature);
-		const minWidth = 10;
-
-		if (maxTemperature - minTemperature < minWidth) {
-			const midPoint = (maxTemperature + minTemperature) / 2;
-			return [midPoint - minWidth / 2, midPoint + minWidth / 2];
-		}
-
-		return [minTemperature, maxTemperature];
-	}
 }

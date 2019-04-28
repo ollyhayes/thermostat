@@ -1,6 +1,8 @@
+import { nest as d3Nest } from 'd3-collection';
+import { extent } from 'd3-array';
+
 import ajax from './ajax';
 import {thermometers} from '../../../common/config.json';
-import { nest as d3Nest } from 'd3-collection';
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -46,4 +48,18 @@ export async function getLimits() {
 		minDate: new Date(minDate),
 		maxDate: new Date(maxDate)
 	};
+}
+
+export function getTemperatureExtent(data) {
+	const [minTemperature, maxTemperature] = extent(
+		data.reduce((flat, next) => [...flat, ...next.values], []),
+		d => d.temperature);
+	const minWidth = 10;
+
+	if (maxTemperature - minTemperature < minWidth) {
+		const midPoint = (maxTemperature + minTemperature) / 2;
+		return [midPoint - minWidth / 2, midPoint + minWidth / 2];
+	}
+
+	return [minTemperature, maxTemperature];
 }
