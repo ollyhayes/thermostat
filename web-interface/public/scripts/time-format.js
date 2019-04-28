@@ -28,8 +28,7 @@ const formatWeek = timeFormat('%b %d');
 const formatMonth = timeFormat('%B');
 const formatYear = timeFormat('%Y');
 
-export default function(date)
-{
+export default function(date) {
 	return (timeSecond(date) < date ? formatMillisecond
 		: timeMinute(date) < date ? formatSecond
 			: timeHour(date) < date ? formatMinute

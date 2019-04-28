@@ -49,8 +49,24 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.append('g')
 		.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-	const xAxis = axisBottom(xScale)
+	const xAxisa = axisBottom(xScale)
 		.tickFormat(multiFormat);
+
+	const xAxis = selection => {
+		selection.call(xAxisa);
+
+		console.log('test');
+
+		selection.selectAll('.tick')
+			.classed('gay', true)
+			.filter(date => {
+
+				// fitlre in here we see if it's major,
+			})
+			.classed('major', true);
+	};
+	xAxis.scale = xAxisa.scale;
+
 	const gX = g.append('g')
 		.classed('axis', true)
 		.attr('transform', `translate(0, ${height})`)
