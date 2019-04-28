@@ -6,8 +6,11 @@ import { axisBottom, axisLeft } from 'd3-axis';
 import { zoom } from 'd3-zoom';
 
 import multiFormat from './time-format';
-import getTemperature, { getLimits } from './data-repository';
+import getTemperatureRaw, { getLimits } from './data-repository';
+import throttler from './throttler';
 import {autoRefresh} from '../../../common/config.json';
+
+const getTemperature = throttler(getTemperatureRaw);
 
 export default async function drawChart(element)
 {
