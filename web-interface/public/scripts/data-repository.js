@@ -62,5 +62,5 @@ export function getTemperatureExtent(data) {
 		return [midPoint - minWidth / 2, midPoint + minWidth / 2];
 	}
 
-	return [minTemperature, maxTemperature];
+	return [minTemperature - 3, maxTemperature + 3];
 }
