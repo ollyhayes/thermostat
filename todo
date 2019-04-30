@@ -6,6 +6,7 @@ autorefresh
 animation on y-scale change
 zoom in url
 delete database from history
+index on precisionLevel and date?
 
 normalised
 	+way more data in database

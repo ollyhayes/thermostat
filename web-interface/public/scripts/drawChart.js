@@ -4,11 +4,20 @@ import { line } from 'd3-shape';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 
+import {
+	timeSecond,
+	timeMinute,
+	timeHour,
+	timeDay,
+	timeWeek,
+	timeMonth,
+	timeYear
+} from 'd3-time';
+
 import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
 import throttler from './throttler';
 import {autoRefresh} from '../../../common/config.json';
-import { gzip } from 'zlib';
 
 const getTemperature = throttler(getTemperatureRaw);
 
@@ -52,20 +61,56 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	const xAxisa = axisBottom(xScale)
 		.tickFormat(multiFormat);
 
+		//-----wrap in func-----
+	const majorScale = scaleTime()
+		.domain([minDate, maxDate]);
 	const xAxis = selection => {
 		selection.call(xAxisa);
 
-		console.log('test');
+		const domain = xAxis.scale().domain();
+		//// using major scale dosent work as too many intervals to choose from
+		// majorScale.domain(domain);
+		// const ticks = majorScale.ticks();
+
+
+
+		// do it like this, but use bisect, like on https://github.com/d3/d3-scale/blob/master/src/time.js#L40
+		// const width = (domain[1].getTime() - domain[0].getTime()) / 1000;
+		// const majorUnit = width < 1 ? timeSecond
+		// 	: width < 60 ? timeMinute
+		// 	: width < 3600 ? timeHour
+		// 	: width < 86400 ? timeDay
+		// 	: width < 604800 ? timeWeek
+		// 	: width < 2419200 ? timeMonth
+		// 	: timeYear;
+
+		console.log(`Using major ticks of ${ticks}`);
+			
+		// console.log(domain);
 
 		selection.selectAll('.tick')
 			.classed('gay', true)
 			.filter(date => {
 
-				// fitlre in here we see if it's major,
+				return true;
+				// return majorUnit(date) === date;
+
+
+				// need to findo ut which borders are relevant for our domain
+				// need to find out if it's on a border
+				
 			})
 			.classed('major', true);
 	};
-	xAxis.scale = xAxisa.scale;
+	xAxis.scale = (scale) => {
+		if (scale) {
+			xAxisa.scale(scale);
+			return xAxis;
+		} else {
+			return xAxisa.scale();
+		}
+	};
+		//----------------------
 
 	const gX = g.append('g')
 		.classed('axis', true)
