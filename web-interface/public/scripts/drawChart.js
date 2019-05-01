@@ -13,6 +13,7 @@ import {
 	timeMonth,
 	timeYear
 } from 'd3-time';
+import {bisector} from 'd3-array';
 
 import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
@@ -62,16 +63,50 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.tickFormat(multiFormat);
 
 		//-----wrap in func-----
-	const majorScale = scaleTime()
-		.domain([minDate, maxDate]);
+	const durationSecond = 1000,
+		durationMinute = durationSecond * 60,
+		durationHour = durationMinute * 60,
+		durationDay = durationHour * 24,
+		durationWeek = durationDay * 7,
+		durationMonth = durationDay * 30,
+		durationYear = durationDay * 365;
+
+	const tickIntervals = [
+		[timeSecond,  1,      durationSecond],
+		[timeSecond, 30, 30 * durationSecond],
+		[timeMinute,  1,      durationMinute],
+		[timeMinute, 15, 15 * durationMinute],
+		[  timeHour,  1,      durationHour  ],
+		[  timeHour,  6,  6 * durationHour  ],
+		[   timeDay,  1,      durationDay   ],
+		[  timeWeek,  1,      durationWeek  ],
+		[ timeMonth,  1,      durationMonth ],
+		[  timeYear,  1,      durationYear  ]
+	];
 	const xAxis = selection => {
 		selection.call(xAxisa);
 
 		const domain = xAxis.scale().domain();
+		const width = (domain[1].getTime() - domain[0].getTime());
+
+		const tickIntervalIndex = bisector(i => i[2]).right(tickIntervals, width);
+		const currentTickInterval = tickIntervals[tickIntervalIndex];
+		const previousTickInterval = tickIntervals[tickIntervalIndex - 1];
+
+		const tickInterval = previousTickInterval[2] < currentTickInterval[2]
+			? previousTickInterval
+			: currentTickInterval;
+		const step = tickInterval[1];
+		const interval = tickInterval[0];
+		
 		//// using major scale dosent work as too many intervals to choose from
 		// majorScale.domain(domain);
 		// const ticks = majorScale.ticks();
 
+		const ticks = interval
+			.every(step)
+			.range(...domain)
+			.map(date => date.getTime());
 
 
 		// do it like this, but use bisect, like on https://github.com/d3/d3-scale/blob/master/src/time.js#L40
@@ -89,18 +124,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		// console.log(domain);
 
 		selection.selectAll('.tick')
-			.classed('gay', true)
-			.filter(date => {
-
-				return true;
-				// return majorUnit(date) === date;
-
-
-				// need to findo ut which borders are relevant for our domain
-				// need to find out if it's on a border
-				
-			})
-			.classed('major', true);
+			.classed('major', date => ticks.includes(date.getTime()));
 	};
 	xAxis.scale = (scale) => {
 		if (scale) {
