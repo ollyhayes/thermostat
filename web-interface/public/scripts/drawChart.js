@@ -13,7 +13,7 @@ import {
 	timeMonth,
 	timeYear
 } from 'd3-time';
-import {bisector} from 'd3-array';
+import {bisector, tickStep} from 'd3-array';
 
 import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
@@ -71,40 +71,74 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		durationMonth = durationDay * 30,
 		durationYear = durationDay * 365;
 
-	const tickIntervals = [
-		[timeSecond,  1,      durationSecond],
-		[timeSecond, 30, 30 * durationSecond],
-		[timeMinute,  1,      durationMinute],
-		[timeMinute, 15, 15 * durationMinute],
-		[  timeHour,  1,      durationHour  ],
-		[  timeHour,  6,  6 * durationHour  ],
-		[   timeDay,  1,      durationDay   ],
-		[  timeWeek,  1,      durationWeek  ],
-		[ timeMonth,  1,      durationMonth ],
-		[  timeYear,  1,      durationYear  ]
+	// const tickIntervals = [
+	// 	[timeSecond,  1,      durationSecond],
+	// 	[timeSecond, 30, 30 * durationSecond],
+	// 	[timeMinute,  1,      durationMinute],
+	// 	[timeMinute, 15, 15 * durationMinute],
+	// 	[  timeHour,  1,      durationHour  ],
+	// 	[  timeHour,  6,  6 * durationHour  ],
+	// 	[   timeDay,  1,      durationDay   ],
+	// 	[  timeWeek,  1,      durationWeek  ],
+	// 	[ timeMonth,  1,      durationMonth ],
+	// 	[ timeMonth,  1,  3 * durationMonth ],
+	// 	[  timeYear,  1,      durationYear  ]
+	// ];
+
+	var tickIntervals = [
+		[timeSecond, 30, timeSecond,  1,      durationSecond],
+		[timeSecond, 30, timeSecond,  5,  5 * durationSecond],
+		[timeMinute,  1, timeSecond, 15, 15 * durationSecond],
+		[timeMinute,  1, timeSecond, 30, 30 * durationSecond],
+		[timeMinute, 15, timeMinute,  1,      durationMinute],
+		[timeMinute, 30, timeMinute,  5,  5 * durationMinute],
+		[  timeHour,  1, timeMinute, 15, 15 * durationMinute],
+		[  timeHour,  1, timeMinute, 30, 30 * durationMinute],
+		[  timeHour,  6,   timeHour,  1,      durationHour  ],
+		[   timeDay,  1,   timeHour,  3,  3 * durationHour  ],
+		[   timeDay,  1,   timeHour,  6,  6 * durationHour  ],
+		[   timeDay,  1,   timeHour, 12, 12 * durationHour  ],
+		[  timeWeek,  1,    timeDay,  1,      durationDay   ],
+		[  timeWeek,  1,    timeDay,  2,  2 * durationDay   ],
+		[ timeMonth,  1,   timeWeek,  1,      durationWeek  ],
+		[ timeMonth,  3,  timeMonth,  1,      durationMonth ],
+		[  timeYear,  1,  timeMonth,  3,  3 * durationMonth ],
+		[  timeYear,  1,   timeYear,  1,      durationYear  ]
 	];
+
 	const xAxis = selection => {
 		selection.call(xAxisa);
 
 		const domain = xAxis.scale().domain();
-		const width = (domain[1].getTime() - domain[0].getTime());
+		const width = (domain[1].getTime() - domain[0].getTime()) / 10;
 
-		const tickIntervalIndex = bisector(i => i[2]).right(tickIntervals, width);
-		const currentTickInterval = tickIntervals[tickIntervalIndex];
-		const previousTickInterval = tickIntervals[tickIntervalIndex - 1];
+		const tickIntervalIndex = bisector(i => i[4]).right(tickIntervals, width);
+		// const otherIndexa = bisector(i => i[2]).right(otherIndex, width);
 
-		const tickInterval = previousTickInterval[2] < currentTickInterval[2]
-			? previousTickInterval
-			: currentTickInterval;
-		const step = tickInterval[1];
-		const interval = tickInterval[0];
-		
-		//// using major scale dosent work as too many intervals to choose from
-		// majorScale.domain(domain);
-		// const ticks = majorScale.ticks();
+		// console.log(`${tickIntervalIndex}, ${otherIndexa}`);
 
-		const ticks = interval
-			.every(step)
+		let ticks;
+
+		if (tickIntervalIndex === tickIntervals.length) {
+			const step = tickStep(domain[0].getTime() / durationYear, domain[1].getTime() / durationYear, 10);
+			ticks = timeYear.every(step);
+		} else if (tickIntervalIndex) {
+			const currentTickInterval = tickIntervals[tickIntervalIndex];
+			const previousTickInterval = tickIntervals[tickIntervalIndex - 1];
+
+			const tickInterval = width / previousTickInterval[4] < currentTickInterval[4] / width
+				? previousTickInterval
+				: currentTickInterval;
+			const step = tickInterval[1];
+			const interval = tickInterval[0];
+			
+			ticks = interval
+				.every(step);
+		} else {
+			ticks = timeSecond;
+		}
+
+		const ticks2 = ticks
 			.range(...domain)
 			.map(date => date.getTime());
 
@@ -124,7 +158,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		// console.log(domain);
 
 		selection.selectAll('.tick')
-			.classed('major', date => ticks.includes(date.getTime()));
+			.classed('major', date => ticks2.includes(date.getTime()));
 	};
 	xAxis.scale = (scale) => {
 		if (scale) {
