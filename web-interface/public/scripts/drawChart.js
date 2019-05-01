@@ -4,21 +4,11 @@ import { line } from 'd3-shape';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 
-import {
-	timeSecond,
-	timeMinute,
-	timeHour,
-	timeDay,
-	timeWeek,
-	timeMonth,
-	timeYear
-} from 'd3-time';
-import {bisector, tickStep} from 'd3-array';
-
 import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
 import throttler from './throttler';
 import {autoRefresh} from '../../../common/config.json';
+import applyMajorTickClasses from './majorAxis';
 
 const getTemperature = throttler(getTemperatureRaw);
 
@@ -59,116 +49,9 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.append('g')
 		.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-	const xAxisa = axisBottom(xScale)
-		.tickFormat(multiFormat);
-
-		//-----wrap in func-----
-	const durationSecond = 1000,
-		durationMinute = durationSecond * 60,
-		durationHour = durationMinute * 60,
-		durationDay = durationHour * 24,
-		durationWeek = durationDay * 7,
-		durationMonth = durationDay * 30,
-		durationYear = durationDay * 365;
-
-	// const tickIntervals = [
-	// 	[timeSecond,  1,      durationSecond],
-	// 	[timeSecond, 30, 30 * durationSecond],
-	// 	[timeMinute,  1,      durationMinute],
-	// 	[timeMinute, 15, 15 * durationMinute],
-	// 	[  timeHour,  1,      durationHour  ],
-	// 	[  timeHour,  6,  6 * durationHour  ],
-	// 	[   timeDay,  1,      durationDay   ],
-	// 	[  timeWeek,  1,      durationWeek  ],
-	// 	[ timeMonth,  1,      durationMonth ],
-	// 	[ timeMonth,  1,  3 * durationMonth ],
-	// 	[  timeYear,  1,      durationYear  ]
-	// ];
-
-	var tickIntervals = [
-		[timeSecond, 30, timeSecond,  1,      durationSecond],
-		[timeSecond, 30, timeSecond,  5,  5 * durationSecond],
-		[timeMinute,  1, timeSecond, 15, 15 * durationSecond],
-		[timeMinute,  1, timeSecond, 30, 30 * durationSecond],
-		[timeMinute, 15, timeMinute,  1,      durationMinute],
-		[timeMinute, 30, timeMinute,  5,  5 * durationMinute],
-		[  timeHour,  1, timeMinute, 15, 15 * durationMinute],
-		[  timeHour,  1, timeMinute, 30, 30 * durationMinute],
-		[  timeHour,  6,   timeHour,  1,      durationHour  ],
-		[   timeDay,  1,   timeHour,  3,  3 * durationHour  ],
-		[   timeDay,  1,   timeHour,  6,  6 * durationHour  ],
-		[   timeDay,  1,   timeHour, 12, 12 * durationHour  ],
-		[  timeWeek,  1,    timeDay,  1,      durationDay   ],
-		[  timeWeek,  1,    timeDay,  2,  2 * durationDay   ],
-		[ timeMonth,  1,   timeWeek,  1,      durationWeek  ],
-		[ timeMonth,  3,  timeMonth,  1,      durationMonth ],
-		[  timeYear,  1,  timeMonth,  3,  3 * durationMonth ],
-		[  timeYear,  1,   timeYear,  1,      durationYear  ]
-	];
-
-	const xAxis = selection => {
-		selection.call(xAxisa);
-
-		const domain = xAxis.scale().domain();
-		const width = (domain[1].getTime() - domain[0].getTime()) / 10;
-
-		const tickIntervalIndex = bisector(i => i[4]).right(tickIntervals, width);
-		// const otherIndexa = bisector(i => i[2]).right(otherIndex, width);
-
-		// console.log(`${tickIntervalIndex}, ${otherIndexa}`);
-
-		let ticks;
-
-		if (tickIntervalIndex === tickIntervals.length) {
-			const step = tickStep(domain[0].getTime() / durationYear, domain[1].getTime() / durationYear, 10);
-			ticks = timeYear.every(step);
-		} else if (tickIntervalIndex) {
-			const currentTickInterval = tickIntervals[tickIntervalIndex];
-			const previousTickInterval = tickIntervals[tickIntervalIndex - 1];
-
-			const tickInterval = width / previousTickInterval[4] < currentTickInterval[4] / width
-				? previousTickInterval
-				: currentTickInterval;
-			const step = tickInterval[1];
-			const interval = tickInterval[0];
-			
-			ticks = interval
-				.every(step);
-		} else {
-			ticks = timeSecond;
-		}
-
-		const ticks2 = ticks
-			.range(...domain)
-			.map(date => date.getTime());
-
-
-		// do it like this, but use bisect, like on https://github.com/d3/d3-scale/blob/master/src/time.js#L40
-		// const width = (domain[1].getTime() - domain[0].getTime()) / 1000;
-		// const majorUnit = width < 1 ? timeSecond
-		// 	: width < 60 ? timeMinute
-		// 	: width < 3600 ? timeHour
-		// 	: width < 86400 ? timeDay
-		// 	: width < 604800 ? timeWeek
-		// 	: width < 2419200 ? timeMonth
-		// 	: timeYear;
-
-		console.log(`Using major ticks of ${ticks}`);
-			
-		// console.log(domain);
-
-		selection.selectAll('.tick')
-			.classed('major', date => ticks2.includes(date.getTime()));
-	};
-	xAxis.scale = (scale) => {
-		if (scale) {
-			xAxisa.scale(scale);
-			return xAxis;
-		} else {
-			return xAxisa.scale();
-		}
-	};
-		//----------------------
+	const xAxis = applyMajorTickClasses(
+		axisBottom(xScale)
+			.tickFormat(multiFormat));
 
 	const gX = g.append('g')
 		.classed('axis', true)
