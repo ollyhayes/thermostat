@@ -1,5 +1,6 @@
 @background: #252525;
 @border: #525252;
+@major-border: #999999;
 @foreground: #cccccc;
 
 body
@@ -27,12 +28,17 @@ svg
 {
 	path, line
 	{
-		stroke: @border;
+		stroke: #303030;
 	}
 
 	.major
 	{
-		stroke: red;
+		line {
+			stroke: @major-border;
+		}
+		text {
+			stroke: white;
+		}
 	}
 
 

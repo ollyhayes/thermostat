@@ -53,15 +53,32 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		axisBottom(xScale)
 			.tickFormat(multiFormat));
 
-	const gX = g.append('g')
+	const xAxisGrid = applyMajorTickClasses(
+		axisBottom(xScale)
+			.tickFormat('')
+			.tickSize(-height));
+
+	const gXHolder = g.append('g')
+		.attr('transform', `translate(0, ${height})`);
+	const gX = gXHolder.append('g')
 		.classed('axis', true)
-		.attr('transform', `translate(0, ${height})`)
 		.call(xAxis);
+	const gXGrid = gXHolder.append('g')
+		.classed('axis', true)
+		.call(xAxisGrid);
 
 	const yAxis = axisLeft(yScale);
-	const gY = g.append('g')
+	const yAxisGrid = axisLeft(yScale)
+		.tickFormat('')
+		.tickSize(-width);
+
+	const gYHolder = g.append('g');
+	const gY = gYHolder.append('g')
 		.classed('axis', true)
 		.call(yAxis);
+	const gYGrid = gYHolder.append('g')
+		.classed('axis', true)
+		.call(yAxisGrid);
 
 	const chartArea = g.append('g');
 	const zoom = d3Zoom();
@@ -76,8 +93,8 @@ function initialise(element, minDate, maxDate, handleZoom) {
 
 	return {
 		lineGenerator,
-		xScale, gX, xAxis,
-		yScale, gY, yAxis,
+		xScale, gX, xAxis, gXGrid, xAxisGrid, // maybe export these two lines a functions you can call to update axes
+		yScale, gY, yAxis, gYGrid, yAxisGrid,
 		chartArea,
 		zoom, zoomRect
 	};
@@ -90,8 +107,8 @@ export default async function drawChart(element) {
 
 	const {
 		lineGenerator,
-		xScale, gX, xAxis,
-		yScale, gY, yAxis,
+		xScale, gX, xAxis, gXGrid, xAxisGrid,
+		yScale, gY, yAxis, gYGrid, yAxisGrid,
 		chartArea,
 		zoom, zoomRect
 	} = initialise(element, minDate, maxDate, handleZoom);
@@ -105,6 +122,7 @@ export default async function drawChart(element) {
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
 		gX.call(xAxis.scale(zoomedScale));
+		gXGrid.call(xAxisGrid.scale(zoomedScale));
 	}
 
 	async function reload(startDate, endDate) {
@@ -113,6 +131,7 @@ export default async function drawChart(element) {
 		// reset the y-scale
 		yScale.domain(getTemperatureExtent(data));
 		gY.call(yAxis);
+		gYGrid.call(yAxisGrid);
 
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
@@ -124,6 +143,7 @@ export default async function drawChart(element) {
 		zoomedScale = xScale;
 		chartArea.attr('transform', null);
 		gX.call(xAxis.scale(xScale));
+		gXGrid.call(xAxisGrid.scale(zoomedScale));
 
 		// set the paths
 		chartArea
