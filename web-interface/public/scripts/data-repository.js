@@ -19,9 +19,12 @@ export default async function getTemperature(minDate, maxDate)
 	const max = maxDate.getTime();
 
 	const minuteLimit = (max - min) / (1000 * 60); // how many minutes are we looking at
-	const precisionLevel = minuteLimit > 100 // more than five hundred, maybe adjust? also hours!
-		? 1
-		: 0;
+	const hourLimit = minuteLimit / 60;
+	const precisionLevel = hourLimit > 96
+		? 2
+		: minuteLimit > 100 // more than five hundred, maybe adjust? also hours!
+			? 1
+			: 0;
 	
 	const data = await ajax(`/data?minDate=${min}&maxDate=${max}&precisionLevel=${precisionLevel}`);
 
