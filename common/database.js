@@ -17,6 +17,7 @@ const createDatabaseSql = `
 
 // create index temp_date on temperatures (date)
 // create index temp_precision on temperatures (precisionLevel)
+// create index temp on temperatures (precisionLevel, date)
 
 class Database
 {
@@ -29,6 +30,7 @@ class Database
 	{
 		const isNewDatabase = !fs.existsSync(this.filename);
 		this.db = new Sqlite(this.filename);
+		this.db.pragma('journal_mode = WAL');
 
 		log('opening database' + (isNewDatabase ? ' (creating new)' : ''));
 
