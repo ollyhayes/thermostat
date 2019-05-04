@@ -123,9 +123,79 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		gX.call(xAxis.scale(zoomedScale));
 		gXGrid.call(xAxisGrid.scale(zoomedScale));
+
+		triggerReload();
 	}
 
-	async function reload(startDate, endDate) {
+	// let reloadInProgress = false;
+	// let reloadBannedUntil = null;
+	// let reloadQueued = false;
+	// async function triggerReload() {
+	// 	console.log("triggering");
+
+	// 	if (reloadInProgress) {
+	// 		reloadQueued = true;
+	// 		console.log("queued");
+	// 	} else if (reloadBannedUntil ){
+	// 		await delay
+	// 	} else {
+	// 		reloadInProgress = true;
+
+	// 		try {
+	// 			console.log("reloading");
+	// 			await reload();
+	// 		} finally {
+	// 			if (reloadQueued) {
+	// 				console.log("dequeuing");
+	// 				reloadQueued = false;
+	// 				await delay(reload, 1000);
+	// 			}
+
+	// 			reloadInProgress = false;
+	// 		}
+	// 	}
+	// }
+
+	let reloadQueued = false;
+	let reloadAt = null;
+	function triggerReload() {
+		if (Date.now() > reloadAt) {
+			doReload();
+		} else if (!reloadQueued) {
+			reloadQueued = true;
+			callAt(reloadAt - 30, doReload);
+		}
+
+		function doReload() {
+			reloadAt = Date.now() + 1000;
+			reloadQueued = false;
+
+			reload();
+		}
+	}
+
+	function callAt(time, promise) {
+		return new Promise(resolve =>
+			setTimeout(async () => {
+				await promise();
+				resolve();
+			}, time - Date.now())
+		);
+	}
+
+	// function delay(promise, delay) {
+	// 	return new Promise(resolve => {
+	// 		setTimeout(async () => {
+	// 			await promise();
+	// 			resolve();
+	// 		}, delay);
+	// 	});
+	// }
+
+	async function reload(startDate = null, endDate = null) {
+		if (!startDate || !endDate)
+			[startDate, endDate] = zoomedScale.domain();
+
 		const data = await getTemperature(startDate, endDate);
 
 		// reset the y-scale
@@ -155,11 +225,8 @@ export default async function drawChart(element) {
 	}
 
 	document.addEventListener('keydown', async e => {
-		if (e.key === 'Enter') {
-			const [startDate, endDate] = zoomedScale.domain();
-
-			await reload(startDate, endDate);
-		}
+		if (e.key === 'Enter')
+			await reload();
 	});
 
 	if (autoRefresh)
