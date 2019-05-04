@@ -6,7 +6,7 @@ import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 
 import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
-import throttler from './throttler';
+import throttler, {throttleTime} from './throttler';
 import {autoRefresh} from '../../../common/config.json';
 import applyMajorTickClasses from './majorAxis';
 
@@ -113,9 +113,10 @@ export default async function drawChart(element) {
 		zoom, zoomRect
 	} = initialise(element, minDate, maxDate, handleZoom);
 
-	reload(minDate, maxDate);
-
 	let zoomedScale = xScale;
+	const triggerReload = throttleTime(reloadRaw, 1000);
+	triggerReload(minDate, maxDate);
+
 
 	function handleZoom() {
 		const t = d3Event.transform;
@@ -127,72 +128,15 @@ export default async function drawChart(element) {
 		triggerReload();
 	}
 
-	// let reloadInProgress = false;
-	// let reloadBannedUntil = null;
-	// let reloadQueued = false;
-	// async function triggerReload() {
-	// 	console.log("triggering");
+	document.addEventListener('keydown', async e => {
+		if (e.key === 'Enter')
+			await triggerReload();
+	});
 
-	// 	if (reloadInProgress) {
-	// 		reloadQueued = true;
-	// 		console.log("queued");
-	// 	} else if (reloadBannedUntil ){
-	// 		await delay
-	// 	} else {
-	// 		reloadInProgress = true;
+	if (autoRefresh)
+		setInterval(() => triggerReload(minDate, new Date(Date.now() + 30000)) , 2000);
 
-	// 		try {
-	// 			console.log("reloading");
-	// 			await reload();
-	// 		} finally {
-	// 			if (reloadQueued) {
-	// 				console.log("dequeuing");
-	// 				reloadQueued = false;
-	// 				await delay(reload, 1000);
-	// 			}
-
-	// 			reloadInProgress = false;
-	// 		}
-	// 	}
-	// }
-
-	let reloadQueued = false;
-	let reloadAt = null;
-	function triggerReload() {
-		if (Date.now() > reloadAt) {
-			doReload();
-		} else if (!reloadQueued) {
-			reloadQueued = true;
-			callAt(reloadAt - 30, doReload);
-		}
-
-		function doReload() {
-			reloadAt = Date.now() + 1000;
-			reloadQueued = false;
-
-			reload();
-		}
-	}
-
-	function callAt(time, promise) {
-		return new Promise(resolve =>
-			setTimeout(async () => {
-				await promise();
-				resolve();
-			}, time - Date.now())
-		);
-	}
-
-	// function delay(promise, delay) {
-	// 	return new Promise(resolve => {
-	// 		setTimeout(async () => {
-	// 			await promise();
-	// 			resolve();
-	// 		}, delay);
-	// 	});
-	// }
-
-	async function reload(startDate = null, endDate = null) {
+	async function reloadRaw(startDate = null, endDate = null) {
 		if (!startDate || !endDate)
 			[startDate, endDate] = zoomedScale.domain();
 
@@ -223,12 +167,4 @@ export default async function drawChart(element) {
 				enter => enter.append('path').attr('fill', 'none').attr('stroke', d => d.colour).attr('d', d => lineGenerator(d.values)),
 				update => update.attr('d', d => lineGenerator(d.values)));
 	}
-
-	document.addEventListener('keydown', async e => {
-		if (e.key === 'Enter')
-			await reload();
-	});
-
-	if (autoRefresh)
-		setInterval(() => reload(minDate, new Date(Date.now() + 30000)) , 2000);
 }
