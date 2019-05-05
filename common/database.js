@@ -45,7 +45,7 @@ class Database
 				`insert into temperatures (date, temperature, precisionLevel, thermometerId)
 				values (@date, @temperature, @precisionLevel, @thermometerId);`);
 
-			this.insertCommand = this.db.transaction((temperatures, date) =>
+			this.insertCommand = this.db.transaction((temperatures, date, precisionLevel) =>
 				temperatures.forEach(({temperature, id}) =>
 					singleInsert.run({
 						date: toUnix(date),
@@ -57,7 +57,7 @@ class Database
 
 		const date = new Date();
 
-		this.insertCommand(temperatures, date);
+		this.insertCommand(temperatures, date, precisionLevel);
 
 		const duration = Date.now() - date.getTime();
 
