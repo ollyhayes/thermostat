@@ -5,7 +5,7 @@ import { axisBottom, axisLeft } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 
 import multiFormat from './time-format';
-import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
+import getTemperatureRaw, { getLimits, getTemperatureExtent, getZoomExtent } from './data-repository';
 import throttler, {throttleTime} from './throttler';
 import {autoRefresh} from '../../../common/config.json';
 import applyMajorTickClasses from './majorAxis';
@@ -81,24 +81,23 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.call(yAxisGrid);
 
 	const chartArea = g.append('g');
+
+	const [minZoom, currentZoom, maxZoom] = getZoomExtent(xScale, minDate, maxDate, minDate, maxDate);
 	const zoom = d3Zoom()
 		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
-		.scaleExtent([
-			1,
-			(xScale(maxDate) - xScale(minDate)) / (xScale(new Date(10000)) - xScale(new Date(0)))]);
+		.scaleExtent([[currentZoom / maxZoom], [currentZoom / minZoom]]);
 
 	const zoomRect = g.append('rect')
 		.attr('width', width)
 		.attr('height', height)
 		.attr('opacity', '0')
 		.call(zoom
-			// .scaleExtent([1e-5, 100])
 			.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 			.on('zoom', handleZoom));
 
 	return {
 		lineGenerator,
-		xScale, gX, xAxis, gXGrid, xAxisGrid, // maybe export these two lines a functions you can call to update axes
+		xScale, gX, xAxis, gXGrid, xAxisGrid, // maybe export these two lines a functions you can call to update axes. Also a func to update the zoom extents etc
 		yScale, gY, yAxis, gYGrid, yAxisGrid,
 		chartArea,
 		zoom, zoomRect
@@ -164,10 +163,10 @@ export default async function drawChart(element) {
 		gX.call(xAxis.scale(xScale));
 		gXGrid.call(xAxisGrid.scale(zoomedScale));
 
+		// set extents
+		const [minZoom, currentZoom, maxZoom] = getZoomExtent(xScale, startDate, endDate, minDate, maxDate);
 		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
-			.scaleExtent([
-				(xScale(endDate) - xScale(startDate)) / (xScale(maxDate) - xScale(minDate)),
-				(xScale(endDate) - xScale(startDate)) / (xScale(new Date(10000)) - xScale(new Date(0)))]);
+			.scaleExtent([[currentZoom / maxZoom], [currentZoom / minZoom]]);
 
 		// set the paths
 		chartArea
