@@ -1,10 +1,17 @@
-systemd start on daaron pi
-gzip
 autorefresh
+limits
+gzip
 animation on y-scale change
 zoom in url
 delete database from history
 some way of showing data that doesn't yet have averages when you're zoomed out
+	don't think this is really required under normal operation
+	or: count the values first and then return precisionLevel based on value count
+	or: get sqlite to count the values?
+clip graph
+return one extra off graph (with a couple of unioned limit 1s)
+production build
+update rxjs
 
 normalised
 	+way more data in database
