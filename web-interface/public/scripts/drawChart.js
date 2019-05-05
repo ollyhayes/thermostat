@@ -82,10 +82,9 @@ function initialise(element, minDate, maxDate, handleZoom) {
 
 	const chartArea = g.append('g');
 
-	const [minZoom, currentZoom, maxZoom] = getZoomExtent(xScale, minDate, maxDate, minDate, maxDate);
 	const zoom = d3Zoom()
 		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
-		.scaleExtent([[currentZoom / maxZoom], [currentZoom / minZoom]]);
+		.scaleExtent(getZoomExtent(xScale, minDate, maxDate, minDate, maxDate));
 
 	const zoomRect = g.append('rect')
 		.attr('width', width)
@@ -164,9 +163,8 @@ export default async function drawChart(element) {
 		gXGrid.call(xAxisGrid.scale(zoomedScale));
 
 		// set extents
-		const [minZoom, currentZoom, maxZoom] = getZoomExtent(xScale, startDate, endDate, minDate, maxDate);
 		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
-			.scaleExtent([[currentZoom / maxZoom], [currentZoom / minZoom]]);
+			.scaleExtent(getZoomExtent(xScale, startDate, endDate, minDate, maxDate));
 
 		// set the paths
 		chartArea

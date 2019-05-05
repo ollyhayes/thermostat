@@ -73,5 +73,5 @@ export function getZoomExtent(scale, currentMin, currentMax, absoluteMin, absolu
 	const currentZoom = scale(currentMax) - scale(currentMin);
 	const maxZoom = scale(absoluteMax) - scale(absoluteMin);
 	
-	return [minZoom, currentZoom, maxZoom];
+	return [[currentZoom / maxZoom], [currentZoom / minZoom]];
 }
