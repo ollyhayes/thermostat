@@ -24,15 +24,14 @@ svg
 	flex-grow: 1;
 }
 
-.axis
+.axis,.grid
 {
 	path, line
 	{
 		stroke: #303030;
 	}
 
-	.major
-	{
+	.major {
 		line {
 			stroke: @major-border;
 		}
@@ -42,8 +41,15 @@ svg
 	}
 
 
+
 	text
 	{
 		fill: @foreground
+	}
+}
+
+.axis{
+	.domain {
+		stroke: @major-border;
 	}
 }

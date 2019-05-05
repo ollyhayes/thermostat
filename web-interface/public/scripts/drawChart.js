@@ -64,7 +64,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.classed('axis', true)
 		.call(xAxis);
 	const gXGrid = gXHolder.append('g')
-		.classed('axis', true)
+		.classed('grid', true)
 		.call(xAxisGrid);
 
 	const yAxis = axisLeft(yScale);
@@ -77,7 +77,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.classed('axis', true)
 		.call(yAxis);
 	const gYGrid = gYHolder.append('g')
-		.classed('axis', true)
+		.classed('grid', true)
 		.call(yAxisGrid);
 
 	const chartArea = g.append('g');
