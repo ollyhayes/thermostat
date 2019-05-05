@@ -1,3 +1,5 @@
+averaging coming out in secondly graph
+systemd start on daaron pi
 better default zoom
 refresh on scroll
 gzip
@@ -6,6 +8,7 @@ animation on y-scale change
 zoom in url
 delete database from history
 index on precisionLevel and date?
+some way of showing data that doesn't yet have averages when you're zoomed out
 
 normalised
 	+way more data in database
