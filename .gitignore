@@ -1,5 +1,8 @@
 /node_modules
-/*.db
 bundles
 /package-lock.json
 /common/config.json
+
+/*.db
+/*-wal
+/*-shm
