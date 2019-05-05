@@ -81,14 +81,19 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.call(yAxisGrid);
 
 	const chartArea = g.append('g');
-	const zoom = d3Zoom();
+	const zoom = d3Zoom()
+		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
+		.scaleExtent([
+			1,
+			(xScale(maxDate) - xScale(minDate)) / (xScale(new Date(10000)) - xScale(new Date(0)))]);
 
 	const zoomRect = g.append('rect')
 		.attr('width', width)
 		.attr('height', height)
 		.attr('opacity', '0')
 		.call(zoom
-			.scaleExtent([1e-5, 100])
+			// .scaleExtent([1e-5, 100])
+			.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 			.on('zoom', handleZoom));
 
 	return {
@@ -158,6 +163,11 @@ export default async function drawChart(element) {
 		chartArea.attr('transform', null);
 		gX.call(xAxis.scale(xScale));
 		gXGrid.call(xAxisGrid.scale(zoomedScale));
+
+		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
+			.scaleExtent([
+				(xScale(endDate) - xScale(startDate)) / (xScale(maxDate) - xScale(minDate)),
+				(xScale(endDate) - xScale(startDate)) / (xScale(new Date(10000)) - xScale(new Date(0)))]);
 
 		// set the paths
 		chartArea
