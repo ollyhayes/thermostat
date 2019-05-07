@@ -1,3 +1,4 @@
+order graph better - gridlines (minor then major (use z-index)), graphs, axes
 autorefresh
 gzip
 animation on y-scale change

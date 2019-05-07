@@ -56,29 +56,31 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	const xAxisGrid = applyMajorTickClasses(
 		axisBottom(xScale)
 			.tickFormat('')
-			.tickSize(-height));
+			.tickSize(-height)
+			.tickSizeOuter(0));
 
 	const gXHolder = g.append('g')
 		.attr('transform', `translate(0, ${height})`);
-	const gX = gXHolder.append('g')
-		.classed('axis', true)
-		.call(xAxis);
 	const gXGrid = gXHolder.append('g')
 		.classed('grid', true)
 		.call(xAxisGrid);
+	const gX = gXHolder.append('g')
+		.classed('axis', true)
+		.call(xAxis);
 
 	const yAxis = axisLeft(yScale);
 	const yAxisGrid = axisLeft(yScale)
 		.tickFormat('')
-		.tickSize(-width);
+		.tickSize(-width)
+		.tickSizeOuter(0);
 
 	const gYHolder = g.append('g');
-	const gY = gYHolder.append('g')
-		.classed('axis', true)
-		.call(yAxis);
 	const gYGrid = gYHolder.append('g')
 		.classed('grid', true)
 		.call(yAxisGrid);
+	const gY = gYHolder.append('g')
+		.classed('axis', true)
+		.call(yAxis);
 
 	const chartArea = g.append('g');
 
