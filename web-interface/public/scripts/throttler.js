@@ -34,7 +34,7 @@ export function throttleTime(inner, time) {
 
 			inner();
 		}
-	}
+	};
 }
 
 function callAt(time, promise) {

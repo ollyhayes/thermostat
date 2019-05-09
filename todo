@@ -1,4 +1,7 @@
 order graph better - gridlines (minor then major (use z-index)), graphs, axes
+	no z-index in svg, need to put the majors separate
+always allow going up to the end of the day
+	show a current time marker?
 autorefresh
 gzip
 animation on y-scale change
