@@ -43,9 +43,11 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.x(d => xScale(d.date))
 		.y(d => yScale(d.temperature));
 
-	const g = select(element)
+	const svg = select(element)
 		.append('svg')
-		.attr('viewBox', `${box.x0} ${box.y0} ${box.width} ${box.height}`)
+		.attr('viewBox', `${box.x0} ${box.y0} ${box.width} ${box.height}`);
+
+	const g = svg
 		.append('g')
 		.attr('transform', `translate(${margin.left}, ${margin.top})`);
 
@@ -74,6 +76,12 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.call(xAxisGrid);
 
 	const chartArea = g.append('g');
+	
+	g.append('rect')
+		.classed('chart-clipper', true)
+		.attr('x', -margin.left)
+		.attr('width', margin.left)
+		.attr('height', height);
 
 	const gXAxis = g.append('g')
 		.attr('transform', `translate(0, ${height})`)
