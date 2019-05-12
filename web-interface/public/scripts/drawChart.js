@@ -59,30 +59,29 @@ function initialise(element, minDate, maxDate, handleZoom) {
 			.tickSize(-height)
 			.tickSizeOuter(0));
 
-	const gXHolder = g.append('g')
-		.attr('transform', `translate(0, ${height})`);
-	const gXGrid = gXHolder.append('g')
-		.classed('grid', true)
-		.call(xAxisGrid);
-	const gX = gXHolder.append('g')
-		.classed('axis', true)
-		.call(xAxis);
-
 	const yAxis = axisLeft(yScale);
 	const yAxisGrid = axisLeft(yScale)
 		.tickFormat('')
 		.tickSize(-width)
 		.tickSizeOuter(0);
 
-	const gYHolder = g.append('g');
-	const gYGrid = gYHolder.append('g')
+	const gYGrid = g.append('g')
 		.classed('grid', true)
 		.call(yAxisGrid);
-	const gY = gYHolder.append('g')
-		.classed('axis', true)
-		.call(yAxis);
+	const gXGrid = g.append('g')
+		.attr('transform', `translate(0, ${height})`)
+		.classed('grid', true)
+		.call(xAxisGrid);
 
 	const chartArea = g.append('g');
+
+	const gXAxis = g.append('g')
+		.attr('transform', `translate(0, ${height})`)
+		.classed('axis', true)
+		.call(xAxis);
+	const gYAxis = g.append('g')
+		.classed('axis', true)
+		.call(yAxis);
 
 	const zoom = d3Zoom()
 		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
@@ -100,11 +99,11 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		lineGenerator,
 		xScale, yScale,
 		redrawXAxis(scale = xScale) {
-			gX.call(xAxis.scale(scale));
+			gXAxis.call(xAxis.scale(scale));
 			gXGrid.call(xAxisGrid.scale(scale));
 		},
 		redrawYAxis(scale = yScale) {
-			gY.call(yAxis.scale(scale));
+			gYAxis.call(yAxis.scale(scale));
 			gYGrid.call(yAxisGrid.scale(scale));
 		},
 		chartArea,
