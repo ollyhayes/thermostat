@@ -98,8 +98,15 @@ function initialise(element, minDate, maxDate, handleZoom) {
 
 	return {
 		lineGenerator,
-		xScale, gX, xAxis, gXGrid, xAxisGrid, // maybe export these two lines a functions you can call to update axes. Also a func to update the zoom extents etc
-		yScale, gY, yAxis, gYGrid, yAxisGrid,
+		xScale, yScale,
+		redrawXAxis(scale = xScale) {
+			gX.call(xAxis.scale(scale));
+			gXGrid.call(xAxisGrid.scale(scale));
+		},
+		redrawYAxis(scale = yScale) {
+			gY.call(yAxis.scale(scale));
+			gYGrid.call(yAxisGrid.scale(scale));
+		},
 		chartArea,
 		zoom, zoomRect
 	};
@@ -112,8 +119,8 @@ export default async function drawChart(element) {
 
 	const {
 		lineGenerator,
-		xScale, gX, xAxis, gXGrid, xAxisGrid,
-		yScale, gY, yAxis, gYGrid, yAxisGrid,
+		xScale, yScale,
+		redrawXAxis, redrawYAxis,
 		chartArea,
 		zoom, zoomRect
 	} = initialise(element, minDate, maxDate, handleZoom);
@@ -122,13 +129,11 @@ export default async function drawChart(element) {
 	const triggerReload = throttleTime(reloadRaw, 1000);
 	triggerReload(minDate, maxDate);
 
-
 	function handleZoom() {
 		const t = d3Event.transform;
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
-		gX.call(xAxis.scale(zoomedScale));
-		gXGrid.call(xAxisGrid.scale(zoomedScale));
+		redrawXAxis(zoomedScale);
 
 		triggerReload();
 	}
@@ -149,8 +154,7 @@ export default async function drawChart(element) {
 
 		// reset the y-scale
 		yScale.domain(getTemperatureExtent(data));
-		gY.call(yAxis);
-		gYGrid.call(yAxisGrid);
+		redrawYAxis();
 
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
@@ -161,8 +165,7 @@ export default async function drawChart(element) {
 		xScale.domain(zoomedScale.domain());
 		zoomedScale = xScale;
 		chartArea.attr('transform', null);
-		gX.call(xAxis.scale(xScale));
-		gXGrid.call(xAxisGrid.scale(zoomedScale));
+		redrawYAxis();
 
 		// set extents
 		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
