@@ -1,5 +1,4 @@
-always allow going up to the end of the day
-	show a current time marker?
+show a current time marker?
 autorefresh
 gzip
 animation on y-scale change

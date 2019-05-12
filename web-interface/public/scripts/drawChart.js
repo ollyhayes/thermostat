@@ -3,6 +3,7 @@ import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
 import { axisBottom, axisLeft } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
+import { timeDay } from 'd3-time';
 
 import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent, getZoomExtent } from './data-repository';
@@ -92,16 +93,18 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.classed('axis', true)
 		.call(yAxis);
 
+	const minExtent = timeDay(minDate);
+	const maxExtent = timeDay.ceil(maxDate);
 	const zoom = d3Zoom()
-		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
-		.scaleExtent(getZoomExtent(xScale, minDate, maxDate, minDate, maxDate));
+		.extent([[0,0],[width, height]])
+		.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
+		.scaleExtent(getZoomExtent(xScale, minDate, maxDate, minExtent, maxExtent));
 
 	const zoomRect = g.append('rect')
 		.attr('width', width)
 		.attr('height', height)
 		.attr('opacity', '0')
 		.call(zoom
-			.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 			.on('zoom', handleZoom));
 
 	return {
@@ -176,8 +179,10 @@ export default async function drawChart(element) {
 		redrawYAxis();
 
 		// set extents
-		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
-			.scaleExtent(getZoomExtent(xScale, startDate, endDate, minDate, maxDate));
+		const minExtent = timeDay(minDate);
+		const maxExtent = timeDay.ceil(maxDate);
+		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
+			.scaleExtent(getZoomExtent(xScale, startDate, endDate, minExtent, maxExtent));
 
 		// set the paths
 		chartArea
