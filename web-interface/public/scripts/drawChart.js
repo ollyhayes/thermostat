@@ -53,15 +53,16 @@ function initialise(element, minDate, maxDate, handleZoom) {
 
 	const xAxis = applyMajorTickClasses(
 		axisBottom(xScale)
-			.tickFormat(multiFormat));
-
+			.tickFormat(multiFormat)
+			.tickSizeInner(4));
 	const xAxisGrid = applyMajorTickClasses(
 		axisBottom(xScale)
 			.tickFormat('')
 			.tickSize(-height)
 			.tickSizeOuter(0));
 
-	const yAxis = axisLeft(yScale);
+	const yAxis = axisLeft(yScale)
+		.tickSizeInner(4);
 	const yAxisGrid = axisLeft(yScale)
 		.tickFormat('')
 		.tickSize(-width)
