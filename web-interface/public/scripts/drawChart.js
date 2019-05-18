@@ -155,7 +155,7 @@ export default async function drawChart(element) {
 		const [startDate, endDate] = zoomedScale.domain();
 		const currentDate = new Date();
 
-		if (endDate > currentDate && currentDate > startDate)
+		if (endDate > currentDate && currentDate > startDate && endDate - startDate < 10 * 60 * 1000)
 			triggerReload(minDate, new Date(Date.now() + 30000));
 	}, 1000);
 
