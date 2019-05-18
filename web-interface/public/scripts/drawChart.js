@@ -8,7 +8,6 @@ import { timeDay } from 'd3-time';
 import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent, getZoomExtent } from './data-repository';
 import throttler, {throttleTime} from './throttler';
-import {autoRefresh} from '../../../common/config.json';
 import applyMajorTickClasses from './majorAxis';
 
 const getTemperature = throttler(getTemperatureRaw);
@@ -124,9 +123,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 }
 
 export default async function drawChart(element) {
-	const {minDate, maxDate} = autoRefresh
-		? {minDate: new Date(Date.now() - 30000), maxDate: new Date(Date.now() + 30000)}
-		: (await getLimits());
+	const {minDate, maxDate} = await getLimits();
 
 	const {
 		lineGenerator,
@@ -154,8 +151,13 @@ export default async function drawChart(element) {
 			await triggerReload();
 	});
 
-	if (autoRefresh)
-		setInterval(() => triggerReload(minDate, new Date(Date.now() + 30000)) , 2000);
+	setInterval(() => {
+		const [startDate, endDate] = zoomedScale.domain();
+		const currentDate = new Date();
+
+		if (endDate > currentDate && currentDate > startDate)
+			triggerReload(minDate, new Date(Date.now() + 30000));
+	}, 1000);
 
 	async function reloadRaw(startDate = null, endDate = null) {
 		if (!startDate || !endDate)
