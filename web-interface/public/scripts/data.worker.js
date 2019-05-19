@@ -1,8 +1,10 @@
 
-import getTemperature, { getLimits, getTemperatureExtent } from './data-repository';
+import getTemperature, { getTemperatureExtent } from './data-repository';
 
-self.addEventListener('message', ({data: [startDate, endDate]}) => {
-	console.log('worker triggered', startDate, endDate);
+self.addEventListener('message', async ({data: [startDate, endDate]}) => {
+	const data = await getTemperature(startDate, endDate);
 
-	postMessage({data: ["test"], extent: ["test2"]});
+	const extent = getTemperatureExtent(data);
+
+	postMessage({data, extent, startDate, endDate});
 });

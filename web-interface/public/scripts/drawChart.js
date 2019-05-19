@@ -133,10 +133,6 @@ export default async function drawChart(element) {
 
 	let zoomedScale = xScale;
 	const triggerReload = throttleTime(() => dataWorker.postMessage(zoomedScale.domain()), 1000);
-		// dataWorker.postMessage({
-		// 	startDate: zoomedScale.domain()[0],
-		// 	endDate: zoomedScale.domain()[1]
-		// }), 1000);
 	triggerReload(minDate, maxDate);
 	dataWorker.addEventListener('message', handleNewData);
 
@@ -162,11 +158,7 @@ export default async function drawChart(element) {
 			triggerReload(minDate, new Date(Date.now() + 30000));
 	}, 1000);
 
-	function handleNewData({data: {data, extent}}) {
-		// const data = await getTemperature(startDate, endDate);
-
-		console.log(data, extent);
-
+	function handleNewData({data: {data, extent, startDate, endDate}}) {
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
 		zoomRect.call(zoom.transform, zoomIdentity);
@@ -178,7 +170,7 @@ export default async function drawChart(element) {
 		chartArea.attr('transform', null);
 
 		// reset the y-scale
-		yScale.domain(getTemperatureExtent(data));
+		yScale.domain(extent);
 		redrawYAxis();
 
 		// set extents
