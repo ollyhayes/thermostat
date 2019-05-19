@@ -9,6 +9,7 @@ import multiFormat from './time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent, getZoomExtent } from './data-repository';
 import throttler, {throttleTime} from './throttler';
 import applyMajorTickClasses from './majorAxis';
+import ticker from './ticker';
 
 const getTemperature = throttler(getTemperatureRaw);
 
@@ -55,11 +56,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		axisBottom(xScale)
 			.tickFormat(multiFormat)
 			.tickSizeInner(4));
-	// const xAxisGrid = applyMajorTickClasses(
-	// 	axisBottom(xScale)
-	// 		.tickFormat('')
-	// 		.tickSize(-height)
-	// 		.tickSizeOuter(0));
+	const xAxisGrid = ticker(xScale, height);
 
 	const yAxis = axisLeft(yScale)
 		.tickSizeInner(4);
@@ -71,10 +68,9 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	const gYGrid = g.append('g')
 		.classed('grid', true)
 		.call(yAxisGrid);
-	// const gXGrid = g.append('g')
-	// 	.attr('transform', `translate(0, ${height})`)
-	// 	.classed('grid', true)
-	// 	.call(xAxisGrid);
+	const gXGrid = g.append('g')
+		.classed('grid', true)
+		.call(xAxisGrid);
 
 	const chartArea = g.append('g');
 	
@@ -111,7 +107,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		xScale, yScale,
 		redrawXAxis(scale = xScale) {
 			gXAxis.call(xAxis.scale(scale));
-			// gXGrid.call(xAxisGrid.scale(scale));
+			gXGrid.call(xAxisGrid.scale(scale));
 		},
 		redrawYAxis(scale = yScale) {
 			gYAxis.call(yAxis.scale(scale));
@@ -190,7 +186,12 @@ export default async function drawChart(element) {
 			.selectAll('path')
 			.data(data, d => d.key)
 			.join(
-				enter => enter.append('path').attr('fill', 'none').attr('stroke', d => d.colour).attr('d', d => lineGenerator(d.values)),
-				update => update.attr('d', d => lineGenerator(d.values)));
+				enter => enter
+					.append('path')
+					.attr('fill', 'none')
+					.attr('stroke', d => d.colour)
+					.attr('d', d => lineGenerator(d.values)),
+				update => update
+					.attr('d', d => lineGenerator(d.values)));
 	}
 }

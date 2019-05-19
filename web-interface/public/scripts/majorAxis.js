@@ -40,7 +40,7 @@ const tickIntervals = [
 
 // this is a copy of https://github.com/d3/d3-scale/blob/1e35c71c80def6b500b5a498540f3eb75eb59638/src/time.js#L69
 // except using an updated tickIntervals array that gives major intervals
-function getMajorTickInterval(min, max) {
+export function getMajorTickInterval(min, max) {
 	// the target interval from the tickIntervals[4] array above
 	const target = (max - min) / 10;
 
