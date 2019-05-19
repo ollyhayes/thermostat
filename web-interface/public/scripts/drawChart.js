@@ -165,10 +165,6 @@ export default async function drawChart(element) {
 
 		const data = await getTemperature(startDate, endDate);
 
-		// reset the y-scale
-		yScale.domain(getTemperatureExtent(data));
-		redrawYAxis();
-
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
 		zoomRect.call(zoom.transform, zoomIdentity);
@@ -178,6 +174,9 @@ export default async function drawChart(element) {
 		xScale.domain(zoomedScale.domain());
 		zoomedScale = xScale;
 		chartArea.attr('transform', null);
+
+		// reset the y-scale
+		yScale.domain(getTemperatureExtent(data));
 		redrawYAxis();
 
 		// set extents
