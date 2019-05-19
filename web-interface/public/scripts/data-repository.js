@@ -28,7 +28,7 @@ export default async function getTemperature(minDate, maxDate)
 	
 	const data = await ajax(`/data?minDate=${min}&maxDate=${max}&precisionLevel=${precisionLevel}`);
 
-	log(`Precision: ${precisionLevel}, Datapoints: ${data.length}`, 'green');
+	//log(`Precision: ${precisionLevel}, Datapoints: ${data.length}`, 'green');
 	
 	const parsedData = data.map(dataPoint => ({
 		...dataPoint,
