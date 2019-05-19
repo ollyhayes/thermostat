@@ -1,3 +1,13 @@
+performance
+	console.log
+	move grouping to server (sqlite?)
+	hide axes whilst zooming
+	switch to canvas
+	parse json in webworker
+	draw x-axis grid manually
+differentiate between constant and single update
+	single update: instant get
+	constant update: wait a second
 show a current time marker?
 autorefresh
 gzip

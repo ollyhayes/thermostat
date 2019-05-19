@@ -102,7 +102,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	const zoomRect = g.append('rect')
 		.attr('width', width)
 		.attr('height', height)
-		.attr('opacity', '0')
+		.attr('opacity', '0.0001')
 		.call(zoom
 			.on('zoom', handleZoom));
 
