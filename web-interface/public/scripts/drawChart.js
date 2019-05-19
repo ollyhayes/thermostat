@@ -6,12 +6,14 @@ import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 
 import multiFormat from './time-format';
-import getTemperatureRaw, { getLimits, getTemperatureExtent, getZoomExtent } from './data-repository';
-import throttler, {throttleTime} from './throttler';
+import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
+import DataWorker from './data.worker.js';
+import {getZoomExtent} from './utils';
+import {throttleTime} from './throttler';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 
-const getTemperature = throttler(getTemperatureRaw);
+const dataWorker = new DataWorker();
 
 function initialise(element, minDate, maxDate, handleZoom) {
 	const box = {
@@ -130,8 +132,13 @@ export default async function drawChart(element) {
 	} = initialise(element, minDate, maxDate, handleZoom);
 
 	let zoomedScale = xScale;
-	const triggerReload = throttleTime(reloadRaw, 1000);
+	const triggerReload = throttleTime(() => dataWorker.postMessage(zoomedScale.domain()), 1000);
+		// dataWorker.postMessage({
+		// 	startDate: zoomedScale.domain()[0],
+		// 	endDate: zoomedScale.domain()[1]
+		// }), 1000);
 	triggerReload(minDate, maxDate);
+	dataWorker.addEventListener('message', handleNewData);
 
 	function handleZoom() {
 		const t = d3Event.transform;
@@ -155,11 +162,10 @@ export default async function drawChart(element) {
 			triggerReload(minDate, new Date(Date.now() + 30000));
 	}, 1000);
 
-	async function reloadRaw(startDate = null, endDate = null) {
-		if (!startDate || !endDate)
-			[startDate, endDate] = zoomedScale.domain();
+	function handleNewData({data: {data, extent}}) {
+		// const data = await getTemperature(startDate, endDate);
 
-		const data = await getTemperature(startDate, endDate);
+		console.log(data, extent);
 
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);

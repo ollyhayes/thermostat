@@ -1,5 +1,3 @@
-const XMLHttpRequest = window.XMLHttpRequest;
-
 export default function ajax(url, method, json)
 {
 	return new Promise((resolve, reject) =>

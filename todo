@@ -1,5 +1,4 @@
 performance
-	draw x-axis grid manually
 	hide axes whilst zooming
 	use webworkers
 		parse json
