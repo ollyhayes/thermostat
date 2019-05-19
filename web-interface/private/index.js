@@ -1,4 +1,5 @@
 const Koa = require('koa');
+const compress = require('koa-compress');
 const Router = require('koa-router');
 const serve = require('koa-static');
 const path = require('path');
@@ -11,6 +12,7 @@ function start(db) {
 	router.get('/data', data(db));
 	router.get('/limits', limits(db));
 
+	app.use(compress());
 	app.use(serve(path.join(__dirname, '../public')));
 	app.use(router.routes());
 

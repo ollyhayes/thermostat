@@ -1,16 +1,17 @@
 performance
-	console.log
-	move grouping to server (sqlite?)
-	hide axes whilst zooming
 	switch to canvas
-	parse json, create dates in webworker
 	draw x-axis grid manually
+	move grouping to server (sqlite?), find y-extent
+	hide axes whilst zooming
+	use webworkers
+		parse json
+		deserialize dates
+		create path
 differentiate between constant and single update
 	single update: instant get
 	constant update: wait a second
 show a current time marker?
 autorefresh
-gzip
 animation on y-scale change
 zoom in url
 delete database from history
