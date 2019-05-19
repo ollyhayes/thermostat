@@ -20,9 +20,9 @@ export default async function getTemperature(minDate, maxDate)
 
 	const minuteLimit = (max - min) / (1000 * 60); // how many minutes are we looking at
 	const hourLimit = minuteLimit / 60;
-	const precisionLevel = hourLimit > 96
+	const precisionLevel = hourLimit > 50
 		? 2
-		: minuteLimit > 100 // more than five hundred, maybe adjust? also hours!
+		: minuteLimit > 75
 			? 1
 			: 0;
 	
