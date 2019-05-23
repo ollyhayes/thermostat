@@ -7,6 +7,8 @@ const app = new Koa();
 const router = new Router();
 
 const {data, limits} = require('./data');
+const initDataSocket = require('./data-ws');
+const initDataStream = require('./data-stream');
 
 function start(db) {
 	router.get('/data', data(db));
@@ -18,7 +20,10 @@ function start(db) {
 
 	app.listen(8080);
 
+	initDataSocket(initDataStream(db));
+
 	console.log('Listening on port 8080');
+
 }
 
 module.exports = {start};
