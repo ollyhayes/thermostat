@@ -1,7 +1,7 @@
 import { select, event as d3Event} from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
-import { axisBottom, axisLeft } from 'd3-axis';
+import { axisBottom, axisLeft, axisRight } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 
@@ -24,7 +24,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	};
 	const margin = {
 		left: 50,
-		right: 20,
+		right: 50,
 		top: 20,
 		bottom: 30
 	};
@@ -62,6 +62,8 @@ function initialise(element, minDate, maxDate, handleZoom) {
 
 	const yAxis = axisLeft(yScale)
 		.tickSizeInner(4);
+	const yAxisRight = axisRight(yScale)
+		.tickSizeInner(4);
 	const yAxisGrid = axisLeft(yScale)
 		.tickFormat('')
 		.tickSize(-width)
@@ -89,6 +91,10 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	const gYAxis = g.append('g')
 		.classed('axis', true)
 		.call(yAxis);
+	const gYAxisRight = g.append('g')
+		.classed('axis', true)
+		.attr('transform', `translate(${width}, 0)`)
+		.call(yAxisRight);
 
 	const minExtent = timeDay(minDate);
 	const maxExtent = timeDay.ceil(maxDate);
@@ -113,6 +119,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		},
 		redrawYAxis(scale = yScale) {
 			gYAxis.call(yAxis.scale(scale));
+			gYAxisRight.call(yAxisRight.scale(scale));
 			gYGrid.call(yAxisGrid.scale(scale));
 		},
 		chartArea,
