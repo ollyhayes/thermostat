@@ -14,6 +14,7 @@ const createDatabaseSql = `
 	temperature integer not null,
 	precisionLevel integer not null,
 	thermometerId integer not null);
+	create index date on temperatures (date);
 	create index temp on temperatures (precisionLevel, date);`;
 
 class Database
