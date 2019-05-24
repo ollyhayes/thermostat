@@ -89,9 +89,12 @@ class Database
 
 	getLimits() {
 		if (!this.limitCommand)
-			this.limitCommand = this.db.prepare('select min(date) as minDate, max(date) as maxDate from temperatures;');
+			this.limitCommand = this.db.prepare(
+				`select min(date) as date from temperatures
+				union select max(date) as date from temperatures
+				order by date`);
 
-		const {minDate, maxDate} = this.limitCommand.get();
+		const [{date: minDate}, {date: maxDate}] = this.limitCommand.all();
 
 		return {
 			minDate: fromUnix(minDate),
