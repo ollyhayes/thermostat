@@ -83,6 +83,11 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.attr('x', -margin.left)
 		.attr('width', margin.left)
 		.attr('height', height);
+	g.append('rect')
+		.classed('chart-clipper', true)
+		.attr('x', width)
+		.attr('width', margin.right)
+		.attr('height', height);
 
 	const gXAxis = g.append('g')
 		.attr('transform', `translate(0, ${height})`)
