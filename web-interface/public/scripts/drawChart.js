@@ -186,8 +186,6 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, startDate, endDate, minExtent, maxExtent));
 
-		console.log(`count: ${data[0].values.length}`);
-
 		// set the paths
 		chartArea
 			.selectAll('path')
