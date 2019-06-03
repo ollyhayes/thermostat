@@ -3,7 +3,6 @@ import { extent } from 'd3-array';
 
 import ajax from './ajax';
 import {thermometers} from '../../../common/config.json';
-import log from '../../../common/log';
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -28,7 +27,7 @@ export default async function getTemperature(minDate, maxDate)
 	
 	const data = await ajax(`/data?minDate=${min}&maxDate=${max}&precisionLevel=${precisionLevel}`);
 
-	//log(`Precision: ${precisionLevel}, Datapoints: ${data.length}`, 'green');
+	//console.log(`Precision: ${precisionLevel}, Datapoints: ${data.length}`);
 	
 	const parsedData = data.map(dataPoint => ({
 		...dataPoint,

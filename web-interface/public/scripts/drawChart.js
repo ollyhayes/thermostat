@@ -1,7 +1,7 @@
 import { select, event as d3Event} from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
-import { axisBottom, axisLeft } from 'd3-axis';
+import { axisBottom, axisLeft, axisRight } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 
@@ -24,7 +24,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	};
 	const margin = {
 		left: 50,
-		right: 20,
+		right: 50,
 		top: 20,
 		bottom: 30
 	};
@@ -62,6 +62,8 @@ function initialise(element, minDate, maxDate, handleZoom) {
 
 	const yAxis = axisLeft(yScale)
 		.tickSizeInner(4);
+	const yAxisRight = axisRight(yScale)
+		.tickSizeInner(4);
 	const yAxisGrid = axisLeft(yScale)
 		.tickFormat('')
 		.tickSize(-width)
@@ -81,6 +83,11 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		.attr('x', -margin.left)
 		.attr('width', margin.left)
 		.attr('height', height);
+	g.append('rect')
+		.classed('chart-clipper', true)
+		.attr('x', width)
+		.attr('width', margin.right)
+		.attr('height', height);
 
 	const gXAxis = g.append('g')
 		.attr('transform', `translate(0, ${height})`)
@@ -89,6 +96,10 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	const gYAxis = g.append('g')
 		.classed('axis', true)
 		.call(yAxis);
+	const gYAxisRight = g.append('g')
+		.classed('axis', true)
+		.attr('transform', `translate(${width}, 0)`)
+		.call(yAxisRight);
 
 	const minExtent = timeDay(minDate);
 	const maxExtent = timeDay.ceil(maxDate);
@@ -113,6 +124,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 		},
 		redrawYAxis(scale = yScale) {
 			gYAxis.call(yAxis.scale(scale));
+			gYAxisRight.call(yAxisRight.scale(scale));
 			gYGrid.call(yAxisGrid.scale(scale));
 		},
 		chartArea,
@@ -178,8 +190,6 @@ export default async function drawChart(element) {
 		const maxExtent = timeDay.ceil(maxDate);
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, startDate, endDate, minExtent, maxExtent));
-
-		console.log(`count: ${data[0].values.length}`);
 
 		// set the paths
 		chartArea

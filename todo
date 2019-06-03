@@ -1,8 +1,6 @@
 performance
 	hide axes whilst zooming
 	use webworkers
-		parse json
-		deserialize dates
 		create path
 	switch to canvas
 differentiate between constant and single update
