@@ -13,6 +13,26 @@ document.addEventListener('DOMContentLoaded', () =>
 });
 
 function socketTest() {
-	const socket = new WebSocket('ws://locahost:8080');
-	socket.
+	const socket = new WebSocket('ws://localhost:8081');
+
+	socket.onopen = function () {
+		// socket.send('Ping'); // Send the message 'Ping' to the server
+		console.log('socket connected');
+		socket.send(JSON.stringify(['a', 'b', 'c']));
+		console.log('text sent');
+	};
+	
+	// // Log errors
+	// socket.onerror = function (error) {
+	// 	console.log('WebSocket Error ' + error);
+	// };
+	
+	// // Log messages from the server
+	// socket.onmessage = function (e) {
+	// 	console.log('Server: ' + e.data);
+	// };
+
+	console.log('socket connected');
+	// socket.send('test');
+	// console.log('text sent');
 }
