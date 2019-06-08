@@ -14,25 +14,33 @@ document.addEventListener('DOMContentLoaded', () =>
 
 function socketTest() {
 	const socket = new WebSocket('ws://localhost:8081');
+	const requests = [1, 2, 3];
+	let currentRequest = 4;
 
 	socket.onopen = function () {
-		// socket.send('Ping'); // Send the message 'Ping' to the server
 		console.log('socket connected');
-		socket.send(JSON.stringify(['a', 'b', 'c']));
-		console.log('text sent');
+
+		window.token = setInterval(() => {
+			requests.push(currentRequest++);
+
+			send(requests);
+		}, 1000);
 	};
 	
-	// // Log errors
-	// socket.onerror = function (error) {
-	// 	console.log('WebSocket Error ' + error);
-	// };
+	// Log errors
+	socket.onerror = function (error) {
+		console.log('WebSocket Error ' + error);
+	};
 	
-	// // Log messages from the server
-	// socket.onmessage = function (e) {
-	// 	console.log('Server: ' + e.data);
-	// };
+	// Log messages from the server
+	socket.onmessage = function (e) {
+		requests.splice(requests.indexOf(Number(e.data)), 1);
+		console.log(`got: ${e.data}, requests: ${requests}`);
+	};
 
-	console.log('socket connected');
-	// socket.send('test');
-	// console.log('text sent');
+	function send(data) {
+		const dataString = JSON.stringify(data);
+		socket.send(dataString);
+		console.log(`sending ${dataString}`);
+	}
 }

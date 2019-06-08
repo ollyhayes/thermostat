@@ -17,7 +17,6 @@ function init(createDataStream) {
 
 		ws.on('message', requestsJson => {
 			const requests = JSON.parse(requestsJson);
-			console.log(requests);
 			updateRequestList(requests);
 		});
 

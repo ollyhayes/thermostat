@@ -7,14 +7,19 @@ function createDataStreamCreator(database) {
 		let completedRequests = [];
 		let i = 0;
 
-		function processRequests() {
+		async function processRequests() {
 			const newRequest = requestsList.find(request => !completedRequests.includes(request));
 
 			// there must be a better way!
-			requestsList = requestsList.filter(request => request !== newRequest);
+			// requestsList = requestsList.filter(request => request !== newRequest);
+			requestsList.splice(requestsList.indexOf(newRequest), 1);
+
+			console.log(`new request: ${newRequest}, requsts: ${requestsList}, completed: ${completedRequests}`);
+
+			await new Promise(resolve => setTimeout(resolve, 1500));
 
 			// get the data
-			sendUpdate(newRequest + i++);
+			sendUpdate(newRequest);
 
 			// update completedRequests (pushing out the end)
 
@@ -25,7 +30,7 @@ function createDataStreamCreator(database) {
 			if (completedRequests > 50) // think about this
 				completedRequests.unshift();
 
-			if (requestsList.length)
+			if (requestsList.find(request => !completedRequests.includes(request))) 
 				setTimeout(processRequests);
 		}
 
