@@ -1,21 +1,23 @@
-// const windowToDates;
-// const datesToWindow;
+const log = require('../../common/log');
 
 function createDataStreamCreator(database) {
 	return function createDataStream(sendUpdate) {
 		let requestsList = [];
-		let completedRequests = [];
+		let completedRequests = new Set();
+		// let completedRequests = [];
 
 		async function processRequests() {
 			const newRequest = requestsList[0];
 
-			console.log(`new request: ${newRequest}, requsts: ${requestsList}, completed: ${completedRequests}`);
+			log('new request'.cyan + `: ${requestToString(newRequest)},` +
+				'requsts'.cyan + `: ${requestsList.map(requestToString)},` +
+				'completed'.cyan + `: ${completedRequests.size}`);
+
+			completedRequests.add(requestToCode(newRequest));
+			if (completedRequests > 50) // think about this
+				completedRequests.entries().next();
 
 			await new Promise(resolve => setTimeout(resolve, 1500));
-
-			completedRequests.push(newRequest);
-			if (completedRequests > 50) // think about this
-				completedRequests.unshift();
 
 			const newRequestIndex = requestsList.indexOf(newRequest);
 			if (newRequestIndex !== -1)
@@ -31,12 +33,26 @@ function createDataStreamCreator(database) {
 		return function updateRequestList(requests) {
 			const triggerRequests = requestsList.length === 0;
 
-			requestsList = requests.filter(request => !completedRequests.includes(request));
+			requestsList = requests
+				.map(({minDate, maxDate, precisionLevel}) => ({
+					minDate: new Date(minDate),
+					maxDate: new Date(maxDate),
+					precisionLevel
+				}))
+				.filter(request => !completedRequests.has(requestToCode(request)));
 
-			if (triggerRequests)
+			if (triggerRequests && requestsList.length)
 				processRequests();
 		};
 	};
+}
+
+function requestToCode({minDate, maxDate, precisionLevel}) {
+	return '' + minDate.getTime() + maxDate.getTime() + precisionLevel;
+}
+
+function requestToString({minDate, precisionLevel}) {
+	return `${minDate.getHours()}:${precisionLevel}`.green;
 }
 
 module.exports = createDataStreamCreator;
