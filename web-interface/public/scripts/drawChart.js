@@ -146,7 +146,8 @@ export default async function drawChart(element) {
 	} = initialise(element, minDate, maxDate, handleZoom);
 
 	let zoomedScale = xScale;
-	const triggerReload = throttleTime(() => dataWorker.postMessage(zoomedScale.domain()), 1000);
+	const triggerReload = () => dataWorker.postMessage(zoomedScale.domain());
+	// const triggerReload = throttleTime(() => dataWorker.postMessage(zoomedScale.domain()), 1000);
 	triggerReload(minDate, maxDate);
 	dataWorker.addEventListener('message', handleNewData);
 

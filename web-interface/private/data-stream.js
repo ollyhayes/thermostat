@@ -47,7 +47,7 @@ function createDataStreamCreator(database) {
 }
 
 function requestToString({minDate, precisionLevel}) {
-	return `${minDate.getHours()}:${precisionLevel}`.green;
+	return `${minDate.getHours()}:${minDate.getMinutes()}:${precisionLevel}`.green;
 }
 
 module.exports = createDataStreamCreator;
