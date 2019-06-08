@@ -29,18 +29,15 @@ socket.onopen = function () {
 };
 
 function requestsFromDates(minDate, maxDate, precisionLevel) {
-	// 5 minute increments
+	const flooredDate = new Date(minDate.getTime() - minDate.getTime() % (5 * 60 * 1000));
 
-	const range =  timeMinutes(minDate, maxDate, 5);
-
-	return timeMinutes(minDate, maxDate, 5)
+	return timeMinutes(flooredDate, maxDate, 5)
 		.map(minRequestDate => ({
 			minDate: minRequestDate,
 			maxDate: new Date(minRequestDate.getTime() + 5 * 60 * 1000 - 1000),
 			precisionLevel: precisionLevel
 		}))
 		.filter(request => !receivedRequests.has(request));
-	// first need to floor the range, using minDate - minDate % 5 or something?
 	// think about ordering from the center out (do the above twice?)
 	// remove throttler
 
