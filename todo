@@ -1,4 +1,6 @@
 switch websocket to use same port/server
+have websocket reconnect
+catch the first requests before the socket is open
 performance
 	hide axes whilst zooming
 	use webworkers

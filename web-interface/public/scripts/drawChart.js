@@ -133,7 +133,9 @@ function initialise(element, minDate, maxDate, handleZoom) {
 }
 
 export default async function drawChart(element) {
-	const {minDate, maxDate} = await getLimits();
+	// const {minDate, maxDate} = await getLimits();
+	const minDate = new Date(2019, 3, 21, 21, 0, 0);
+	const maxDate = new Date(minDate.getTime() + 60	* 60 * 1000 * 2);
 
 	const {
 		lineGenerator,

@@ -1,31 +1,29 @@
 const log = require('../../common/log');
+const createRequestsSet = require('../public/scripts/requests-set');
 
 function createDataStreamCreator(database) {
 	return function createDataStream(sendUpdate) {
 		let requestsList = [];
-		let completedRequests = new Set();
-		// let completedRequests = [];
+		const completedRequests = createRequestsSet(50);
 
 		function processRequests() {
 			const newRequest = requestsList[0];
 
 			log('new request'.cyan + `: ${requestToString(newRequest)},` +
 				'requsts'.cyan + `: ${requestsList.map(requestToString)},` +
-				'completed'.cyan + `: ${completedRequests.size}`);
+				'completed'.cyan + `: ${completedRequests.size()}`);
 
-			completedRequests.add(requestToCode(newRequest));
-			if (completedRequests > 50) // think about this
-				completedRequests.entries().next();
+			completedRequests.add(newRequest);
 
 			const newRequestIndex = requestsList.indexOf(newRequest);
 			if (newRequestIndex !== -1)
 				requestsList.splice(newRequestIndex, 1);
 
-			const data = database.read(
+			const temperatures = database.read(
 				newRequest.minDate,
 				newRequest.maxDate,
 				newRequest.precisionLevel);
-			sendUpdate(data);
+			sendUpdate({temperatures, request: newRequest});
 
 			if (requestsList.length)
 				setTimeout(processRequests);
@@ -40,16 +38,12 @@ function createDataStreamCreator(database) {
 					maxDate: new Date(maxDate),
 					precisionLevel
 				}))
-				.filter(request => !completedRequests.has(requestToCode(request)));
+				.filter(request => !completedRequests.has(request));
 
 			if (triggerRequests && requestsList.length)
 				processRequests();
 		};
 	};
-}
-
-function requestToCode({minDate, maxDate, precisionLevel}) {
-	return '' + minDate.getTime() + maxDate.getTime() + precisionLevel;
 }
 
 function requestToString({minDate, precisionLevel}) {
