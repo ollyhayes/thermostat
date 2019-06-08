@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () =>
 	const root = document.querySelector('.root');
 	drawChart(root);
 
-	socketTest();
+	// socketTest();
 });
 
 function socketTest() {
@@ -19,12 +19,6 @@ function socketTest() {
 
 	socket.onopen = function () {
 		console.log('socket connected');
-
-		window.token = setInterval(() => {
-			requests.push(currentRequest++);
-
-			send(requests);
-		}, 1000);
 	};
 	
 	// Log errors
@@ -43,4 +37,15 @@ function socketTest() {
 		socket.send(dataString);
 		console.log(`sending ${dataString}`);
 	}
+
+	window.startTest = function() {
+		window.token = setInterval(() => {
+			requests.push(currentRequest++);
+			send(requests);
+		}, 1000);
+	};
+
+	window.endTest = function() {
+		clearInterval(window.token);
+	};
 }
