@@ -6,7 +6,7 @@ function createDataStreamCreator(database) {
 		let completedRequests = new Set();
 		// let completedRequests = [];
 
-		async function processRequests() {
+		function processRequests() {
 			const newRequest = requestsList[0];
 
 			log('new request'.cyan + `: ${requestToString(newRequest)},` +
@@ -17,14 +17,15 @@ function createDataStreamCreator(database) {
 			if (completedRequests > 50) // think about this
 				completedRequests.entries().next();
 
-			await new Promise(resolve => setTimeout(resolve, 1500));
-
 			const newRequestIndex = requestsList.indexOf(newRequest);
 			if (newRequestIndex !== -1)
 				requestsList.splice(newRequestIndex, 1);
 
-			// get the data
-			sendUpdate(newRequest);
+			const data = database.read(
+				newRequest.minDate,
+				newRequest.maxDate,
+				newRequest.precisionLevel);
+			sendUpdate(data);
 
 			if (requestsList.length)
 				setTimeout(processRequests);

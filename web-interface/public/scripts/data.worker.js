@@ -54,7 +54,7 @@ function nextRequest() {
 	return {
 		minDate,
 		maxDate,
-		precisionLevel: 1
+		precisionLevel: 0
 	};
 }
 
