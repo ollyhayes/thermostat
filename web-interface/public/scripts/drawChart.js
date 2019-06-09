@@ -162,7 +162,7 @@ export default async function drawChart(element) {
 
 	document.addEventListener('keydown', async e => {
 		if (e.key === 'Enter')
-			await triggerReload();
+			await reRender();
 	});
 
 	setInterval(() => {
@@ -174,15 +174,34 @@ export default async function drawChart(element) {
 	}, 1000);
 
 	const dataStore = [];
-	let dataStoreExtent = [Infinity, -Infinity];
 
 	function handleNewData({data: {data, extent}}) {
-		// this should be calculated on render
-		dataStoreExtent = [
-			Math.min(extent[0], dataStoreExtent[0]),
-			Math.max(extent[1], dataStoreExtent[1]),
-		];
+		//call rerender if the y extent changes
 
+		data.forEach(data =>
+			dataStore.push(data));
+		
+		// should store the extend (x & y) of each bit of data on that object
+		// and index the data by position somehow?
+
+		// need to trigger rerender sometimes
+		// when zoom changes a bit
+		// when you scroll a long way
+		// when y-extent changes
+
+		// set the paths
+		chartArea
+			.selectAll('path')
+			.data(dataStore) // need to filter the datastore to just show the current screen?
+			.join(
+				enter => enter
+					.append('path')
+					.attr('fill', 'none')
+					.attr('stroke', d => d.colour)
+					.attr('d', d => lineGenerator(d.values)));
+	}
+
+	function reRender() {
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
 		zoomRect.call(zoom.transform, zoomIdentity);
@@ -194,7 +213,8 @@ export default async function drawChart(element) {
 		chartArea.attr('transform', null);
 
 		// reset the y-scale
-		yScale.domain(dataStoreExtent);
+		// yScale.domain(dataStoreExtent); // get this from the filtered data
+		yScale.domain([10, 80]);
 		redrawYAxis();
 
 		// set extents
@@ -203,15 +223,6 @@ export default async function drawChart(element) {
 		const maxExtent = timeDay.ceil(maxDate);
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
-
-		data.forEach(data =>
-			dataStore.push(data));
-
-		// this function needs to be split
-		// the new data handler adds data to the datastore (and calls render?)
-		// 		actually, just calls chartArea with enter only
-		// we have a render function
-		// that optionally resets the zoom?
 
 		// set the paths
 		chartArea

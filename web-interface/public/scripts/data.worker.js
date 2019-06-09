@@ -49,14 +49,6 @@ function requestsFromDates(minDate, maxDate, precisionLevel) {
 		}))
 		.filter(request => !receivedRequests.has(request));
 	// think about ordering from the center out (do the above twice?)
-	// remove throttler
-
-	// in the onmessage
-	// parse etc
-	// record which request we've had back
-	// postMessage to the frond end
-	// maybe turn to a line (actually this means we'll need access to tohe domain etc)
-	// 		also for re-rendering we'd prob wanna do that in the main thread so maybe this is pointless
 }
 
 // const socket = new self.WebSocket('ws://localhost:8081');
