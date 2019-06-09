@@ -173,7 +173,16 @@ export default async function drawChart(element) {
 			triggerReload(minDate, new Date(Date.now() + 30000));
 	}, 1000);
 
-	function handleNewData({data: {data, extent, startDate, endDate}}) {
+	const dataStore = [];
+	let dataStoreExtent = [Infinity, -Infinity];
+
+	function handleNewData({data: {data, extent}}) {
+		// this should be calculated on render
+		dataStoreExtent = [
+			Math.min(extent[0], dataStoreExtent[0]),
+			Math.max(extent[1], dataStoreExtent[1]),
+		];
+
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
 		zoomRect.call(zoom.transform, zoomIdentity);
@@ -185,19 +194,29 @@ export default async function drawChart(element) {
 		chartArea.attr('transform', null);
 
 		// reset the y-scale
-		yScale.domain(extent);
+		yScale.domain(dataStoreExtent);
 		redrawYAxis();
 
 		// set extents
+		// this are fixed, may aswell define them outside of here
 		const minExtent = timeDay(minDate);
 		const maxExtent = timeDay.ceil(maxDate);
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
-			.scaleExtent(getZoomExtent(xScale, startDate, endDate, minExtent, maxExtent));
+			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
+
+		data.forEach(data =>
+			dataStore.push(data));
+
+		// this function needs to be split
+		// the new data handler adds data to the datastore (and calls render?)
+		// 		actually, just calls chartArea with enter only
+		// we have a render function
+		// that optionally resets the zoom?
 
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(data, d => d.key)
+			.data(dataStore) // need to filter the datastore to just show the current screen?
 			.join(
 				enter => enter
 					.append('path')

@@ -9,6 +9,9 @@ function createDataStreamCreator(database) {
 		function processRequests() {
 			const newRequest = requestsList[0];
 
+			if (!newRequest)
+				return;
+
 			log('new request'.cyan + `: ${requestToString(newRequest)},` +
 				'requsts'.cyan + `: ${requestsList.map(requestToString)},` +
 				'completed'.cyan + `: ${completedRequests.size()}`);
@@ -40,7 +43,7 @@ function createDataStreamCreator(database) {
 				}))
 				.filter(request => !completedRequests.has(request));
 
-			if (triggerRequests && requestsList.length)
+			if (triggerRequests)
 				processRequests();
 		};
 	};

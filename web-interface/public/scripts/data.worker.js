@@ -1,7 +1,17 @@
 import {timeMinutes} from 'd3-time';
+import { nest as d3Nest } from 'd3-collection';
 
 import getTemperature, { getTemperatureExtent } from './data-repository';
 import createRequestsSet from './requests-set';
+import {thermometers} from '../../../common/config.json';
+
+const nest = d3Nest()
+	.key(d => d.id);
+
+const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
+	...colours,
+	[id]: colour
+}),{});
 
 // self.addEventListener('message', async ({data: [startDate, endDate]}) => {
 // 	const data = await getTemperature(startDate, endDate);
@@ -53,7 +63,6 @@ function requestsFromDates(minDate, maxDate, precisionLevel) {
 // let currentDate = new Date(2019, 3, 21, 21, 0, 0);
 // const requests = [];
 
-
 // Log errors
 socket.onerror = function (error) {
 	console.log('WebSocket Error ' + error);
@@ -64,14 +73,32 @@ socket.onmessage = function ({data}) {
 	const {temperatures, request} = JSON.parse(data);
 	console.log(`got: ${temperatures.length} values`);
 
-	const request2 = {
+	const requestParsed = {
 		minDate: new Date(request.minDate),
 		maxDate: new Date(request.maxDate),
 		precisionLevel: request.precisionLevel
 	};
-	
 
-	receivedRequests.add(request2);
+	receivedRequests.add(requestParsed);
+
+	if (!temperatures.length)
+		return;
+
+	const parsedData = temperatures.map(dataPoint => ({
+		...dataPoint,
+		date: new Date(dataPoint.date),
+	}));
+
+	const nestedData = nest.entries(parsedData)
+		.map(({key, values}) => ({
+			key,
+			colour: thermometerColours[key],
+			values
+		}));
+
+	const extent = getTemperatureExtent(nestedData);
+
+	self.postMessage({data: nestedData, extent});
 };
 
 // function send(data) {
