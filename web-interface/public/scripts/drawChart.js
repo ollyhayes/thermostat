@@ -149,10 +149,12 @@ export default async function drawChart(element) {
 		zoom, zoomRect
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
 
+	const dataStore = [];
 	let zoomedScale = xScale;
-	const triggerReload = () => dataWorker.postMessage(zoomedScale.domain());
+	const updateRequestQueue = () => dataWorker.postMessage(zoomedScale.domain());
 	// const triggerReload = throttleTime(() => dataWorker.postMessage(zoomedScale.domain()), 1000);
-	triggerReload(minDate, maxDate);
+	updateRequestQueue();
+	reRender();
 	dataWorker.addEventListener('message', handleNewData);
 
 	function handleZoom() {
@@ -161,37 +163,33 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
-		triggerReload();
+		updateRequestQueue();
+
+		if (t.k < 0.5 || t.k > 2 || Math.abs(t.x) > 5000)
+			reRender();
 	}
 
-	document.addEventListener('keydown', async e => {
+	document.addEventListener('keydown', e => {
 		if (e.key === 'Enter')
-			await reRender();
+			reRender();
 	});
 
-	setInterval(() => {
-		const [startDate, endDate] = zoomedScale.domain();
-		const currentDate = new Date();
-
-		if (endDate > currentDate && currentDate > startDate && endDate - startDate < 10 * 60 * 1000)
-			triggerReload(minDate, new Date(Date.now() + 30000));
-	}, 1000);
-
-	const dataStore = [];
 
 	function handleNewData({data: {data, extent}}) {
 		//call rerender if the y extent changes
 
 		data.forEach(data =>
 			dataStore.push(data));
+
+		// need to do all the different perision levels
 		
 		// should store the extend (x & y) of each bit of data on that object
 		// and index the data by position somehow?
 
 		// need to trigger rerender sometimes
-		// when zoom changes a bit
-		// when you scroll a long way
-		// when y-extent changes
+			// when y-extent changes
+
+		// need to cut down the datastore based on last used and how much memory?
 
 		// set the paths
 		chartArea

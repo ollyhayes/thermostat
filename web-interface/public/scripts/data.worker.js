@@ -22,21 +22,24 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 // });
 
 const socket = new self.WebSocket('ws://localhost:8081');
+const socketOpen = new Promise(resolve => socket.addEventListener('open', resolve));
 const receivedRequests = createRequestsSet();
 let lastRequests = '';
 
 socket.onopen = function () {
 	console.log('socket connected');
-
-	self.addEventListener('message', async ({data: [startDate, endDate]}) => {
-		const requests = requestsFromDates(startDate, endDate, 0);
-
-		if (requests !== lastRequests && requests.length > 0) {
-			lastRequests = requests;
-			socket.send(JSON.stringify(requests));
-		}
-	});
 };
+
+self.addEventListener('message', async ({data: [startDate, endDate]}) => {
+	const requests = requestsFromDates(startDate, endDate, 0);
+
+	if (requests !== lastRequests && requests.length > 0) {
+		lastRequests = requests;
+
+		await socketOpen;
+		socket.send(JSON.stringify(requests));
+	}
+});
 
 function requestsFromDates(minDate, maxDate, precisionLevel) {
 	const flooredDate = new Date(minDate.getTime() - minDate.getTime() % (5 * 60 * 1000));
