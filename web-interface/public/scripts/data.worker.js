@@ -1,4 +1,4 @@
-import {timeMinutes} from 'd3-time';
+import {timeMinute, timeHour, timeWeek} from 'd3-time';
 import { nest as d3Nest } from 'd3-collection';
 
 import getTemperature, { getTemperatureExtent } from './data-repository';
@@ -35,7 +35,18 @@ socket.onopen = function () {
 };
 
 self.addEventListener('message', ({data: [startDate, endDate]}) => {
-	const requests = requestsFromDates(startDate, endDate, 0);
+	const min = startDate.getTime();
+	const max = endDate.getTime();
+	
+	const minuteLimit = (max - min) / (1000 * 60); // how many minutes are we looking at
+	const hourLimit = minuteLimit / 60;
+	const precisionLevel = hourLimit > 50
+		? 2
+		: minuteLimit > 75
+			? 1
+			: 0;
+	
+	const requests = requestsFromDates(startDate, endDate, precisionLevel);
 
 	if (requests !== lastRequests && requests.length > 0) {
 		lastRequests = requests;
@@ -48,16 +59,33 @@ self.addEventListener('message', ({data: [startDate, endDate]}) => {
 });
 
 function requestsFromDates(minDate, maxDate, precisionLevel) {
-	const flooredDate = new Date(minDate.getTime() - minDate.getTime() % (5 * 60 * 1000));
+	const {range, offset} = getRangeForPrecisionLevel(precisionLevel);
 
-	return timeMinutes(flooredDate, maxDate, 5)
+	return range(minDate, maxDate)
 		.map(minRequestDate => ({
 			minDate: minRequestDate,
-			maxDate: new Date(minRequestDate.getTime() + 5 * 60 * 1000 - 1000),
+			maxDate: offset(minRequestDate),
 			precisionLevel: precisionLevel
 		}))
 		.filter(request => !receivedRequests.has(request));
 	// think about ordering from the center out (do the above twice?)
+}
+
+function getRangeForPrecisionLevel(precisionLevel) {
+	function tools(interval, step) {
+		return {
+			range: (start, stop) =>
+				interval
+					.every(step)
+					.range(interval.offset(start, -1), interval.offset(stop, 1)),
+			offset: date => interval.offset(date, step)
+		};
+	}
+	switch (precisionLevel) {
+	case 0: return tools(timeMinute, 5);
+	case 1: return tools(timeHour, 5);
+	case 2: return tools(timeWeek, 1);
+	}
 }
 
 // const socket = new self.WebSocket('ws://localhost:8081');
