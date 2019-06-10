@@ -15,7 +15,7 @@ import ticker from './ticker';
 
 const dataWorker = new DataWorker();
 
-function initialise(element, minDate, maxDate, handleZoom) {
+function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom) {
 	const box = {
 		x0: 0,
 		x1: 1200,
@@ -35,7 +35,7 @@ function initialise(element, minDate, maxDate, handleZoom) {
 	const height = box.height - margin.top - margin.bottom;
 
 	const xScale = scaleTime()
-		.domain([minDate, maxDate])
+		.domain([initialMinDate, initialMaxDate])
 		.rangeRound([0, width]);
 
 	const yScale = scaleLinear()
@@ -134,6 +134,8 @@ function initialise(element, minDate, maxDate, handleZoom) {
 
 export default async function drawChart(element) {
 	const {minDate, maxDate} = await getLimits();
+	const initialMinDate = timeDay(new Date());
+	const initialMaxDate = timeDay.ceil(new Date());
 
 	const {
 		lineGenerator,
@@ -141,7 +143,7 @@ export default async function drawChart(element) {
 		redrawXAxis, redrawYAxis,
 		chartArea,
 		zoom, zoomRect
-	} = initialise(element, minDate, maxDate, handleZoom);
+	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
 
 	let zoomedScale = xScale;
 	const triggerReload = throttleTime(() => dataWorker.postMessage(zoomedScale.domain()), 1000);
