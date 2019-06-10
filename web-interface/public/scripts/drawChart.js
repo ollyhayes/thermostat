@@ -165,7 +165,7 @@ export default async function drawChart(element) {
 
 		updateRequestQueue();
 
-		if (t.k < 0.5 || t.k > 2 || Math.abs(t.x) > 5000)
+		if (t.k < 0.67 || t.k > 1.5 || Math.abs(t.x) > 5000)
 			reRender();
 	}
 
@@ -187,7 +187,7 @@ export default async function drawChart(element) {
 		// and index the data by position somehow?
 
 		// need to trigger rerender sometimes
-			// when y-extent changes
+		// when y-extent changes
 
 		// need to cut down the datastore based on last used and how much memory?
 

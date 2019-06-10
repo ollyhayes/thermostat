@@ -22,22 +22,28 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 // });
 
 const socket = new self.WebSocket('ws://localhost:8081');
-const socketOpen = new Promise(resolve => socket.addEventListener('open', resolve));
 const receivedRequests = createRequestsSet();
 let lastRequests = '';
+let firstRequests = null;
 
 socket.onopen = function () {
 	console.log('socket connected');
+	if (firstRequests) {
+		socket.send(JSON.stringify(firstRequests));
+		firstRequests = null;
+	}
 };
 
-self.addEventListener('message', async ({data: [startDate, endDate]}) => {
+self.addEventListener('message', ({data: [startDate, endDate]}) => {
 	const requests = requestsFromDates(startDate, endDate, 0);
 
 	if (requests !== lastRequests && requests.length > 0) {
 		lastRequests = requests;
 
-		await socketOpen;
-		socket.send(JSON.stringify(requests));
+		if (socket.readyState === 0)
+			firstRequests = requests;
+		else
+			socket.send(JSON.stringify(requests));
 	}
 });
 
