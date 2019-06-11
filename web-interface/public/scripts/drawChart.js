@@ -252,9 +252,7 @@ export default async function drawChart(element) {
 				enter => enter
 					.append('path')
 					.attr('fill', 'none')
-					.attr('stroke', d => d.colour)
-					.attr('d', d => lineGenerator(d.values)),
-				update => update
-					.attr('d', d => lineGenerator(d.values)));
+					.attr('stroke', d => d.colour))
+			.attr('d', d => lineGenerator(d.values));
 	}
 }
