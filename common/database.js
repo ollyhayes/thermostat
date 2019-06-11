@@ -1,5 +1,6 @@
 const Sqlite = require('better-sqlite3');
 const fs = require('fs');
+const path = require('path');
 const log = require('./log');
 
 const toUnix = date => Math.round(date.getTime() / 1000);
@@ -101,6 +102,26 @@ class Database
 			minDate: fromUnix(minDate),
 			maxDate: fromUnix(maxDate)
 		};
+	}
+
+	async backup() {
+		const backupFile = path.join(path.dirname(this.filename), 'backup.db')
+
+		if (fs.existsSync(backupFile)) {
+			log(`Cannot backup database - file already present: ${backupFile}`, 'red');
+			return;
+		}
+
+		const startTime = Date.now();
+		await this.db.backup(
+			backupFile,
+			{
+				progress({totalPages, remainingPages}) {
+					log(`Backup progress: ${((totalPages - remainingPages) / totalPages * 100).toFixed(1)}%`, 'yellow')
+				}
+			});
+
+		log(`Backup successful in ${(Date.now() - startTime) / 1000} seconds`, 'green');
 	}
 
 	close()
