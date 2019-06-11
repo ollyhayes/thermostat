@@ -112,12 +112,13 @@ socket.onmessage = function ({data}) {
 		.map(({key, values}) => ({
 			key,
 			colour: thermometerColours[key],
-			values
+			values,
+			request: requestParsed
 		}));
 
 	const extent = getTemperatureExtent(nestedData);
 
-	self.postMessage({data: nestedData, extent, request});
+	self.postMessage({data: nestedData, extent});
 };
 
 // function send(data) {

@@ -190,17 +190,18 @@ export default async function drawChart(element) {
 			reRender();
 	});
 
-
-	function handleNewData({data: {data, extent, request}}) {
-		//call rerender if the y extent changes
-
+	function handleNewData({data: {data, extent}}) {
 		data.forEach(data =>
-			dataStore[request.precisionLevel].push(data));
-
-		// need to do all the different perision levels
+			dataStore[data.request.precisionLevel].push(data));
 		
 		// should store the extend (x & y) of each bit of data on that object
 		// and index the data by position somehow?
+
+		// I'm thinking - the datastore should be a map from requestCode to data
+		// We move that function that gets list of requests from worker to here
+		// In rerender and in here we use it to grab all the requests out of the data store
+		// Can also use it to send the list of requests required to the worker
+		// Doing the 'what do we already have' filter in here.
 
 		// need to trigger rerender sometimes
 		// when y-extent changes
@@ -209,11 +210,10 @@ export default async function drawChart(element) {
 
 		const precisionLevel = getPrecisionLevel(zoomedScale.domain());
 
-
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(dataStore[precisionLevel]) // need to filter the datastore to just show the current screen?
+			.data(dataStore[precisionLevel], d => requestToCode(d.request))
 			.enter()
 				.append('path')
 				.attr('fill', 'none')
@@ -244,10 +244,11 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
 
+		const data = dataStore[getPrecisionLevel(zoomedScale.domain())];
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(dataStore[getPrecisionLevel(zoomedScale.domain())]) // need to filter the datastore to just show the current screen?
+			.data(data, d => requestToCode(d.request))
 			.join(
 				enter => enter
 					.append('path')
@@ -255,4 +256,9 @@ export default async function drawChart(element) {
 					.attr('stroke', d => d.colour))
 			.attr('d', d => lineGenerator(d.values));
 	}
+}
+
+// move this to common place!! shared with requests-set
+function requestToCode({minDate, maxDate, precisionLevel}) {
+	return '' + minDate.getTime() + maxDate.getTime() + precisionLevel;
 }
