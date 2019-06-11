@@ -13,5 +13,6 @@ process.on('exit', () => {
 	log('database closed');
 });
 
+process.on('SIGUSR1', () => db.backup());
 process.on('SIGINT', () => process.exit(0));
 process.on('SIGTERM', () => process.exit(0));

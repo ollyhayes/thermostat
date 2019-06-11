@@ -103,6 +103,25 @@ class Database
 		};
 	}
 
+	async backup() {
+		const backupFile = path.join(path.dirname(this.filename), 'backup.db')
+
+		if (fs.existsSync(backupFile)) {
+			log(`Cannot backup database - file already present: ${backupFile}`, 'red');
+			return;
+		}
+
+		await this.db.backup(
+			backupFile,
+			{
+				progress({totalPages, remainingPages}) {
+					log(`Backup progress: ${((totalPages / remainingPages) / totalPages * 100).toFixed(1)}%`, 'yello')
+				}
+			});
+
+		console.log('Backup successful', 'green');
+	}
+
 	close()
 	{
 		log('closing database');
