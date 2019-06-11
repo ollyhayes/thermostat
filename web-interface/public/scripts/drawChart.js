@@ -151,8 +151,24 @@ export default async function drawChart(element) {
 
 	const dataStore = [];
 	let zoomedScale = xScale;
-	const updateRequestQueue = () => dataWorker.postMessage(zoomedScale.domain());
-	// const triggerReload = throttleTime(() => dataWorker.postMessage(zoomedScale.domain()), 1000);
+
+	function getPrecisionLevel([minDate, maxDate]) {
+		const minuteLimit = (maxDate.getTime() - minDate.getTime()) / (1000 * 60); // how many minutes are we looking at
+		const hourLimit = minuteLimit / 60;
+		return hourLimit > 50
+			? 2
+			: minuteLimit > 75
+				? 1
+				: 0;
+	}
+
+	function updateRequestQueue() {
+		const [minDate, maxDate] = zoomedScale.domain();
+		const precisionLevel = getPrecisionLevel(zoomedScale.domain());
+
+		dataWorker.postMessage({minDate, maxDate, precisionLevel});
+	}
+
 	updateRequestQueue();
 	reRender();
 	dataWorker.addEventListener('message', handleNewData);
@@ -175,7 +191,7 @@ export default async function drawChart(element) {
 	});
 
 
-	function handleNewData({data: {data, extent}}) {
+	function handleNewData({data: {data, extent, request}}) {
 		//call rerender if the y extent changes
 
 		data.forEach(data =>

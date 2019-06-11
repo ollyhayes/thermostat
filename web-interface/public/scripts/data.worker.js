@@ -34,19 +34,9 @@ socket.onopen = function () {
 	}
 };
 
-self.addEventListener('message', ({data: [startDate, endDate]}) => {
-	const min = startDate.getTime();
-	const max = endDate.getTime();
+self.addEventListener('message', ({data: {minDate, maxDate, precisionLevel}}) => {
 	
-	const minuteLimit = (max - min) / (1000 * 60); // how many minutes are we looking at
-	const hourLimit = minuteLimit / 60;
-	const precisionLevel = hourLimit > 50
-		? 2
-		: minuteLimit > 75
-			? 1
-			: 0;
-	
-	const requests = requestsFromDates(startDate, endDate, precisionLevel);
+	const requests = requestsFromDates(minDate, maxDate, precisionLevel);
 
 	if (requests !== lastRequests && requests.length > 0) {
 		lastRequests = requests;
@@ -127,7 +117,7 @@ socket.onmessage = function ({data}) {
 
 	const extent = getTemperatureExtent(nestedData);
 
-	self.postMessage({data: nestedData, extent});
+	self.postMessage({data: nestedData, extent, request});
 };
 
 // function send(data) {
