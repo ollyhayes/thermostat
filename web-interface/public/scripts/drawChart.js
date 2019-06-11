@@ -149,7 +149,7 @@ export default async function drawChart(element) {
 		zoom, zoomRect
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
 
-	const dataStore = [];
+	const dataStore = [[], [], []];
 	let zoomedScale = xScale;
 
 	function getPrecisionLevel([minDate, maxDate]) {
@@ -195,7 +195,7 @@ export default async function drawChart(element) {
 		//call rerender if the y extent changes
 
 		data.forEach(data =>
-			dataStore.push(data));
+			dataStore[request.precisionLevel].push(data));
 
 		// need to do all the different perision levels
 		
@@ -207,16 +207,18 @@ export default async function drawChart(element) {
 
 		// need to cut down the datastore based on last used and how much memory?
 
+		const precisionLevel = getPrecisionLevel(zoomedScale.domain());
+
+
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(dataStore) // need to filter the datastore to just show the current screen?
-			.join(
-				enter => enter
-					.append('path')
-					.attr('fill', 'none')
-					.attr('stroke', d => d.colour)
-					.attr('d', d => lineGenerator(d.values)));
+			.data(dataStore[precisionLevel]) // need to filter the datastore to just show the current screen?
+			.enter()
+				.append('path')
+				.attr('fill', 'none')
+				.attr('stroke', d => d.colour)
+				.attr('d', d => lineGenerator(d.values));
 	}
 
 	function reRender() {
@@ -245,7 +247,7 @@ export default async function drawChart(element) {
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(dataStore) // need to filter the datastore to just show the current screen?
+			.data(dataStore[getPrecisionLevel(zoomedScale.domain())]) // need to filter the datastore to just show the current screen?
 			.join(
 				enter => enter
 					.append('path')
