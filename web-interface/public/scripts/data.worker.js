@@ -22,7 +22,6 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 // });
 
 const socket = new self.WebSocket('ws://localhost:8081');
-const receivedRequests = createRequestsSet();
 let lastRequests = '';
 let firstRequests = null;
 
@@ -34,10 +33,7 @@ socket.onopen = function () {
 	}
 };
 
-self.addEventListener('message', ({data: {minDate, maxDate, precisionLevel}}) => {
-	
-	const requests = requestsFromDates(minDate, maxDate, precisionLevel);
-
+self.addEventListener('message', ({data: requests}) => {
 	if (requests !== lastRequests && requests.length > 0) {
 		lastRequests = requests;
 
@@ -47,36 +43,6 @@ self.addEventListener('message', ({data: {minDate, maxDate, precisionLevel}}) =>
 			socket.send(JSON.stringify(requests));
 	}
 });
-
-function requestsFromDates(minDate, maxDate, precisionLevel) {
-	const {range, offset} = getRangeForPrecisionLevel(precisionLevel);
-
-	return range(minDate, maxDate)
-		.map(minRequestDate => ({
-			minDate: minRequestDate,
-			maxDate: offset(minRequestDate),
-			precisionLevel: precisionLevel
-		}))
-		.filter(request => !receivedRequests.has(request));
-	// think about ordering from the center out (do the above twice?)
-}
-
-function getRangeForPrecisionLevel(precisionLevel) {
-	function tools(interval, step) {
-		return {
-			range: (start, stop) =>
-				interval
-					.every(step)
-					.range(interval.offset(start, -1), interval.offset(stop, 1)),
-			offset: date => interval.offset(date, step)
-		};
-	}
-	switch (precisionLevel) {
-	case 0: return tools(timeMinute, 5);
-	case 1: return tools(timeHour, 5);
-	case 2: return tools(timeWeek, 1);
-	}
-}
 
 // const socket = new self.WebSocket('ws://localhost:8081');
 // let currentDate = new Date(2019, 3, 21, 21, 0, 0);
@@ -98,7 +64,7 @@ socket.onmessage = function ({data}) {
 		precisionLevel: request.precisionLevel
 	};
 
-	receivedRequests.add(requestParsed);
+	// receivedRequests.add(requestParsed);
 
 	if (!temperatures.length)
 		return;
@@ -112,13 +78,19 @@ socket.onmessage = function ({data}) {
 		.map(({key, values}) => ({
 			key,
 			colour: thermometerColours[key],
-			values,
-			request: requestParsed
+			values
 		}));
 
 	const extent = getTemperatureExtent(nestedData);
 
-	self.postMessage({data: nestedData, extent});
+	const requestComplete = {
+		data: nestedData,
+		minTemperature: extent[0],
+		maxTemperature: extent[1],
+		...requestParsed
+	};
+
+	self.postMessage(requestComplete);
 };
 
 // function send(data) {

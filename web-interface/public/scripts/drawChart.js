@@ -12,6 +12,7 @@ import {getZoomExtent} from './utils';
 import {throttleTime} from './throttler';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
+import createDataStore from './data-store';
 
 const dataWorker = new DataWorker();
 
@@ -149,24 +150,13 @@ export default async function drawChart(element) {
 		zoom, zoomRect
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
 
-	const dataStore = [[], [], []];
 	let zoomedScale = xScale;
-
-	function getPrecisionLevel([minDate, maxDate]) {
-		const minuteLimit = (maxDate.getTime() - minDate.getTime()) / (1000 * 60); // how many minutes are we looking at
-		const hourLimit = minuteLimit / 60;
-		return hourLimit > 50
-			? 2
-			: minuteLimit > 75
-				? 1
-				: 0;
-	}
+	const {getRequests, storeRequest, getMissingRequests} = createDataStore();
 
 	function updateRequestQueue() {
 		const [minDate, maxDate] = zoomedScale.domain();
-		const precisionLevel = getPrecisionLevel(zoomedScale.domain());
 
-		dataWorker.postMessage({minDate, maxDate, precisionLevel});
+		dataWorker.postMessage(getMissingRequests(minDate, maxDate));
 	}
 
 	updateRequestQueue();
@@ -190,9 +180,8 @@ export default async function drawChart(element) {
 			reRender();
 	});
 
-	function handleNewData({data: {data, extent}}) {
-		data.forEach(data =>
-			dataStore[data.request.precisionLevel].push(data));
+	function handleNewData({data: request}) {
+		storeRequest(request);
 		
 		// should store the extend (x & y) of each bit of data on that object
 		// and index the data by position somehow?
@@ -208,17 +197,28 @@ export default async function drawChart(element) {
 
 		// need to cut down the datastore based on last used and how much memory?
 
-		const precisionLevel = getPrecisionLevel(zoomedScale.domain());
+		const requests = getRequests(...zoomedScale.domain());
+		// -----------------------------------------------------
+		// need to split each request into seperate thermometers
+		// and turn the requestcode into thermometer specific
+		// -----------------------------------------------------
+		const splitRequests = requests.reduce((split, next) => ([
+			...split,
+			...next.data.map(d => ({
+				...d,
+				dataCode: next.requestCode + d.key
+			}))
+		]), []);
 
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(dataStore[precisionLevel], d => requestToCode(d.request))
+			.data(splitRequests, r => r.dataCode)
 			.enter()
-				.append('path')
-				.attr('fill', 'none')
-				.attr('stroke', d => d.colour)
-				.attr('d', d => lineGenerator(d.values));
+			.append('path')
+			.attr('fill', 'none')
+			.attr('stroke', d => d.colour)
+			.attr('d', d => lineGenerator(d.values));
 	}
 
 	function reRender() {
@@ -244,11 +244,19 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
 
-		const data = dataStore[getPrecisionLevel(zoomedScale.domain())];
+		const requests = getRequests(...zoomedScale.domain());
+		const splitRequests = requests.reduce((split, next) => ([
+			...split,
+			...next.data.map(d => ({
+				...d,
+				dataCode: next.requestCode + d.key
+			}))
+		]), []);
+
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(data, d => requestToCode(d.request))
+			.data(splitRequests, d => d.dataCode)
 			.join(
 				enter => enter
 					.append('path')
@@ -256,9 +264,4 @@ export default async function drawChart(element) {
 					.attr('stroke', d => d.colour))
 			.attr('d', d => lineGenerator(d.values));
 	}
-}
-
-// move this to common place!! shared with requests-set
-function requestToCode({minDate, maxDate, precisionLevel}) {
-	return '' + minDate.getTime() + maxDate.getTime() + precisionLevel;
 }
