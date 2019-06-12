@@ -21,7 +21,7 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 // 	self.postMessage({data, extent, startDate, endDate});
 // });
 
-const socket = new self.WebSocket('ws://localhost:8081');
+const socket = new self.WebSocket(`ws://${self.location.hostname}:8081`);
 let lastRequests = '';
 let firstRequests = null;
 

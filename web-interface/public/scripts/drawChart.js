@@ -183,25 +183,12 @@ export default async function drawChart(element) {
 	function handleNewData({data: request}) {
 		storeRequest(request);
 		
-		// should store the extend (x & y) of each bit of data on that object
-		// and index the data by position somehow?
-
-		// I'm thinking - the datastore should be a map from requestCode to data
-		// We move that function that gets list of requests from worker to here
-		// In rerender and in here we use it to grab all the requests out of the data store
-		// Can also use it to send the list of requests required to the worker
-		// Doing the 'what do we already have' filter in here.
-
 		// need to trigger rerender sometimes
 		// when y-extent changes
 
 		// need to cut down the datastore based on last used and how much memory?
 
 		const requests = getRequests(...zoomedScale.domain());
-		// -----------------------------------------------------
-		// need to split each request into seperate thermometers
-		// and turn the requestcode into thermometer specific
-		// -----------------------------------------------------
 		const splitRequests = requests.reduce((split, next) => ([
 			...split,
 			...next.data.map(d => ({
