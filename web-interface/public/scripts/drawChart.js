@@ -188,6 +188,11 @@ export default async function drawChart(element) {
 
 		// need to cut down the datastore based on last used and how much memory?
 
+		// need to join up the hours and seconds data
+
+		// and move the below into the store?
+		// also should the store be in control of turning dates into requests?
+
 		const requests = getRequests(...zoomedScale.domain());
 		const splitRequests = requests.reduce((split, next) => ([
 			...split,

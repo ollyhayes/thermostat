@@ -64,7 +64,7 @@ function getRangeForPrecisionLevel(precisionLevel) {
 			range: (start, stop) =>
 				interval
 					.every(step)
-					.range(interval.offset(start, -step), interval.offset(stop, step)),
+					.range(interval.offset(start, -step), stop),
 			offset: date => interval.offset(date, step)
 		};
 	}
