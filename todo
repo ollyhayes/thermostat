@@ -1,3 +1,4 @@
+bug - slide along the hour view - when we get to a new frame loads of requests are made from client instead of one
 sides of the svg get wide when the screen is very horizontal
 database backup test
 switch websocket to use same port/server

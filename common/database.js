@@ -66,25 +66,17 @@ class Database
 	read(minDate, maxDate, precisionLevel)
 	{
 		if (!this.readCommand)
-			// this.readCommand = this.db.prepare(
-			// 	`select date, temperature, thermometerId
-			// 	from temperatures
-			// 	where date between @minDate and @maxDate and precisionLevel = @precisionLevel
-			// 	union
-			// 	select date, temperature, thermometerId
-			// 	from temperatures
-			// 	where date = (select min(date) from temperatures where date > @maxDate and precisionLevel = @precisionLevel) and precisionLevel = @precisionLevel
-			// 	order by date`);
-
 			this.readCommand = this.db.prepare(
 				`select date, temperature, thermometerId
 				from temperatures
 				where
 					date between @minDate and ifnull(
-						(select min(date)
-						from temperatures
-						where date > @maxDate and precisionLevel = @precisionLevel)
-					, 2223458463)
+						(
+							select min(date)
+							from temperatures
+							where date > @maxDate and precisionLevel = @precisionLevel
+						),
+						2223458463)
 					and precisionLevel = @precisionLevel
 				order by date`);
 

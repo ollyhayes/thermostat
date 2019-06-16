@@ -190,7 +190,9 @@ export default async function drawChart(element) {
 
 		// need to cut down the datastore based on last used and how much memory?
 
-		// need to join up the hours and seconds data
+		// why do we show both graphs for some view levels
+		// ah because the new one is added without rerender getting rid of the old
+		// need to call exit below and get rid of ones no in our precisiol Level?
 
 		// and move the below into the store?
 		// also should the store be in control of turning dates into requests?
