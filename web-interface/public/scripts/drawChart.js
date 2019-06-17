@@ -190,10 +190,6 @@ export default async function drawChart(element) {
 
 		// need to cut down the datastore based on last used and how much memory?
 
-		// why do we show both graphs for some view levels
-		// ah because the new one is added without rerender getting rid of the old
-		// need to call exit below and get rid of ones no in our precisiol Level?
-
 		// and move the below into the store?
 		// also should the store be in control of turning dates into requests?
 
@@ -210,11 +206,12 @@ export default async function drawChart(element) {
 		chartArea
 			.selectAll('path')
 			.data(splitRequests, r => r.dataCode)
-			.enter()
-			.append('path')
-			.attr('fill', 'none')
-			.attr('stroke', d => d.colour)
-			.attr('d', d => lineGenerator(d.values));
+			.join(
+				enter => enter
+					.append('path')
+					.attr('fill', 'none')
+					.attr('stroke', d => d.colour)
+					.attr('d', d => lineGenerator(d.values)));
 	}
 
 	function reRender() {
