@@ -22,7 +22,6 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 // });
 
 const socket = new self.WebSocket(`ws://${self.location.hostname}:8081`);
-let lastRequests = '';
 let firstRequests = null;
 
 socket.onopen = function () {
@@ -33,14 +32,15 @@ socket.onopen = function () {
 	}
 };
 
+const sendData = distinctify(requests => socket.send(requests));
+
 self.addEventListener('message', ({data: requests}) => {
-	if (requests !== lastRequests && requests.length > 0) {
-		lastRequests = requests;
+	if (requests.length > 0) {
 
 		if (socket.readyState === 0)
 			firstRequests = requests;
 		else
-			socket.send(JSON.stringify(requests));
+			sendData(JSON.stringify(requests));
 	}
 });
 
@@ -63,11 +63,6 @@ socket.onmessage = function ({data}) {
 		maxDate: new Date(request.maxDate),
 		precisionLevel: request.precisionLevel
 	};
-
-	// receivedRequests.add(requestParsed);
-
-	if (!temperatures.length)
-		return;
 
 	const parsedData = temperatures.map(dataPoint => ({
 		...dataPoint,
@@ -127,3 +122,15 @@ socket.onmessage = function ({data}) {
 // function requestToString({minDate, precisionLevel}) {
 // 	return `${minDate.getHours()}:${precisionLevel}`;
 // }
+
+function distinctify(innerFunction) {
+	let previousArgument = null;
+
+	return (currentArgument) => {
+		if (currentArgument === previousArgument)
+			return;
+
+		previousArgument = currentArgument;
+		innerFunction(currentArgument);
+	};
+}
