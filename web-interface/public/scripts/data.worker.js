@@ -1,5 +1,5 @@
 import { nest as d3Nest } from 'd3-collection';
-import { getTemperatureExtent } from './data-repository';
+import { getTemperatureExtent } from './utils';
 import {thermometers} from '../../../common/config.json';
 
 const nest = d3Nest()

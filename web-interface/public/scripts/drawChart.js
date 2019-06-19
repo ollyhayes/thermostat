@@ -6,9 +6,8 @@ import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 
 import multiFormat from './time-format';
-import { getLimits } from './data-repository';
 import DataWorker from './data.worker.js';
-import {getZoomExtent} from './utils';
+import {getZoomExtent, getLimits} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import createDataStore from './data-store';
