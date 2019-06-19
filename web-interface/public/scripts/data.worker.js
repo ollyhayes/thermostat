@@ -1,5 +1,5 @@
 import { nest as d3Nest } from 'd3-collection';
-import { getTemperatureExtent } from './utils';
+// import { getTemperatureExtent } from './utils';
 
 const nest = d3Nest()
 	.key(d => d.id);

@@ -166,9 +166,9 @@ export default async function drawChart(element) {
 		dataWorker.postMessage(getMissingRequests(minDate, maxDate));
 	}
 
+	dataWorker.addEventListener('message', handleNewData);
 	updateRequestQueue();
 	reRender();
-	dataWorker.addEventListener('message', handleNewData);
 
 	function handleZoom() {
 		const t = d3Event.transform;
