@@ -1,5 +1,5 @@
 const log = require('../../common/log');
-const createRequestsSet = require('../public/scripts/requests-set');
+const createRequestsSet = require('./requests-set');
 
 function createDataStreamCreator(database) {
 	return function createDataStream(sendUpdate) {

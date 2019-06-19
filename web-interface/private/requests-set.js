@@ -17,6 +17,7 @@ function createRequestsSet(maxSize = -1) {
 	};
 }
 
+// when node supports es6 we can get this from request-utils.js
 function requestToCode({minDate, maxDate, precisionLevel}) {
 	return '' + minDate.getTime() + maxDate.getTime() + precisionLevel;
 }
