@@ -11,6 +11,7 @@ import {getZoomExtent, getLimits} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import createDataStore from './data-store';
+import { flattenRequests } from './request-utils';
 
 const dataWorker = new DataWorker();
 
@@ -188,22 +189,12 @@ export default async function drawChart(element) {
 
 		// need to cut down the datastore based on last used and how much memory?
 
-		// and move the below into the store?
-		// also should the store be in control of turning dates into requests?
-
-		const requests = getRequests(...zoomedScale.domain());
-		const splitRequests = requests.reduce((split, next) => ([
-			...split,
-			...next.data.map(d => ({
-				...d,
-				dataCode: next.requestCode + d.key
-			}))
-		]), []);
+		const data = flattenRequests(getRequests(...zoomedScale.domain()));
 
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(splitRequests, r => r.dataCode)
+			.data(data, d => d.key)
 			.join(
 				enter => enter
 					.append('path')
@@ -235,19 +226,12 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
 
-		const requests = getRequests(...zoomedScale.domain());
-		const splitRequests = requests.reduce((split, next) => ([
-			...split,
-			...next.data.map(d => ({
-				...d,
-				dataCode: next.requestCode + d.key
-			}))
-		]), []);
+		const data = flattenRequests(getRequests(...zoomedScale.domain()));
 
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(splitRequests, d => d.dataCode)
+			.data(data, d => d.key)
 			.join(
 				enter => enter
 					.append('path')
