@@ -43,13 +43,9 @@ function getPrecisionLevelForDateRange(minDate, maxDate) {
 export function flattenRequests(requests) {
 	return requests.reduce((flattenedArray, nextRequest) => ([
 		...flattenedArray,
-		...nextRequest.data.map(d => ({
-			...d,
-			key: nextRequest.requestCode + d.key
+		...nextRequest.thermometers.map(thermometerData => ({
+			...thermometerData,
+			key: nextRequest.requestCode + thermometerData.thermometerId
 		}))
 	]), []);
 }
-
-
-// change key to thermometerId
-// move colour to drawChart

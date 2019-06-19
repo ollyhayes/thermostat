@@ -12,8 +12,14 @@ import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import createDataStore from './data-store';
 import { flattenRequests } from './request-utils';
+import {thermometers} from '../../../common/config.json';
 
 const dataWorker = new DataWorker();
+
+const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
+	...colours,
+	[id]: colour
+}),{});
 
 function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom) {
 	const box = {
@@ -199,8 +205,8 @@ export default async function drawChart(element) {
 				enter => enter
 					.append('path')
 					.attr('fill', 'none')
-					.attr('stroke', d => d.colour)
-					.attr('d', d => lineGenerator(d.values)));
+					.attr('stroke', d => thermometerColours[d.thermometerId])
+					.attr('d', d => lineGenerator(d.temperatures)));
 	}
 
 	function reRender() {
@@ -236,7 +242,7 @@ export default async function drawChart(element) {
 				enter => enter
 					.append('path')
 					.attr('fill', 'none')
-					.attr('stroke', d => d.colour))
-			.attr('d', d => lineGenerator(d.values));
+					.attr('stroke', d => thermometerColours[d.thermometerId]))
+			.attr('d', d => lineGenerator(d.temperatures));
 	}
 }
