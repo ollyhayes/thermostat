@@ -1,5 +1,5 @@
 const log = require('../common/log');
-const Rx = require('rxjs');
+const {Observable} = require('rxjs');
 
 module.exports = function(timeout, action)
 {
@@ -21,7 +21,7 @@ module.exports = function(timeout, action)
 		}
 	}
 
-	return Rx.Observable.create(observer =>
+	return Observable.create(observer =>
 	{
 		var options = {
 			stopped: false
