@@ -4,7 +4,7 @@ import { nest as d3Nest } from 'd3-collection';
 const nest = d3Nest()
 	.key(d => d.id);
 
-const socket = new self.WebSocket(`ws://${self.location.hostname}:8081`);
+const socket = new self.WebSocket(`ws://${self.location.hostname}:8080`);
 const sendData = distinctify(requests => socket.send(requests));
 let firstRequests = null;
 

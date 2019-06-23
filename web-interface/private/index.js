@@ -1,3 +1,4 @@
+const http = require('http');
 const Koa = require('koa');
 const compress = require('koa-compress');
 const Router = require('koa-router');
@@ -18,9 +19,10 @@ function start(db) {
 	app.use(serve(path.join(__dirname, '../public')));
 	app.use(router.routes());
 
-	app.listen(8080);
+	const server = http.createServer(app.callback());
+	server.listen(8080);
 
-	initDataSocket(initDataStream(db));
+	initDataSocket(server, initDataStream(db));
 
 	console.log('Listening on port 8080');
 
