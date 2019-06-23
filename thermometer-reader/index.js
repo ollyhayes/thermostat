@@ -3,7 +3,6 @@ const log = require('../common/log');
 const looper = require('./timeout-looper');
 const {combineLatest} = require('rxjs');
 const {
-	filter,
 	map,
 	publishReplay,
 	refCount,
@@ -14,9 +13,9 @@ const {
 	count
 } = require('rxjs/operators');
 
-const thermometers = require('../common/config.json')
-	.thermometers
-	.filter(thermometer => !thermometer.disabled);
+const {thermometers: allThermometers, outputSwitch} = require('../common/config.json');
+
+const thermometers = allThermometers.filter(thermometer => !thermometer.disabled);
 
 function start(database) {
 	const temperatures = looper(1000, () =>
@@ -38,11 +37,11 @@ function start(database) {
 				error => log('temperature error: ' + error)));
 
 	subscriptions.push(
-		performAveraging(60 * 1000, temperatures)
+		temperatures.pipe(performAveraging(60 * 1000))
 			.subscribe(temperature => database.insert(temperature, 1)));
 
 	subscriptions.push(
-		performAveraging(3600 * 1000, temperatures)
+		temperatures.pipe(performAveraging(3600 * 1000))
 			.subscribe(temperature => database.insert(temperature, 2)));
 
 	return () => subscriptions.forEach(subscription => subscription.unsubscribe());
@@ -50,25 +49,27 @@ function start(database) {
 
 module.exports = {start};
 
-function performAveraging(time, temperatures) {
-	//this would look so much nicer in rxjs 6
-	return temperatures.pipe(
-		windowTime(time),
-		switchMap(window => 
-			combineLatest(
-				...thermometers.map((_, index) =>
-					averageOver(window.pipe(map(windowArray => windowArray[index].temperature))).pipe(
-						withLatestFrom(window.pipe(map(windowArray => windowArray[index]))),
-						map(([average, latest]) =>
-							({
-								...latest,
-								temperature: average
-							})))))));
+function performAveraging(time) {
+	return observable =>
+		observable.pipe(
+			windowTime(time),
+			switchMap(window => 
+				combineLatest(
+					...thermometers.map((_, index) =>
+						window.pipe(
+							map(windowArray => windowArray[index].temperature),
+							averageOver(),
+							withLatestFrom(window.pipe(map(windowArray => windowArray[index]))),
+							map(([average, latest]) =>
+								({
+									...latest,
+									temperature: average
+								})))))));
 
-	function averageOver(temperatures) {
-		return combineLatest(
-			temperatures.pipe(reduce((sum, next) => sum + next, 0)),
-			temperatures.pipe(count())
+	function averageOver() {
+		return ovseravable => combineLatest(
+			ovseravable.pipe(reduce((sum, next) => sum + next, 0)),
+			ovseravable.pipe(count())
 		).pipe(
 			map(([sum, count]) => sum / count));
 	}
