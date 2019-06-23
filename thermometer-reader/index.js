@@ -1,7 +1,19 @@
 const getTemperature = require('./thermometer');
 const log = require('../common/log');
 const looper = require('./timeout-looper');
-const Rx = require('rxjs');
+const {combineLatest} = require('rxjs');
+const {
+	filter,
+	map,
+	publishReplay,
+	refCount,
+	windowTime,
+	switchMap,
+	withLatestFrom,
+	reduce,
+	count
+} = require('rxjs/operators');
+
 const thermometers = require('../common/config.json')
 	.thermometers
 	.filter(thermometer => !thermometer.disabled);
@@ -13,9 +25,9 @@ function start(database) {
 				.map(async thermometer => ({
 					...thermometer,
 					temperature: await getTemperature(thermometer.serial),
-				}))))
-		.publishReplay(1)
-		.refCount();
+				})))).pipe(
+		publishReplay(1),
+		refCount());
 
 	const subscriptions = [];
 
@@ -40,27 +52,24 @@ module.exports = {start};
 
 function performAveraging(time, temperatures) {
 	//this would look so much nicer in rxjs 6
-	return temperatures
-		.windowTime(time)
-		.switchMap(window => 
-			Rx.Observable.combineLatest(
+	return temperatures.pipe(
+		windowTime(time),
+		switchMap(window => 
+			combineLatest(
 				...thermometers.map((_, index) =>
-					averageOver(
-						window
-							.map(windowArray => windowArray[index].temperature))
-						.withLatestFrom(window
-							.map(windowArray => windowArray[index]))
-						.map(([average, latest]) =>
+					averageOver(window.pipe(map(windowArray => windowArray[index].temperature))).pipe(
+						withLatestFrom(window.pipe(map(windowArray => windowArray[index]))),
+						map(([average, latest]) =>
 							({
 								...latest,
 								temperature: average
-							})))));
+							})))))));
 
 	function averageOver(temperatures) {
-		return Rx.Observable.combineLatest(
-			temperatures.reduce((sum, next) => sum + next, 0),
-			temperatures.count()
-		)
-			.map(([sum, count]) => sum / count);
+		return combineLatest(
+			temperatures.pipe(reduce((sum, next) => sum + next, 0)),
+			temperatures.pipe(count())
+		).pipe(
+			map(([sum, count]) => sum / count));
 	}
 }
