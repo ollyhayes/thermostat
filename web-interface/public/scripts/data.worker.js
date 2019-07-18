@@ -39,12 +39,12 @@ socket.onmessage = function ({data}) {
 			temperatures: values
 		}));
 
-	const extent = getTemperatureExtent(temperatures);
+	const [minTemperature, maxTemperature] = getTemperatureExtent(temperatures);
 
 	const requestComplete = {
 		thermometers: groupedByThermometer,
-		minTemperature: extent[0],
-		maxTemperature: extent[1],
+		minTemperature,
+		maxTemperature,
 		...request
 	};
 

@@ -178,7 +178,7 @@ export default async function drawChart(element) {
 
 		updateRequestQueue();
 
-		if (t.k < 0.67 || t.k > 1.5 || Math.abs(t.x) > 200)
+		if (t.k < 0.67 || t.k > 1.5 || Math.abs(t.x) > 200) // this needs to rerender if current requests change eh? can get rid of the x part
 			reRender();
 	}
 

@@ -55,12 +55,4 @@ export function flattenRequests(requests) {
 			}))
 		]
 	}), {minTemperature: Number.MAX_VALUE, maxTemperature: Number.MIN_VALUE, thermometerReadings: []});
-
-	// return requests.reduce((flattenedArray, nextRequest) => ([
-	// 	...flattenedArray,
-	// 	...nextRequest.thermometers.map(thermometerData => ({
-	// 		...thermometerData,
-	// 		key: nextRequest.requestCode + thermometerData.thermometerId
-	// 	}))
-	// ]), []);
 }
