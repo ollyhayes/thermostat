@@ -180,6 +180,11 @@ export default async function drawChart(element) {
 
 		if (t.k < 0.67 || t.k > 1.5 || Math.abs(t.x) > 200) // this needs to rerender if current requests change eh? can get rid of the x part
 			reRender();
+
+		// maybe I just forgot how this works, but I think,
+		// * if the t.k changes like above, call reRender();
+		// * if the current requests change, call drawGraphs(true);
+		// right???
 	}
 
 	document.addEventListener('keydown', e => {
@@ -197,7 +202,7 @@ export default async function drawChart(element) {
 
 		// also need to allow autoupdate to work again
 
-		drawGraphs(false);
+		drawGraphs(true);
 	}
 
 	function reRender() {
@@ -218,18 +223,18 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
 
-		drawGraphs(true);
+		drawGraphs();
 	}
 
-	function drawGraphs(redrawAll) {
+	function drawGraphs(onlyDrawNew = false) {
 		const {thermometerReadings, minTemperature, maxTemperature} = flattenRequests(getRequests(...zoomedScale.domain()));
 
 		// reset the y-scale
+		// be nice to have a better equality here
 		const yScaleUpdated = minTemperature !== yScale.domain()[0] || maxTemperature !== yScale.domain()[1];
 		if (yScaleUpdated) {
 			yScale.domain([minTemperature, maxTemperature]);
 			redrawYAxis();
-			console.log('redrawing');
 		}
 
 		// set the paths
@@ -242,9 +247,8 @@ export default async function drawChart(element) {
 					.attr('fill', 'none')
 					.attr('stroke', d => thermometerColours[d.thermometerId])
 					.attr('d', d => lineGenerator(d.temperatures)),
-				update => yScaleUpdated || redrawAll
+				update => yScaleUpdated || !onlyDrawNew
 					? update.attr('d', d => lineGenerator(d.temperatures))
 					: update);
-
 	}
 }

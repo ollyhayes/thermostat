@@ -1,14 +1,10 @@
 sides of the svg get wide when the screen is very horizontal
-switch websocket to use same port/server
 have websocket reconnect
 performance
 	hide axes whilst zooming
 	use webworkers
 		create path
 	switch to canvas
-differentiate between constant and single update
-	single update: instant get
-	constant update: wait a second
 show a current time marker?
 animation on y-scale change
 zoom in url
