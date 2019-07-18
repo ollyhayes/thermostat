@@ -40,12 +40,27 @@ function getPrecisionLevelForDateRange(minDate, maxDate) {
 			: 0;
 }
 
+// turn a list of requests (each with it's own list of themometer readings)
+// into one big list of thermometer readings (plug min/max temp)
 export function flattenRequests(requests) {
-	return requests.reduce((flattenedArray, nextRequest) => ([
-		...flattenedArray,
-		...nextRequest.thermometers.map(thermometerData => ({
-			...thermometerData,
-			key: nextRequest.requestCode + thermometerData.thermometerId
-		}))
-	]), []);
+
+	return requests.reduce(({thermometerReadings, minTemperature, maxTemperature}, nextRequest) => ({
+		minTemperature: Math.min(minTemperature, nextRequest.minTemperature),
+		maxTemperature: Math.max(maxTemperature, nextRequest.maxTemperature),
+		thermometerReadings: [
+			...thermometerReadings,
+			...nextRequest.thermometers.map(thermometerData => ({
+				...thermometerData,
+				key: nextRequest.requestCode + thermometerData.thermometerId
+			}))
+		]
+	}), {minTemperature: Number.MAX_VALUE, maxTemperature: Number.MIN_VALUE, thermometerReadings: []});
+
+	// return requests.reduce((flattenedArray, nextRequest) => ([
+	// 	...flattenedArray,
+	// 	...nextRequest.thermometers.map(thermometerData => ({
+	// 		...thermometerData,
+	// 		key: nextRequest.requestCode + thermometerData.thermometerId
+	// 	}))
+	// ]), []);
 }

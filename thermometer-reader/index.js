@@ -13,7 +13,7 @@ const {
 	count
 } = require('rxjs/operators');
 
-const {thermometers: allThermometers, outputSwitch} = require('../common/config.json');
+const {thermometers: allThermometers} = require('../common/config.json');
 
 const thermometers = allThermometers.filter(thermometer => !thermometer.disabled);
 

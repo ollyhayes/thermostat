@@ -9,7 +9,7 @@ export default function createDataStore() {
 
 			return requests
 				.map(({requestCode}) => store.get(requestCode))
-				.filter(request => request);
+				.filter(request => request && request.thermometers.length > 0);
 
 		},
 		storeRequest(request) {

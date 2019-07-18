@@ -1,5 +1,5 @@
 import { nest as d3Nest } from 'd3-collection';
-// import { getTemperatureExtent } from './utils';
+import { getTemperatureExtent } from './utils';
 
 const nest = d3Nest()
 	.key(d => d.id);
@@ -39,12 +39,12 @@ socket.onmessage = function ({data}) {
 			temperatures: values
 		}));
 
-	// const extent = getTemperatureExtent(groupedByThermometer);
+	const extent = getTemperatureExtent(temperatures);
 
 	const requestComplete = {
 		thermometers: groupedByThermometer,
-		// minTemperature: extent[0],
-		// maxTemperature: extent[1],
+		minTemperature: extent[0],
+		maxTemperature: extent[1],
 		...request
 	};
 

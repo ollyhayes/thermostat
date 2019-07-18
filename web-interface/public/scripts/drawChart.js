@@ -195,12 +195,17 @@ export default async function drawChart(element) {
 
 		// need to cut down the datastore based on last used and how much memory?
 
-		const data = flattenRequests(getRequests(...zoomedScale.domain()));
+		// also need to allow autoupdate to work again
+
+		const {thermometerReadings, minTemperature, maxTemperature} = flattenRequests(getRequests(...zoomedScale.domain()));
+
+		yScale.domain([minTemperature, maxTemperature]);
+		redrawYAxis();
 
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(data, d => d.key)
+			.data(thermometerReadings, d => d.key)
 			.join(
 				enter => enter
 					.append('path')
@@ -220,11 +225,6 @@ export default async function drawChart(element) {
 		zoomedScale = xScale;
 		chartArea.attr('transform', null);
 
-		// reset the y-scale
-		// yScale.domain(dataStoreExtent); // get this from the filtered data
-		yScale.domain([10, 80]);
-		redrawYAxis();
-
 		// set extents
 		// this are fixed, may aswell define them outside of here
 		const minExtent = timeDay(minDate);
@@ -232,12 +232,16 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
 
-		const data = flattenRequests(getRequests(...zoomedScale.domain()));
+		const {thermometerReadings, minTemperature, maxTemperature} = flattenRequests(getRequests(...zoomedScale.domain()));
+
+		// reset the y-scale
+		yScale.domain([minTemperature, maxTemperature]);
+		redrawYAxis();
 
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(data, d => d.key)
+			.data(thermometerReadings, d => d.key)
 			.join(
 				enter => enter
 					.append('path')
