@@ -197,21 +197,7 @@ export default async function drawChart(element) {
 
 		// also need to allow autoupdate to work again
 
-		const {thermometerReadings, minTemperature, maxTemperature} = flattenRequests(getRequests(...zoomedScale.domain()));
-
-		yScale.domain([minTemperature, maxTemperature]);
-		redrawYAxis();
-
-		// set the paths
-		chartArea
-			.selectAll('path')
-			.data(thermometerReadings, d => d.key)
-			.join(
-				enter => enter
-					.append('path')
-					.attr('fill', 'none')
-					.attr('stroke', d => thermometerColours[d.thermometerId])
-					.attr('d', d => lineGenerator(d.temperatures)));
+		drawGraphs(false);
 	}
 
 	function reRender() {
@@ -232,11 +218,19 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
 
+		drawGraphs(true);
+	}
+
+	function drawGraphs(redrawAll) {
 		const {thermometerReadings, minTemperature, maxTemperature} = flattenRequests(getRequests(...zoomedScale.domain()));
 
 		// reset the y-scale
-		yScale.domain([minTemperature, maxTemperature]);
-		redrawYAxis();
+		const yScaleUpdated = minTemperature !== yScale.domain()[0] || maxTemperature !== yScale.domain()[1];
+		if (yScaleUpdated) {
+			yScale.domain([minTemperature, maxTemperature]);
+			redrawYAxis();
+			console.log('redrawing');
+		}
 
 		// set the paths
 		chartArea
@@ -246,7 +240,11 @@ export default async function drawChart(element) {
 				enter => enter
 					.append('path')
 					.attr('fill', 'none')
-					.attr('stroke', d => thermometerColours[d.thermometerId]))
-			.attr('d', d => lineGenerator(d.temperatures));
+					.attr('stroke', d => thermometerColours[d.thermometerId])
+					.attr('d', d => lineGenerator(d.temperatures)),
+				update => yScaleUpdated || redrawAll
+					? update.attr('d', d => lineGenerator(d.temperatures))
+					: update);
+
 	}
 }
