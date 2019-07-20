@@ -44,7 +44,10 @@ function start(database) {
 		temperatures.pipe(performAveraging(3600 * 1000))
 			.subscribe(temperature => database.insert(temperature, 2)));
 
-	return () => subscriptions.forEach(subscription => subscription.unsubscribe());
+	return {
+		stopThermometer: () => subscriptions.forEach(subscription => subscription.unsubscribe()),
+		newDataEmitter: temperatures
+	};
 }
 
 module.exports = {start};

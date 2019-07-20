@@ -4,6 +4,21 @@ export function chunkToCode({minDate, maxDate, precisionLevel}) {
 	return '' + minDate.getTime() + maxDate.getTime() + precisionLevel;
 }
 
+export function getChunkContaining(date) {
+	const interval = timeMinute.every(5);
+
+	const chunk = ({
+		minDate: interval(date),
+		maxDate: interval.ceil(date),
+		precisionLevel: 0,
+	});
+
+	return {
+		...chunk,
+		chunkCode: chunkToCode(chunk)
+	};
+}
+
 export function getChunksForDateRange(minDate, maxDate) {
 	const precisionLevel = getPrecisionLevelForDateRange(minDate, maxDate);
 	const {interval, step} = getChunkInterval(precisionLevel);

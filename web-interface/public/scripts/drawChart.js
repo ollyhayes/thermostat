@@ -15,7 +15,8 @@ import {thermometers} from '../../../common/config.json';
 import {
 	flattenChunks,
 	getChunksForDateRange,
-	createChunksChangedCalculator
+	createChunksChangedCalculator,
+	getChunkContaining
 } from './chunk-utils';
 
 const dataWorker = new DataWorker();
@@ -145,8 +146,8 @@ export default async function drawChart(element) {
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
 
-	const initialMinDate = timeDay(new Date(2019, 5, 0));
-	// const initialMinDate = timeDay(maxDate);
+	// const initialMinDate = timeDay(new Date(2019, 5, 0));
+	const initialMinDate = timeDay(maxDate);
 	const initialMaxDate = timeDay.ceil(new Date(initialMinDate.getTime() + 1));
 
 	const {
@@ -175,6 +176,7 @@ export default async function drawChart(element) {
 	}
 
 	function render(zoomChanged) {
+		// get the special chunk from here if we're viewing the present?
 		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
 		const chunksHaveChanged = chunksChanged(chunksInView);
 
@@ -192,9 +194,13 @@ export default async function drawChart(element) {
 	}
 
 	function handleNewData({data: chunk}) {
-		storeChunk(chunk);
+		if (chunk.special) 
+			chunk = {
+				...chunk,
+				...getChunkContaining(new Date())
+			};
 
-		// also need to allow autoupdate to work again
+		storeChunk(chunk);
 
 		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), false);
 	}

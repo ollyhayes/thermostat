@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 
-function init(server, createDataStream) {
+function init(server, createDataStream, newDataEmitter = null) {
 	const wss = new WebSocket.Server({server});
 
 	wss.on('connection', async ws => {
@@ -24,6 +24,19 @@ function init(server, createDataStream) {
 		});
 
 		ws.on('close', () => updateChunkList([]));
+
+		if (newDataEmitter)
+			newDataEmitter.subscribe(temperatures => {
+				ws.send(JSON.stringify({
+					temperatures: temperatures.map(({temperature}) => ({
+						temperature,
+						date: new Date() // prob best to use same date as in db
+					})),
+					chunk: {
+						special: true
+					}
+				}));
+			});
 	});
 }
 

@@ -57,10 +57,12 @@ function parseData(json) {
 			...dataPoint,
 			date: new Date(dataPoint.date),
 		})),
-		chunk: {
-			minDate: new Date(chunk.minDate),
-			maxDate: new Date(chunk.maxDate),
-			precisionLevel: chunk.precisionLevel
-		} 
+		chunk: chunk.special
+			? chunk
+			: {
+				minDate: new Date(chunk.minDate),
+				maxDate: new Date(chunk.maxDate),
+				precisionLevel: chunk.precisionLevel
+			} 
 	};
 }
