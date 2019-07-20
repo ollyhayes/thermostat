@@ -7,14 +7,14 @@ import { timeDay } from 'd3-time';
 
 import multiFormat from './time-format';
 import DataWorker from './data.worker.js';
-import {getZoomExtent, getLimits, memoizeLast} from './utils';
+import {getZoomExtent, getLimits} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import createDataStore from './data-store';
 import {thermometers} from '../../../common/config.json';
 import {
 	flattenChunks,
-	getChunksForDateRange as getChunksForDateRangeUncached,
+	getChunksForDateRange,
 	createChunksChangedCalculator
 } from './chunk-utils';
 
@@ -157,11 +157,7 @@ export default async function drawChart(element) {
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
 
 	let zoomedScale = xScale;
-	const {getChunks, storeChunk, getMissingChunks} = createDataStore();
-	const getChunksForDateRange = memoizeLast(
-		getChunksForDateRangeUncached,
-		(current, next) => current.every((item, index) => item.getTime() === next[index].getTime())
-	);
+	const {getChunks: getChunkData, storeChunk, getMissingChunks} = createDataStore();
 
 	const chunksChanged = createChunksChangedCalculator();
 
@@ -191,7 +187,7 @@ export default async function drawChart(element) {
 			resetZoom();
 
 		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
-			drawGraphs(zoomChanged);
+			drawGraphs(chunksInView, zoomChanged);
 	}
 
 	function handleNewData({data: chunk}) {
@@ -201,7 +197,7 @@ export default async function drawChart(element) {
 
 		// also need to allow autoupdate to work again
 
-		drawGraphs(false);
+		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), false);
 	}
 
 	function resetZoom() {
@@ -223,9 +219,9 @@ export default async function drawChart(element) {
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
 	}
 
-	function drawGraphs(redrawExisting) {
+	function drawGraphs(chunks, redrawExistingGraphs) {
 		const {thermometerReadings, minTemperature, maxTemperature} = 
-			flattenChunks(getChunks(getChunksForDateRange(...zoomedScale.domain())));
+			flattenChunks(getChunkData(chunks));
 
 		// reset the y-scale
 		// be nice to have a better equality here
@@ -246,7 +242,7 @@ export default async function drawChart(element) {
 					.attr('fill', 'none')
 					.attr('stroke', d => thermometerColours[d.thermometerId])
 					.attr('d', d => lineGenerator(d.temperatures)),
-				update => yScaleUpdated || redrawExisting
+				update => yScaleUpdated || redrawExistingGraphs
 					? update.attr('d', d => lineGenerator(d.temperatures))
 					: update);
 	}

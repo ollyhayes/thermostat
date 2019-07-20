@@ -31,17 +31,3 @@ export async function getLimits() {
 		maxDate: new Date(maxDate)
 	};
 }
-
-export function memoizeLast(innerFunction, areEqual) {
-	let previousArguments = null;
-	let previousValue = null;
-
-	return (...currentArguments) => {
-		if (previousArguments === null || !areEqual(currentArguments, previousArguments)) {
-			previousArguments = currentArguments;
-			previousValue = innerFunction(...currentArguments);
-		}
-
-		return previousValue;
-	};
-}
