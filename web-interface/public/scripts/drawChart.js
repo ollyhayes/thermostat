@@ -11,7 +11,7 @@ import {getZoomExtent, getLimits} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import createDataStore from './data-store';
-import { flattenRequests } from './request-utils';
+import { flattenRequests, getRequestsForDateRange } from './request-utils';
 import {thermometers} from '../../../common/config.json';
 
 const dataWorker = new DataWorker();
@@ -170,6 +170,8 @@ export default async function drawChart(element) {
 	updateRequestQueue();
 	reRender();
 
+	let currentRequests = null;
+
 	function handleZoom() {
 		const t = d3Event.transform;
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
@@ -178,13 +180,17 @@ export default async function drawChart(element) {
 
 		updateRequestQueue();
 
-		if (t.k < 0.67 || t.k > 1.5 || Math.abs(t.x) > 200) // this needs to rerender if current requests change eh? can get rid of the x part
+		if (t.k < 0.67 || t.k > 1.5)
 			reRender();
 
-		// maybe I just forgot how this works, but I think,
-		// * if the t.k changes like above, call reRender();
-		// * if the current requests change, call drawGraphs(true);
-		// right???
+		const [minDate, maxDate] = zoomedScale.domain();
+		const newCurrentRequests = getRequestsForDateRange(minDate, maxDate); // currently doing this loads, do once!
+		if (currentRequests === null
+			|| newCurrentRequests.length !== currentRequests.length
+			|| newCurrentRequests.some((request, index) => request.requestCode !== currentRequests[index].requestCode)) {
+			currentRequests = newCurrentRequests;
+			drawGraphs(true);
+		}
 	}
 
 	document.addEventListener('keydown', e => {
