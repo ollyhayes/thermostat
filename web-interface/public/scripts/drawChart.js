@@ -111,12 +111,10 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 		.attr('transform', `translate(${width}, 0)`)
 		.call(yAxisRight);
 
-	const minExtent = timeDay(minDate);
-	const maxExtent = timeDay.ceil(maxDate);
 	const zoom = d3Zoom()
 		.extent([[0,0],[width, height]])
-		.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
-		.scaleExtent(getZoomExtent(xScale, minDate, maxDate, minExtent, maxExtent));
+		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
+		.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
 
 	const zoomRect = g.append('rect')
 		.attr('width', width)
@@ -143,7 +141,10 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 }
 
 export default async function drawChart(element) {
-	const {minDate, maxDate} = await getLimits();
+	const {minDate: minDateLimit, maxDate: maxDateLimit} = await getLimits();
+	const minDate = timeDay(minDateLimit);
+	const maxDate = timeDay.ceil(maxDateLimit);
+
 	const initialMinDate = timeDay(new Date(2019, 5, 0));
 	// const initialMinDate = timeDay(maxDate);
 	const initialMaxDate = timeDay.ceil(new Date(initialMinDate.getTime() + 1));
@@ -212,11 +213,8 @@ export default async function drawChart(element) {
 		chartArea.attr('transform', null);
 
 		// set extents
-		// this are fixed, may aswell define them outside of here
-		const minExtent = timeDay(minDate);
-		const maxExtent = timeDay.ceil(maxDate);
-		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
-			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
+		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
+			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
 	}
 
 	function drawGraphs(chunks, redrawExistingGraphs) {
