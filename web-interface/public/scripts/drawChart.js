@@ -7,12 +7,16 @@ import { timeDay } from 'd3-time';
 
 import multiFormat from './time-format';
 import DataWorker from './data.worker.js';
-import {getZoomExtent, getLimits} from './utils';
+import {getZoomExtent, getLimits, memoizeLast} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import createDataStore from './data-store';
-import { flattenRequests, getRequestsForDateRange, createRequestsChangedCalculator } from './request-utils';
 import {thermometers} from '../../../common/config.json';
+import {
+	flattenRequests,
+	getRequestsForDateRange as getRequestsForDateRangeUncached,
+	createRequestsChangedCalculator
+} from './request-utils';
 
 const dataWorker = new DataWorker();
 
@@ -140,14 +144,9 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 
 export default async function drawChart(element) {
 	const {minDate, maxDate} = await getLimits();
-	// const initialMinDate = timeDay(new Date());
-	// const initialMaxDate = timeDay.ceil(new Date());
-	// const minDate = new Date(2019, 3, 21, 21, 0, 0);
-	// const maxDate = new Date(minDate.getTime() + 60	* 60 * 1000 * 2);
-	// const initialMinDate = minDate;
-	// const initialMaxDate = maxDate;
-	const initialMinDate = timeDay(maxDate);
-	const initialMaxDate = timeDay.ceil(maxDate);
+	const initialMinDate = timeDay(new Date(2019, 5, 0));
+	// const initialMinDate = timeDay(maxDate);
+	const initialMaxDate = timeDay.ceil(new Date(initialMinDate.getTime() + 1));
 
 	const {
 		lineGenerator,
@@ -159,6 +158,10 @@ export default async function drawChart(element) {
 
 	let zoomedScale = xScale;
 	const {getRequests, storeRequest, getMissingRequests} = createDataStore();
+	const getRequestsForDateRange = memoizeLast(
+		getRequestsForDateRangeUncached,
+		(current, next) => current.every((item, index) => item.getTime() === next[index].getTime())
+	);
 
 	dataWorker.addEventListener('message', handleNewData);
 	// can these two be removed, can we just trigger handleZoom straight away? (and maybe rename it or split it)
@@ -177,14 +180,13 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
-		const requestsInView = getRequestsForDateRange(...zoomedScale.domain()); // currently doing this loads, do once!
+		const requestsInView = getRequestsForDateRange(...zoomedScale.domain());
 
 		// if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 		if (t.k < 0.67 || t.k > 1.5)
 			reRender();
-
 		if (requestsChanged(requestsInView)) {
-			updateRequestQueue(requestsInView);
+			updateRequestQueue(requestsInView); // need to do this even if we render eh?
 			drawGraphs(true);
 		}
 	}
@@ -226,7 +228,8 @@ export default async function drawChart(element) {
 	}
 
 	function drawGraphs(onlyDrawNew = false) {
-		const {thermometerReadings, minTemperature, maxTemperature} = flattenRequests(getRequests(getRequestsForDateRange(...zoomedScale.domain())));
+		const {thermometerReadings, minTemperature, maxTemperature} = 
+			flattenRequests(getRequests(getRequestsForDateRange(...zoomedScale.domain())));
 
 		// reset the y-scale
 		// be nice to have a better equality here
