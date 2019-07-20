@@ -181,14 +181,15 @@ export default async function drawChart(element) {
 		redrawXAxis(zoomedScale);
 
 		const requestsInView = getRequestsForDateRange(...zoomedScale.domain());
+		const requestsHaveChanged = requestsChanged(requestsInView);
 
-		// if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
-		if (t.k < 0.67 || t.k > 1.5)
+		if (requestsHaveChanged)
+			updateRequestQueue();
+
+		if (t.k < 0.67 || t.k > 1.5) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			reRender();
-		if (requestsChanged(requestsInView)) {
-			updateRequestQueue(requestsInView); // need to do this even if we render eh?
+		else if (requestsHaveChanged) // if the current view has changed, draw any new requests
 			drawGraphs(true);
-		}
 	}
 
 	document.addEventListener('keydown', e => {
@@ -202,6 +203,8 @@ export default async function drawChart(element) {
 		// need to cut down the datastore based on last used and how much memory?
 
 		// also need to allow autoupdate to work again
+
+		// also change requests for chunks
 
 		drawGraphs(true);
 	}
