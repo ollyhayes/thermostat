@@ -10,7 +10,7 @@ import DataWorker from './data.worker.js';
 import {getZoomExtent, getLimits} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
-import createDataStore from './data-store';
+import createChunkStore from './chunk-store';
 import {thermometers} from '../../../common/config.json';
 import {
 	flattenChunks,
@@ -158,7 +158,7 @@ export default async function drawChart(element) {
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
 
 	let zoomedScale = xScale;
-	const {getChunks: getChunkData, storeChunk, getMissingChunks} = createDataStore();
+	const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
 
 	const chunksChanged = createChunksChangedCalculator();
 

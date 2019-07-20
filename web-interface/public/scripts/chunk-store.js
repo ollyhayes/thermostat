@@ -1,6 +1,6 @@
 import { chunkToCode } from './chunk-utils';
 
-export default function createDataStore() {
+export default function createChunkStore() {
 	const store = new Map();
 
 	return {
