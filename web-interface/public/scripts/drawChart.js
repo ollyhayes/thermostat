@@ -163,16 +163,10 @@ export default async function drawChart(element) {
 		(current, next) => current.every((item, index) => item.getTime() === next[index].getTime())
 	);
 
-	dataWorker.addEventListener('message', handleNewData);
-	// can these two be removed, can we just trigger handleZoom straight away? (and maybe rename it or split it)
-	updateChunkQueue();
-	reRender();
-
-	function updateChunkQueue() {
-		dataWorker.postMessage(getMissingChunks(getChunksForDateRange(...zoomedScale.domain())));
-	}
-
 	const chunksChanged = createChunksChangedCalculator();
+
+	dataWorker.addEventListener('message', handleNewData);
+	render(false);
 
 	function handleZoom() {
 		const t = d3Event.transform;
@@ -180,22 +174,25 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
+		render(t.k < 0.67 || t.k > 1.5);
+	}
+
+	function render(zoomChanged) {
 		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
 		const chunksHaveChanged = chunksChanged(chunksInView);
 
-		if (chunksHaveChanged)
-			updateChunkQueue();
+		if (chunksHaveChanged) { // tell the server we need new chunks
+			const missingChunks = getMissingChunks(chunksInView);
+			if (missingChunks.length > 0)
+				dataWorker.postMessage(missingChunks);
+		}
 
-		if (t.k < 0.67 || t.k > 1.5) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
-			reRender();
-		else if (chunksHaveChanged) // if the current view has changed, draw any new chunks
-			drawGraphs(true);
+		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
+			resetZoom();
+
+		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
+			drawGraphs(zoomChanged);
 	}
-
-	document.addEventListener('keydown', e => {
-		if (e.key === 'Enter')
-			reRender();
-	});
 
 	function handleNewData({data: chunk}) {
 		storeChunk(chunk);
@@ -204,10 +201,10 @@ export default async function drawChart(element) {
 
 		// also need to allow autoupdate to work again
 
-		drawGraphs(true);
+		drawGraphs(false);
 	}
 
-	function reRender() {
+	function resetZoom() {
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
 		zoomRect.call(zoom.transform, zoomIdentity);
@@ -224,11 +221,9 @@ export default async function drawChart(element) {
 		const maxExtent = timeDay.ceil(maxDate);
 		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minExtent, maxExtent));
-
-		drawGraphs();
 	}
 
-	function drawGraphs(onlyDrawNew = false) {
+	function drawGraphs(redrawExisting) {
 		const {thermometerReadings, minTemperature, maxTemperature} = 
 			flattenChunks(getChunks(getChunksForDateRange(...zoomedScale.domain())));
 
@@ -251,7 +246,7 @@ export default async function drawChart(element) {
 					.attr('fill', 'none')
 					.attr('stroke', d => thermometerColours[d.thermometerId])
 					.attr('d', d => lineGenerator(d.temperatures)),
-				update => yScaleUpdated || !onlyDrawNew
+				update => yScaleUpdated || redrawExisting
 					? update.attr('d', d => lineGenerator(d.temperatures))
 					: update);
 	}
