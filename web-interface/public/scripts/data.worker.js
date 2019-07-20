@@ -5,22 +5,22 @@ const nest = d3Nest()
 	.key(d => d.id);
 
 const socket = new self.WebSocket(`ws://${self.location.hostname}:8080`);
-let firstRequests = null;
+let firstChunks = null;
 
 socket.onopen = function () {
 	console.log('socket connected');
-	if (firstRequests) {
-		socket.send(JSON.stringify(firstRequests));
-		firstRequests = null;
+	if (firstChunks) {
+		socket.send(JSON.stringify(firstChunks));
+		firstChunks = null;
 	}
 };
 
-self.addEventListener('message', ({data: requests}) => {
-	if (requests.length > 0) {
+self.addEventListener('message', ({data: chunks}) => {
+	if (chunks.length > 0) {
 		if (socket.readyState === 0)
-			firstRequests = requests;
+			firstChunks = chunks;
 		else
-			socket.send(JSON.stringify(requests));
+			socket.send(JSON.stringify(chunks));
 	}
 });
 
@@ -29,7 +29,7 @@ socket.onerror = function (error) {
 };
 
 socket.onmessage = function ({data}) {
-	const {temperatures, request} = parseData(data);
+	const {temperatures, chunk} = parseData(data);
 
 	const groupedByThermometer = nest.entries(temperatures)
 		.map(({key, values}) => ({
@@ -39,28 +39,28 @@ socket.onmessage = function ({data}) {
 
 	const [minTemperature, maxTemperature] = getTemperatureExtent(temperatures);
 
-	const requestComplete = {
+	const chunkComplete = {
 		thermometers: groupedByThermometer,
 		minTemperature,
 		maxTemperature,
-		...request
+		...chunk
 	};
 
-	self.postMessage(requestComplete);
+	self.postMessage(chunkComplete);
 };
 
 function parseData(json) {
-	const {temperatures, request} = JSON.parse(json);
+	const {temperatures, chunk} = JSON.parse(json);
 
 	return {
 		temperatures: temperatures.map(dataPoint => ({
 			...dataPoint,
 			date: new Date(dataPoint.date),
 		})),
-		request: {
-			minDate: new Date(request.minDate),
-			maxDate: new Date(request.maxDate),
-			precisionLevel: request.precisionLevel
+		chunk: {
+			minDate: new Date(chunk.minDate),
+			maxDate: new Date(chunk.maxDate),
+			precisionLevel: chunk.precisionLevel
 		} 
 	};
 }

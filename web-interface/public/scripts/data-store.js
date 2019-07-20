@@ -1,21 +1,21 @@
-import { requestToCode } from './request-utils';
+import { chunkToCode } from './chunk-utils';
 
 export default function createDataStore() {
 	const store = new Map();
 
 	return {
-		getRequests(requests) {
-			return requests
-				.map(({requestCode}) => store.get(requestCode))
-				.filter(request => request && request.thermometers.length > 0);
+		getChunks(chunks) {
+			return chunks
+				.map(({chunkCode}) => store.get(chunkCode))
+				.filter(chunk => chunk && chunk.thermometers.length > 0);
 
 		},
-		storeRequest(request) {
-			request.requestCode = requestToCode(request);
-			store.set(request.requestCode, request);
+		storeChunk(chunk) {
+			chunk.chunkCode = chunkToCode(chunk);
+			store.set(chunk.chunkCode, chunk);
 		},
-		getMissingRequests(requests) {
-			return requests.filter(({requestCode}) => !store.has(requestCode));
+		getMissingChunks(chunks) {
+			return chunks.filter(({chunkCode}) => !store.has(chunkCode));
 		}
 	};
 }

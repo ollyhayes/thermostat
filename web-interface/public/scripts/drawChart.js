@@ -13,10 +13,10 @@ import ticker from './ticker';
 import createDataStore from './data-store';
 import {thermometers} from '../../../common/config.json';
 import {
-	flattenRequests,
-	getRequestsForDateRange as getRequestsForDateRangeUncached,
-	createRequestsChangedCalculator
-} from './request-utils';
+	flattenChunks,
+	getChunksForDateRange as getChunksForDateRangeUncached,
+	createChunksChangedCalculator
+} from './chunk-utils';
 
 const dataWorker = new DataWorker();
 
@@ -157,22 +157,22 @@ export default async function drawChart(element) {
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
 
 	let zoomedScale = xScale;
-	const {getRequests, storeRequest, getMissingRequests} = createDataStore();
-	const getRequestsForDateRange = memoizeLast(
-		getRequestsForDateRangeUncached,
+	const {getChunks, storeChunk, getMissingChunks} = createDataStore();
+	const getChunksForDateRange = memoizeLast(
+		getChunksForDateRangeUncached,
 		(current, next) => current.every((item, index) => item.getTime() === next[index].getTime())
 	);
 
 	dataWorker.addEventListener('message', handleNewData);
 	// can these two be removed, can we just trigger handleZoom straight away? (and maybe rename it or split it)
-	updateRequestQueue();
+	updateChunkQueue();
 	reRender();
 
-	function updateRequestQueue() {
-		dataWorker.postMessage(getMissingRequests(getRequestsForDateRange(...zoomedScale.domain())));
+	function updateChunkQueue() {
+		dataWorker.postMessage(getMissingChunks(getChunksForDateRange(...zoomedScale.domain())));
 	}
 
-	const requestsChanged = createRequestsChangedCalculator();
+	const chunksChanged = createChunksChangedCalculator();
 
 	function handleZoom() {
 		const t = d3Event.transform;
@@ -180,15 +180,15 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
-		const requestsInView = getRequestsForDateRange(...zoomedScale.domain());
-		const requestsHaveChanged = requestsChanged(requestsInView);
+		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
+		const chunksHaveChanged = chunksChanged(chunksInView);
 
-		if (requestsHaveChanged)
-			updateRequestQueue();
+		if (chunksHaveChanged)
+			updateChunkQueue();
 
 		if (t.k < 0.67 || t.k > 1.5) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			reRender();
-		else if (requestsHaveChanged) // if the current view has changed, draw any new requests
+		else if (chunksHaveChanged) // if the current view has changed, draw any new chunks
 			drawGraphs(true);
 	}
 
@@ -197,14 +197,12 @@ export default async function drawChart(element) {
 			reRender();
 	});
 
-	function handleNewData({data: request}) {
-		storeRequest(request);
+	function handleNewData({data: chunk}) {
+		storeChunk(chunk);
 
 		// need to cut down the datastore based on last used and how much memory?
 
 		// also need to allow autoupdate to work again
-
-		// also change requests for chunks
 
 		drawGraphs(true);
 	}
@@ -232,7 +230,7 @@ export default async function drawChart(element) {
 
 	function drawGraphs(onlyDrawNew = false) {
 		const {thermometerReadings, minTemperature, maxTemperature} = 
-			flattenRequests(getRequests(getRequestsForDateRange(...zoomedScale.domain())));
+			flattenChunks(getChunks(getChunksForDateRange(...zoomedScale.domain())));
 
 		// reset the y-scale
 		// be nice to have a better equality here

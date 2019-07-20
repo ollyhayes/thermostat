@@ -13,17 +13,17 @@ function init(server, createDataStream) {
 
 		// using a data stream per socket is this okay?
 		// maybe we can rely one the event loop to controlo the queue
-		const updateRequestList = createDataStream(data => 
+		const updateChunkList = createDataStream(data => 
 			ws.send(JSON.stringify(data)));
 
-		ws.on('message', requestsJson => {
-			const requests = JSON.parse(requestsJson);
-			console.log(`receiving: ${requests.length} requests`);
+		ws.on('message', chunksJson => {
+			const chunks = JSON.parse(chunksJson);
+			console.log(`receiving: ${chunks.length} chunks`);
 
-			updateRequestList(requests);
+			updateChunkList(chunks);
 		});
 
-		ws.on('close', () => updateRequestList([]));
+		ws.on('close', () => updateChunkList([]));
 	});
 }
 

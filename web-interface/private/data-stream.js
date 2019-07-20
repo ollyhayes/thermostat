@@ -1,55 +1,55 @@
 const log = require('../../common/log');
-const createRequestsSet = require('./requests-set');
+const createChunksSet = require('./chunk-set');
 
 function createDataStreamCreator(database) {
 	return function createDataStream(sendUpdate) {
-		let requestsList = [];
-		const completedRequests = createRequestsSet(50);
+		let chunksList = [];
+		const completedChunks = createChunksSet(50);
 
-		function processRequests() {
-			const newRequest = requestsList[0];
+		function processChunks() {
+			const newChunk = chunksList[0];
 
-			if (!newRequest)
+			if (!newChunk)
 				return;
 
-			log('new request'.cyan + `: ${requestToString(newRequest)},` +
-				'requsts'.cyan + `: ${requestsList.map(requestToString)},` +
-				'completed'.cyan + `: ${completedRequests.size()}`);
+			log('new chunk'.cyan + `: ${chunkToString(newChunk)},` +
+				'requsts'.cyan + `: ${chunksList.map(chunkToString)},` +
+				'completed'.cyan + `: ${completedChunks.size()}`);
 
-			completedRequests.add(newRequest);
+			completedChunks.add(newChunk);
 
-			const newRequestIndex = requestsList.indexOf(newRequest);
-			if (newRequestIndex !== -1)
-				requestsList.splice(newRequestIndex, 1);
+			const newChunkIndex = chunksList.indexOf(newChunk);
+			if (newChunkIndex !== -1)
+				chunksList.splice(newChunkIndex, 1);
 
 			const temperatures = database.read(
-				newRequest.minDate,
-				newRequest.maxDate,
-				newRequest.precisionLevel);
-			sendUpdate({temperatures, request: newRequest});
+				newChunk.minDate,
+				newChunk.maxDate,
+				newChunk.precisionLevel);
+			sendUpdate({temperatures, chunk: newChunk});
 
-			if (requestsList.length)
-				setTimeout(processRequests);
+			if (chunksList.length)
+				setTimeout(processChunks);
 		}
 
-		return function updateRequestList(requests) {
-			const triggerRequests = requestsList.length === 0;
+		return function updateChunkList(chunks) {
+			const triggerChunks = chunksList.length === 0;
 
-			requestsList = requests
+			chunksList = chunks
 				.map(({minDate, maxDate, precisionLevel}) => ({
 					minDate: new Date(minDate),
 					maxDate: new Date(maxDate),
 					precisionLevel
 				}))
-				.filter(request => !completedRequests.has(request));
+				.filter(chunk => !completedChunks.has(chunk));
 
-			if (triggerRequests)
-				processRequests();
+			if (triggerChunks)
+				processChunks();
 		};
 	};
 }
 
-function requestToString({minDate, precisionLevel}) {
+function chunkToString({minDate, precisionLevel}) {
 	return `${minDate.getHours()}:${minDate.getMinutes()}-${precisionLevel}`.green;
 }
 

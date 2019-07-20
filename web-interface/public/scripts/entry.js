@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
 function socketTest() {
 	const socket = new WebSocket('ws://localhost:8081');
-	const requests = [1, 2, 3];
+	const chunks = [1, 2, 3];
 	let currentRequest = 4;
 
 	socket.onopen = function () {
@@ -28,8 +28,8 @@ function socketTest() {
 	
 	// Log messages from the server
 	socket.onmessage = function (e) {
-		requests.splice(requests.indexOf(Number(e.data)), 1);
-		console.log(`got: ${e.data}, requests: ${requests}`);
+		chunks.splice(chunks.indexOf(Number(e.data)), 1);
+		console.log(`got: ${e.data}, chunks: ${chunks}`);
 	};
 
 	function send(data) {
@@ -40,8 +40,8 @@ function socketTest() {
 
 	window.startTest = function() {
 		window.token = setInterval(() => {
-			requests.push(currentRequest++);
-			send(requests);
+			chunks.push(currentRequest++);
+			send(chunks);
 		}, 1000);
 	};
 
