@@ -194,8 +194,6 @@ export default async function drawChart(element) {
 	function handleNewData({data: chunk}) {
 		storeChunk(chunk);
 
-		// need to cut down the datastore based on last used and how much memory?
-
 		// also need to allow autoupdate to work again
 
 		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), false);

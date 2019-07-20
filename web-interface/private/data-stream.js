@@ -4,7 +4,7 @@ const createChunksSet = require('./chunk-set');
 function createDataStreamCreator(database) {
 	return function createDataStream(sendUpdate) {
 		let chunksList = [];
-		const completedChunks = createChunksSet(50);
+		const completedChunks = createChunksSet();
 
 		function processChunks() {
 			const newChunk = chunksList[0];

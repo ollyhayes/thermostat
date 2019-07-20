@@ -1,12 +1,12 @@
-function createChunksSet(maxSize = -1) {
+function createChunksSet() {
 	const set = new Set();
 
 	return {
 		add(chunk) {
 			set.add(chunkToCode(chunk));
 
-			if (maxSize !== -1 && set.size > maxSize) // think about this
-				set.delete(set.entries().next());
+			if (set.size > 25)
+				set.delete(set.keys().next().value);
 		},
 		has(chunk) {
 			return set.has(chunkToCode(chunk));

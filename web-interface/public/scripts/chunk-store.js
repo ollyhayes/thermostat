@@ -13,6 +13,9 @@ export default function createChunkStore() {
 		storeChunk(chunk) {
 			chunk.chunkCode = chunkToCode(chunk);
 			store.set(chunk.chunkCode, chunk);
+
+			if (store.size > 50)
+				store.delete(store.keys().next().value);
 		},
 		getMissingChunks(chunks) {
 			return chunks.filter(({chunkCode}) => !store.has(chunkCode));
