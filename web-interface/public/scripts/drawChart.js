@@ -11,7 +11,7 @@ import {getZoomExtent, getLimits} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import createDataStore from './data-store';
-import { flattenRequests, getRequestsForDateRange } from './request-utils';
+import { flattenRequests, getRequestsForDateRange, createRequestsChangedCalculator } from './request-utils';
 import {thermometers} from '../../../common/config.json';
 
 const dataWorker = new DataWorker();
@@ -160,17 +160,16 @@ export default async function drawChart(element) {
 	let zoomedScale = xScale;
 	const {getRequests, storeRequest, getMissingRequests} = createDataStore();
 
-	function updateRequestQueue() {
-		const [minDate, maxDate] = zoomedScale.domain();
-
-		dataWorker.postMessage(getMissingRequests(minDate, maxDate));
-	}
-
 	dataWorker.addEventListener('message', handleNewData);
+	// can these two be removed, can we just trigger handleZoom straight away? (and maybe rename it or split it)
 	updateRequestQueue();
 	reRender();
 
-	let currentRequests = null;
+	function updateRequestQueue() {
+		dataWorker.postMessage(getMissingRequests(getRequestsForDateRange(...zoomedScale.domain())));
+	}
+
+	const requestsChanged = createRequestsChangedCalculator();
 
 	function handleZoom() {
 		const t = d3Event.transform;
@@ -178,17 +177,14 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
-		updateRequestQueue();
+		const requestsInView = getRequestsForDateRange(...zoomedScale.domain()); // currently doing this loads, do once!
 
+		// if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 		if (t.k < 0.67 || t.k > 1.5)
 			reRender();
 
-		const [minDate, maxDate] = zoomedScale.domain();
-		const newCurrentRequests = getRequestsForDateRange(minDate, maxDate); // currently doing this loads, do once!
-		if (currentRequests === null
-			|| newCurrentRequests.length !== currentRequests.length
-			|| newCurrentRequests.some((request, index) => request.requestCode !== currentRequests[index].requestCode)) {
-			currentRequests = newCurrentRequests;
+		if (requestsChanged(requestsInView)) {
+			updateRequestQueue(requestsInView);
 			drawGraphs(true);
 		}
 	}
@@ -200,9 +196,6 @@ export default async function drawChart(element) {
 
 	function handleNewData({data: request}) {
 		storeRequest(request);
-		
-		// need to trigger rerender sometimes
-		// when y-extent changes
 
 		// need to cut down the datastore based on last used and how much memory?
 
@@ -233,10 +226,11 @@ export default async function drawChart(element) {
 	}
 
 	function drawGraphs(onlyDrawNew = false) {
-		const {thermometerReadings, minTemperature, maxTemperature} = flattenRequests(getRequests(...zoomedScale.domain()));
+		const {thermometerReadings, minTemperature, maxTemperature} = flattenRequests(getRequests(getRequestsForDateRange(...zoomedScale.domain())));
 
 		// reset the y-scale
 		// be nice to have a better equality here
+		// also to do this asynchronously after a bit of time so we only do it once
 		const yScaleUpdated = minTemperature !== yScale.domain()[0] || maxTemperature !== yScale.domain()[1];
 		if (yScaleUpdated) {
 			yScale.domain([minTemperature, maxTemperature]);

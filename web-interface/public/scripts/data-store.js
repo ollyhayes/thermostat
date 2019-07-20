@@ -1,12 +1,10 @@
-import { getRequestsForDateRange, requestToCode } from './request-utils';
+import { requestToCode } from './request-utils';
 
 export default function createDataStore() {
 	const store = new Map();
 
 	return {
-		getRequests(minDate, maxDate) {
-			const requests = getRequestsForDateRange(minDate, maxDate);
-
+		getRequests(requests) {
 			return requests
 				.map(({requestCode}) => store.get(requestCode))
 				.filter(request => request && request.thermometers.length > 0);
@@ -16,9 +14,7 @@ export default function createDataStore() {
 			request.requestCode = requestToCode(request);
 			store.set(request.requestCode, request);
 		},
-		getMissingRequests(minDate, maxDate) {
-			const requests = getRequestsForDateRange(minDate, maxDate);
-
+		getMissingRequests(requests) {
 			return requests.filter(({requestCode}) => !store.has(requestCode));
 		}
 	};
