@@ -1,5 +1,11 @@
 live reload
-	only emit when we have the special chunk from the client
+	only emit live stuff when we have the special chunk from the client
+	the start of the current chunk not loading on page load
+	gap between chunks
+	y-axis
+	not using correct date
+	the merging logic doesn't really belong in the chunk-store
+	
 
 sides of the svg get wide when the screen is very horizontal
 have websocket reconnect

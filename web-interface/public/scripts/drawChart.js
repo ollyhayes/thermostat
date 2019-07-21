@@ -202,7 +202,7 @@ export default async function drawChart(element) {
 
 		storeChunk(chunk);
 
-		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), false);
+		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), chunk.special);
 	}
 
 	function resetZoom() {
