@@ -28,10 +28,12 @@ function init(server, createDataStream, newDataEmitter = null) {
 		if (newDataEmitter)
 			newDataEmitter.subscribe(temperatures => {
 				ws.send(JSON.stringify({
-					temperatures: temperatures.map(({temperature}) => ({
-						temperature,
-						date: new Date() // prob best to use same date as in db
-					})),
+					temperatures: temperatures.map(
+						({temperature, id}) => ({
+							temperature,
+							id,
+							date: new Date() // prob best to use same date as in db
+						})),
 					chunk: {
 						special: true
 					}
