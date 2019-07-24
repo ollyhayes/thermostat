@@ -3,9 +3,12 @@ module.exports = function()
 	const config = {
 		mode: 'development',
 		devtool: 'eval-source-map',
-		entry: './public/scripts/entry.js',
+		entry: {
+			streaming: './public/scripts/entry.js',
+			nonStreaming: './public/scripts/non-streaming-version/entry.js'
+		},
 		output: {
-			filename: 'bundle.js',
+			filename: '[name].bundle.js',
 			path: __dirname + '/public/scripts/bundles',
 			publicPath: '/scripts/bundles/'
 		},
