@@ -5,13 +5,13 @@ import { axisBottom, axisLeft, axisRight } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 
-import multiFormat from './time-format';
+import multiFormat from '../time-format';
 import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
 import DataWorker from './data.worker.js';
 import {getZoomExtent} from './utils';
 import {throttleTime} from './throttler';
-import applyMajorTickClasses from './majorAxis';
-import ticker from './ticker';
+import applyMajorTickClasses from '../majorAxis';
+import ticker from '../ticker';
 
 const dataWorker = new DataWorker();
 

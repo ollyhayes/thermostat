@@ -1,8 +1,8 @@
 import { nest as d3Nest } from 'd3-collection';
 import { extent } from 'd3-array';
 
-import ajax from './ajax';
-import {thermometers} from '../../../common/config.json';
+import ajax from '../ajax';
+import {thermometers} from '../../../../common/config.json';
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,

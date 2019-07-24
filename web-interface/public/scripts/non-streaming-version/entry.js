@@ -1,4 +1,4 @@
-import '../less/page.less';
+import '../../less/page.less';
 import drawChart from './drawChart';
 
 
