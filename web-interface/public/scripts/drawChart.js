@@ -6,14 +6,24 @@ import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 
 import multiFormat from './time-format';
-import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
 import DataWorker from './data.worker.js';
-import {getZoomExtent} from './utils';
-import {throttleTime} from './throttler';
+import {getZoomExtent, getLimits} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
+import createChunkStore from './chunk-store';
+import {thermometers} from '../../../common/config.json';
+import {
+	flattenChunks,
+	getChunksForDateRange,
+	createChunksChangedCalculator
+} from './chunk-utils';
 
 const dataWorker = new DataWorker();
+
+const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
+	...colours,
+	[id]: colour
+}),{});
 
 function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom) {
 	const box = {
@@ -101,12 +111,10 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 		.attr('transform', `translate(${width}, 0)`)
 		.call(yAxisRight);
 
-	const minExtent = timeDay(minDate);
-	const maxExtent = timeDay.ceil(maxDate);
 	const zoom = d3Zoom()
 		.extent([[0,0],[width, height]])
-		.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
-		.scaleExtent(getZoomExtent(xScale, minDate, maxDate, minExtent, maxExtent));
+		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
+		.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
 
 	const zoomRect = g.append('rect')
 		.attr('width', width)
@@ -133,9 +141,13 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 }
 
 export default async function drawChart(element) {
-	const {minDate, maxDate} = await getLimits();
-	const initialMinDate = timeDay(new Date());
-	const initialMaxDate = timeDay.ceil(new Date());
+	const {minDate: minDateLimit, maxDate: maxDateLimit} = await getLimits();
+	const minDate = timeDay(minDateLimit);
+	const maxDate = timeDay.ceil(maxDateLimit);
+
+	const initialMinDate = timeDay(new Date(2019, 5, 0));
+	// const initialMinDate = timeDay(maxDate);
+	const initialMaxDate = timeDay.ceil(new Date(initialMinDate.getTime() + 1));
 
 	const {
 		lineGenerator,
@@ -146,9 +158,12 @@ export default async function drawChart(element) {
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
 
 	let zoomedScale = xScale;
-	const triggerReload = throttleTime(() => dataWorker.postMessage(zoomedScale.domain()), 1000);
-	triggerReload(minDate, maxDate);
+	const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
+
+	const chunksChanged = createChunksChangedCalculator();
+
 	dataWorker.addEventListener('message', handleNewData);
+	render(false);
 
 	function handleZoom() {
 		const t = d3Event.transform;
@@ -156,23 +171,35 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
-		triggerReload();
+		render(t.k < 0.67 || t.k > 1.5);
 	}
 
-	document.addEventListener('keydown', async e => {
-		if (e.key === 'Enter')
-			await triggerReload();
-	});
+	function render(zoomChanged) {
+		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
+		const chunksHaveChanged = chunksChanged(chunksInView);
 
-	setInterval(() => {
-		const [startDate, endDate] = zoomedScale.domain();
-		const currentDate = new Date();
+		if (chunksHaveChanged) { // tell the server we need new chunks
+			const missingChunks = getMissingChunks(chunksInView);
+			if (missingChunks.length > 0)
+				dataWorker.postMessage(missingChunks);
+		}
 
-		if (endDate > currentDate && currentDate > startDate && endDate - startDate < 10 * 60 * 1000)
-			triggerReload(minDate, new Date(Date.now() + 30000));
-	}, 1000);
+		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
+			resetZoom();
 
-	function handleNewData({data: {data, extent, startDate, endDate}}) {
+		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
+			drawGraphs(chunksInView, zoomChanged);
+	}
+
+	function handleNewData({data: chunk}) {
+		storeChunk(chunk);
+
+		// also need to allow autoupdate to work again
+
+		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), false);
+	}
+
+	function resetZoom() {
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
 		zoomRect.call(zoom.transform, zoomIdentity);
@@ -183,27 +210,36 @@ export default async function drawChart(element) {
 		zoomedScale = xScale;
 		chartArea.attr('transform', null);
 
-		// reset the y-scale
-		yScale.domain(extent);
-		redrawYAxis();
-
 		// set extents
-		const minExtent = timeDay(minDate);
-		const maxExtent = timeDay.ceil(maxDate);
-		zoom.translateExtent([[xScale(minExtent), 0], [xScale(maxExtent), 1]])
-			.scaleExtent(getZoomExtent(xScale, startDate, endDate, minExtent, maxExtent));
+		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
+			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
+	}
+
+	function drawGraphs(chunks, redrawExistingGraphs) {
+		const {thermometerReadings, minTemperature, maxTemperature} = 
+			flattenChunks(getChunkData(chunks));
+
+		// reset the y-scale
+		// be nice to have a better equality here
+		// also to do this asynchronously after a bit of time so we only do it once
+		const yScaleUpdated = minTemperature !== yScale.domain()[0] || maxTemperature !== yScale.domain()[1];
+		if (yScaleUpdated) {
+			yScale.domain([minTemperature, maxTemperature]);
+			redrawYAxis();
+		}
 
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(data, d => d.key)
+			.data(thermometerReadings, d => d.key)
 			.join(
 				enter => enter
 					.append('path')
 					.attr('fill', 'none')
-					.attr('stroke', d => d.colour)
-					.attr('d', d => lineGenerator(d.values)),
-				update => update
-					.attr('d', d => lineGenerator(d.values)));
+					.attr('stroke', d => thermometerColours[d.thermometerId])
+					.attr('d', d => lineGenerator(d.temperatures)),
+				update => yScaleUpdated || redrawExistingGraphs
+					? update.attr('d', d => lineGenerator(d.temperatures))
+					: update);
 	}
 }

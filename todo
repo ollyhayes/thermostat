@@ -1,13 +1,11 @@
+sides of the svg get wide when the screen is very horizontal
+have websocket reconnect
 performance
 	hide axes whilst zooming
 	use webworkers
 		create path
 	switch to canvas
-differentiate between constant and single update
-	single update: instant get
-	constant update: wait a second
 show a current time marker?
-autorefresh
 animation on y-scale change
 zoom in url
 delete database from history
@@ -16,7 +14,6 @@ some way of showing data that doesn't yet have averages when you're zoomed out
 	or: count the values first and then return precisionLevel based on value count
 	or: get sqlite to count the values?
 return one extra off graph (with a couple of unioned limit 1s)
-production build
 update rxjs
 
 normalised
