@@ -134,7 +134,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 
 export default async function drawChart(element) {
 	const {minDate, maxDate} = await getLimits();
-	const initialMinDate = timeDay(new Date());
+	const initialMinDate = timeDay(maxDate);
 	const initialMaxDate = timeDay.ceil(new Date());
 
 	const {
