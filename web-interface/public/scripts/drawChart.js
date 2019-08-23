@@ -17,6 +17,7 @@ import {
 	getChunksForDateRange,
 	createChunksChangedCalculator
 } from './chunk-utils';
+import {createSaver} from './domain-save';
 
 const dataWorker = new DataWorker();
 
@@ -165,11 +166,37 @@ export default async function drawChart(element) {
 	dataWorker.addEventListener('message', handleNewData);
 	render(false);
 
+	// fix this
+	let disableSave = false;
+
+	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
+
+		const oldRange = zoomedScale.range();
+		const newRange = newDomain.map(zoomedScale);
+
+		// const scale = (oldRange[1] - oldRange[0]) / (newRange[1] - newRange[0]);
+		// const scaleTransform = zoomIdentity.scale(scale);
+		// const newRangeScaled = newRange.map(p => scaleTransform.invertX(p));
+
+		// const translate = newRangeScaled[0] - oldRange[0];
+		const translate = newRange[0] - oldRange[0];
+		console.log(`translating to: ${newDomain[0]}, by: ${translate}`);
+
+		const transform = zoomIdentity.translate(-translate, 0);
+
+		disableSave = true;
+		zoomRect.call(zoom.transform, transform); // something wierd happening in here...
+		disableSave = false;
+	});
+
 	function handleZoom() {
 		const t = d3Event.transform;
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
+
+		if (!disableSave)
+			saveDomain(zoomedScale.domain());
 
 		render(t.k < 0.67 || t.k > 1.5);
 	}
