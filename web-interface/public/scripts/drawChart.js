@@ -171,19 +171,27 @@ export default async function drawChart(element) {
 
 	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
 
+		resetZoom();
+
+		const oldTransform = zoomTransform(zoomRect.node());
 		const oldRange = zoomedScale.range();
 		const newRange = newDomain.map(zoomedScale);
 
-		// const scale = (oldRange[1] - oldRange[0]) / (newRange[1] - newRange[0]);
-		// const scaleTransform = zoomIdentity.scale(scale);
+		const scale = (oldRange[1] - oldRange[0]) / (newRange[1] - newRange[0]);
+		// const scaledTransform = oldTransform.scale(scale);
 		// const newRangeScaled = newRange.map(p => scaleTransform.invertX(p));
 
 		// const translate = newRangeScaled[0] - oldRange[0];
-		const translate = newRange[0] - oldRange[0];
+		const translate = oldTransform.invertX(newRange[0]) - oldTransform.invertX(oldRange[0]);
+
+
+		const transform = oldTransform.translate(-translate, 0).scale(scale);
+		// const transform = oldTransform.scale(scale);
+
+		
 		console.log(`translating to: ${newDomain[0]}, by: ${translate}`);
 
-		const oldTransform = zoomTransform(zoomRect.node());
-		const transform = oldTransform.translate(-translate, 0);
+		// const transform = oldTransform.translate(-translate, 0).scale(scale);
 
 		disableSave = true;
 		zoomRect.call(zoom.transform, transform); // something wierd happening in here...
@@ -192,6 +200,7 @@ export default async function drawChart(element) {
 
 	function handleZoom() {
 		const t = d3Event.transform;
+		// console.log(t.x, t.k);
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
@@ -212,8 +221,8 @@ export default async function drawChart(element) {
 				dataWorker.postMessage(missingChunks);
 		}
 
-		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
-			resetZoom();
+		// if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
+		// 	resetZoom();
 
 		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
 			drawGraphs(chunksInView, zoomChanged);
