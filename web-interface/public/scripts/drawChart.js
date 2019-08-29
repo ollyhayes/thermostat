@@ -2,7 +2,7 @@ import { select, event as d3Event} from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
 import { axisBottom, axisLeft, axisRight } from 'd3-axis';
-import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
+import { zoom as d3Zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 
 import multiFormat from './time-format';
@@ -182,7 +182,8 @@ export default async function drawChart(element) {
 		const translate = newRange[0] - oldRange[0];
 		console.log(`translating to: ${newDomain[0]}, by: ${translate}`);
 
-		const transform = zoomIdentity.translate(-translate, 0);
+		const oldTransform = zoomTransform(zoomRect.node());
+		const transform = oldTransform.translate(-translate, 0);
 
 		disableSave = true;
 		zoomRect.call(zoom.transform, transform); // something wierd happening in here...
