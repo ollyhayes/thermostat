@@ -14,25 +14,37 @@ export function createSaver(initialDomain, loadDomain) {
 	let lastTimeSaved = new Date();
 	let lastDomainSaved = initialDomain;
 
-	return domain => {
+	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,18,59,0), new Date(2019,7,29,20,1,0)]));
+	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,19,59,0), new Date(2019,7,29,21,1,0)]));
+	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,20,59,0), new Date(2019,7,29,22,1,0)]));
+	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,21,59,0), new Date(2019,7,29,23,1,0)]));
+	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,20,59,0), new Date(2019,7,29,23,1,0)]));
+	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,19,59,0), new Date(2019,7,29,22,1,0)]));
+	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,18,59,0), new Date(2019,7,29,21,1,0)]));
+	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,17,59,0), new Date(2019,7,29,20,1,0)]));
 
+	return domain => {
 		const currentDate = new Date();
-		const args = [{ domain },
-			'',
-			`#range=${formatTime(domain[0])},${formatTime(domain[1])}`];
+		const args = getHistoryArgs(domain);
 
 		// actually we need to put the push on a timeout that gets cancelled on another replace
 		// that way if we go back we can also go forward
 		// 	hmm, that won't work actually, because what if you don't pause before going back?
 		//	actually, this should be working as is, because we're replacing the front most state, I think I'm seeing a separate bug
 		if (currentDate - lastTimeSaved > 1000) {
-			window.history.pushState(...lastDomainSaved);
-			console.log('state pushed');
+			// window.history.pushState(...lastDomainSaved);
+			// console.log('state pushed');
 		}
 
 		// window.history.replaceState(...args);
 
 		lastTimeSaved = currentDate;
 		lastDomainSaved = args;
+	};
+
+	function getHistoryArgs(domain) {
+		return [{ domain },
+			'',
+			`#range=${formatTime(domain[0])},${formatTime(domain[1])}`];
 	}
 }

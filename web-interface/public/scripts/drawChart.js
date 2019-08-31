@@ -1,4 +1,5 @@
 import { select, event as d3Event} from 'd3-selection';
+import 'd3-transition';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
 import { axisBottom, axisLeft, axisRight } from 'd3-axis';
@@ -18,6 +19,7 @@ import {
 	createChunksChangedCalculator
 } from './chunk-utils';
 import {createSaver} from './domain-save';
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 
 const dataWorker = new DataWorker();
 
@@ -146,9 +148,10 @@ export default async function drawChart(element) {
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
 
-	// const initialMinDate = timeDay(new Date(2019, 5, 0));
-	const initialMinDate = timeDay(maxDate);
-	const initialMaxDate = timeDay.ceil(new Date(initialMinDate.getTime() + 1));
+	// const initialMinDate = timeDay(maxDate);
+	// const initialMaxDate = timeDay.ceil(new Date(initialMinDate.getTime() + 1));
+	const initialMinDate = new Date(2019,7,29,19,0,0);
+	const initialMaxDate = new Date(2019,7,30,1,0,0);
 
 	const {
 		lineGenerator,
@@ -171,7 +174,12 @@ export default async function drawChart(element) {
 
 	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
 
+		// reset the zoom so that the view of the graph is at tx=0
+		// so that if we are transitioning between zoom levels it works properly
+		// this works great when the minDate is aligned between zoom levels but otherwise the translate is off
 		resetZoom();
+		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
+		drawGraphs(chunksInView, true);
 
 		const oldTransform = zoomTransform(zoomRect.node());
 		const oldRange = zoomedScale.range();
@@ -194,13 +202,16 @@ export default async function drawChart(element) {
 		// const transform = oldTransform.translate(-translate, 0).scale(scale);
 
 		disableSave = true;
-		zoomRect.call(zoom.transform, transform); // something wierd happening in here...
+		zoomRect
+			// .transition()
+			// .duration(1000)
+			.call(zoom.transform, transform); // something wierd happening in here...
 		disableSave = false;
 	});
 
 	function handleZoom() {
 		const t = d3Event.transform;
-		// console.log(t.x, t.k);
+		console.log(t.x, t.k);
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
@@ -212,6 +223,7 @@ export default async function drawChart(element) {
 	}
 
 	function render(zoomChanged) {
+		console.log('rendering');
 		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
 		const chunksHaveChanged = chunksChanged(chunksInView);
 
@@ -237,6 +249,7 @@ export default async function drawChart(element) {
 	}
 
 	function resetZoom() {
+		console.log('reseting zoom');
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
 		zoomRect.call(zoom.transform, zoomIdentity);
@@ -253,6 +266,7 @@ export default async function drawChart(element) {
 	}
 
 	function drawGraphs(chunks, redrawExistingGraphs) {
+		console.log(`drawing graphs, redrawing: ${redrawExistingGraphs}`);
 		const {thermometerReadings, minTemperature, maxTemperature} = 
 			flattenChunks(getChunkData(chunks));
 
