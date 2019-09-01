@@ -5,18 +5,20 @@ const formatTime = timeFormat(specifier);
 const parseTime = timeParse(specifier);
 const dateFinder = /#range=(\d\d-\d\d-\d\d-\d\d-\d\d-\d\d),(\d\d-\d\d-\d\d-\d\d-\d\d-\d\d)/;
 
+export function parseHash() {
+	const result = dateFinder.exec(window.location.hash);
+
+	const domain = result
+		? result.slice(1).map(parseTime)
+		: null;
+
+	return domain;
+}
+
 export function createSaver(initialDomain, loadDomain) {
 
-	window.addEventListener('popstate', () => {
-		const result = dateFinder.exec(window.location.hash);
-
-		const domain = result
-			? result.slice(1).map(parseTime)
-			: null;
-
-		loadDomain(domain);
-	});
-
+	window.addEventListener('popstate', () => loadDomain(parseHash()));
+	
 	let lastTimeSaved = new Date();
 	let lastDomainSaved = initialDomain;
 

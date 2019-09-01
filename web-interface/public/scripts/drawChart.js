@@ -20,7 +20,7 @@ import {
 	getChunksForDateRange,
 	createChunksChangedCalculator
 } from './chunk-utils';
-import {createSaver} from './domain-save';
+import {createSaver, parseHash} from './domain-save';
 
 const dataWorker = new DataWorker();
 
@@ -149,10 +149,9 @@ export default async function drawChart(element) {
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
 
-	// const initialMinDate = timeDay(maxDate);
-	// const initialMaxDate = timeDay.ceil(new Date(initialMinDate.getTime() + 1));
-	const initialMinDate = new Date(2019,7,29,19,0,0);
-	const initialMaxDate = new Date(2019,7,30,1,0,0);
+	const defaultMinDate = timeDay(maxDate);
+	const defaultMaxDate = timeDay.ceil(new Date(defaultMinDate.getTime() + 1));
+	const [initialMinDate, initialMaxDate] = parseHash();
 
 	const {
 		lineGenerator,
@@ -175,7 +174,7 @@ export default async function drawChart(element) {
 	let transitionT;
 	let disableSave = false;
 	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
-		transitionDomain = newDomain || [initialMinDate, initialMaxDate];
+		transitionDomain = newDomain || [defaultMinDate, defaultMaxDate];
 		transitionT = 0;
 		transitionToLocation();
 	});
