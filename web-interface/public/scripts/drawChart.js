@@ -5,6 +5,7 @@ import { line } from 'd3-shape';
 import { axisBottom, axisLeft, axisRight } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
 import { timeDay } from 'd3-time';
+import { interpolate } from 'd3-interpolate';
 
 import multiFormat from './time-format';
 import DataWorker from './data.worker.js';
@@ -19,7 +20,6 @@ import {
 	createChunksChangedCalculator
 } from './chunk-utils';
 import {createSaver} from './domain-save';
-import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from 'constants';
 
 const dataWorker = new DataWorker();
 
@@ -115,6 +115,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 		.call(yAxisRight);
 
 	const zoom = d3Zoom()
+		.interpolate(interpolate)
 		.extent([[0,0],[width, height]])
 		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 		.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
@@ -174,7 +175,8 @@ export default async function drawChart(element) {
 
 	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
 		const oldTransform = zoomTransform(zoomRect.node());
-		const oldRange = zoomedScale.range().map(oldTransform.invertX, oldTransform); // could reset the zoom here, instead of transforming these points
+		// could reset the zoom first, instead of transforming these points. This is better though
+		const oldRange = zoomedScale.range().map(oldTransform.invertX, oldTransform);
 		const newRange = newDomain.map(zoomedScale).map(oldTransform.invertX, oldTransform);
 
 		const scale = (oldRange[1] - oldRange[0]) / (newRange[1] - newRange[0]);
@@ -184,20 +186,17 @@ export default async function drawChart(element) {
 
 		disableSave = true;
 		zoomRect
-			// .transition() // if we want transition, need to disable resetZoom whilst transitioning
-			// .duration(500)
+			.transition() // if we want transition, need to disable resetZoom whilst transitioning
+			.duration(500)
 			.call(zoom.transform, transform);
 		disableSave = false;
 	});
 
 	function handleZoom() {
 		const t = d3Event.transform;
-		console.log(t.x, t.k);
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
-
-		console.log(`new domain: ${zoomedScale.domain()}`);
 
 		if (!disableSave)
 			saveDomain(zoomedScale.domain());
@@ -215,8 +214,8 @@ export default async function drawChart(element) {
 				dataWorker.postMessage(missingChunks);
 		}
 
-		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
-			resetZoom();
+		// if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
+		// 	resetZoom();
 
 		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
 			drawGraphs(chunksInView, zoomChanged);

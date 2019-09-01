@@ -27,13 +27,9 @@ export function createSaver(initialDomain, loadDomain) {
 		const currentDate = new Date();
 		const args = getHistoryArgs(domain);
 
-		// actually we need to put the push on a timeout that gets cancelled on another replace
-		// that way if we go back we can also go forward
-		// 	hmm, that won't work actually, because what if you don't pause before going back?
-		//	actually, this should be working as is, because we're replacing the front most state, I think I'm seeing a separate bug
 		if (currentDate - lastTimeSaved > 1000) {
-			// window.history.pushState(...lastDomainSaved);
-			// console.log('state pushed');
+			window.history.pushState(...lastDomainSaved);
+			console.log('state pushed');
 		}
 
 		// window.history.replaceState(...args);
