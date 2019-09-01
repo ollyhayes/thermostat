@@ -6,6 +6,7 @@ import { axisBottom, axisLeft, axisRight } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 import { interpolate } from 'd3-interpolate';
+import { easeCubic } from 'd3-ease';
 
 import multiFormat from './time-format';
 import DataWorker from './data.worker.js';
@@ -178,6 +179,23 @@ export default async function drawChart(element) {
 		transitionToLocation();
 	});
 
+	function cropEase(ease, cropStart) {
+		if (cropStart === 0) return ease;
+
+		const x = scaleLinear()
+			.domain([0,1])
+			.range([cropStart, 1]);
+
+		const y = scaleLinear()
+			.domain([ease(cropStart), 1])
+			.range([0,1]);
+
+		return t => {
+			const newX = x(t);
+			return y(ease(newX));
+		};
+	}
+
 	function transitionToLocation() {
 		if (!transitionDomain || transitionT === 1)
 			return;
@@ -195,7 +213,8 @@ export default async function drawChart(element) {
 
 		zoomRect
 			.transition() // if we want transition, need to disable resetZoom whilst transitioning
-			.duration(5000 * (1 - transitionT))
+			.duration(500 * (1 - transitionT))
+			.ease(cropEase(easeCubic, transitionT))
 			.tween('custom', () => t => transitionT = t)
 			.call(zoom.transform, transform);
 	}
