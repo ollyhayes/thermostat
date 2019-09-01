@@ -173,41 +173,20 @@ export default async function drawChart(element) {
 	let disableSave = false;
 
 	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
-
-		// reset the zoom so that the view of the graph is at tx=0
-		// so that if we are transitioning between zoom levels it works properly
-		// this works great when the minDate is aligned between zoom levels but otherwise the translate is off
-		resetZoom();
-		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
-		drawGraphs(chunksInView, true);
-
 		const oldTransform = zoomTransform(zoomRect.node());
-		const oldRange = zoomedScale.range();
-		const newRange = newDomain.map(zoomedScale);
+		const oldRange = zoomedScale.range().map(oldTransform.invertX, oldTransform); // could reset the zoom here, instead of transforming these points
+		const newRange = newDomain.map(zoomedScale).map(oldTransform.invertX, oldTransform);
 
 		const scale = (oldRange[1] - oldRange[0]) / (newRange[1] - newRange[0]);
-		// const scaledTransform = oldTransform.scale(scale);
-		// const newRangeScaled = newRange.map(p => scaleTransform.invertX(p));
-
-		// const translate = newRangeScaled[0] - oldRange[0];
-		// const translate = oldTransform.invertX(newRange[0]) - oldTransform.invertX(oldRange[0]);
 		const translate = oldRange[0] - scale * newRange[0];
-		const translate2 = oldRange[1] - scale * newRange[1];
-
 
 		const transform = oldTransform.translate(translate, 0).scale(scale);
-		// const transform = oldTransform.scale(scale);
-
-		
-		console.log(`translating to: ${newDomain[0]}, by: ${transform}`);
-
-		// const transform = oldTransform.translate(-translate, 0).scale(scale);
 
 		disableSave = true;
 		zoomRect
-			.transition()
-			.duration(2000)
-			.call(zoom.transform, transform); // something wierd happening in here...
+			// .transition() // if we want transition, need to disable resetZoom whilst transitioning
+			// .duration(500)
+			.call(zoom.transform, transform);
 		disableSave = false;
 	});
 
@@ -236,8 +215,8 @@ export default async function drawChart(element) {
 				dataWorker.postMessage(missingChunks);
 		}
 
-		// if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
-		// 	resetZoom();
+		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
+			resetZoom();
 
 		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
 			drawGraphs(chunksInView, zoomChanged);
