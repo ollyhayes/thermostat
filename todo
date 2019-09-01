@@ -1,7 +1,4 @@
 zoom in url
-	don't save history whilst transitioning
-	replace history whilst zooming
-	don't rely on history state, need to parse fragment
 	load the url on first page load
 	better names for saver
 	get rid of those mutations

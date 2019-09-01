@@ -2,13 +2,14 @@ import {timeFormat, timeParse} from 'd3-time-format';
 
 const specifier = '%y-%m-%d-%H-%M-%S';
 const formatTime = timeFormat(specifier);
-// const parseTime = timeParse(specifier);
+const parseTime = timeParse(specifier);
+const dateFinder = /#range=(\d\d-\d\d-\d\d-\d\d-\d\d-\d\d),(\d\d-\d\d-\d\d-\d\d-\d\d-\d\d)/;
 
 export function createSaver(initialDomain, loadDomain) {
 
-	window.addEventListener('popstate', event => {
-		const {state: {domain}} = event;
-		loadDomain(domain);
+	window.addEventListener('popstate', () => {
+		const [, ...domain] = dateFinder.exec(window.location.hash);
+		loadDomain(domain.map(parseTime));
 	});
 
 	let lastTimeSaved = new Date();
@@ -32,7 +33,7 @@ export function createSaver(initialDomain, loadDomain) {
 	};
 
 	function getHistoryArgs(domain) {
-		return [{ domain },
+		return [{},
 			'',
 			`#range=${formatTime(domain[0])},${formatTime(domain[1])}`];
 	}
