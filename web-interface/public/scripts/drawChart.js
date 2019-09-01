@@ -175,7 +175,7 @@ export default async function drawChart(element) {
 	let transitionT;
 	let disableSave = false;
 	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
-		transitionDomain = newDomain;
+		transitionDomain = newDomain || [initialMinDate, initialMaxDate];
 		transitionT = 0;
 		transitionToLocation();
 	});

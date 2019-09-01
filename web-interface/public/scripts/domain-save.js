@@ -8,8 +8,13 @@ const dateFinder = /#range=(\d\d-\d\d-\d\d-\d\d-\d\d-\d\d),(\d\d-\d\d-\d\d-\d\d-
 export function createSaver(initialDomain, loadDomain) {
 
 	window.addEventListener('popstate', () => {
-		const [, ...domain] = dateFinder.exec(window.location.hash);
-		loadDomain(domain.map(parseTime));
+		const result = dateFinder.exec(window.location.hash);
+
+		const domain = result
+			? result.slice(1).map(parseTime)
+			: null;
+
+		loadDomain(domain);
 	});
 
 	let lastTimeSaved = new Date();
