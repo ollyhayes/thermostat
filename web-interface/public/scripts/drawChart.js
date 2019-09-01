@@ -190,21 +190,23 @@ export default async function drawChart(element) {
 		// const newRangeScaled = newRange.map(p => scaleTransform.invertX(p));
 
 		// const translate = newRangeScaled[0] - oldRange[0];
-		const translate = oldTransform.invertX(newRange[0]) - oldTransform.invertX(oldRange[0]);
+		// const translate = oldTransform.invertX(newRange[0]) - oldTransform.invertX(oldRange[0]);
+		const translate = oldRange[0] - scale * newRange[0];
+		const translate2 = oldRange[1] - scale * newRange[1];
 
 
-		const transform = oldTransform.translate(-translate, 0).scale(scale);
+		const transform = oldTransform.translate(translate, 0).scale(scale);
 		// const transform = oldTransform.scale(scale);
 
 		
-		console.log(`translating to: ${newDomain[0]}, by: ${translate}`);
+		console.log(`translating to: ${newDomain[0]}, by: ${transform}`);
 
 		// const transform = oldTransform.translate(-translate, 0).scale(scale);
 
 		disableSave = true;
 		zoomRect
-			// .transition()
-			// .duration(1000)
+			.transition()
+			.duration(2000)
 			.call(zoom.transform, transform); // something wierd happening in here...
 		disableSave = false;
 	});
@@ -216,6 +218,8 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
+		console.log(`new domain: ${zoomedScale.domain()}`);
+
 		if (!disableSave)
 			saveDomain(zoomedScale.domain());
 
@@ -223,7 +227,6 @@ export default async function drawChart(element) {
 	}
 
 	function render(zoomChanged) {
-		console.log('rendering');
 		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
 		const chunksHaveChanged = chunksChanged(chunksInView);
 
@@ -249,7 +252,6 @@ export default async function drawChart(element) {
 	}
 
 	function resetZoom() {
-		console.log('reseting zoom');
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
 		zoomRect.call(zoom.transform, zoomIdentity);
@@ -266,7 +268,6 @@ export default async function drawChart(element) {
 	}
 
 	function drawGraphs(chunks, redrawExistingGraphs) {
-		console.log(`drawing graphs, redrawing: ${redrawExistingGraphs}`);
 		const {thermometerReadings, minTemperature, maxTemperature} = 
 			flattenChunks(getChunkData(chunks));
 
