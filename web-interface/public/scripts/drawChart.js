@@ -1,9 +1,12 @@
 import { select, event as d3Event} from 'd3-selection';
+import 'd3-transition';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
 import { axisBottom, axisLeft, axisRight } from 'd3-axis';
-import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
+import { zoom as d3Zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
 import { timeDay } from 'd3-time';
+import { interpolate } from 'd3-interpolate';
+import { easeCubic } from 'd3-ease';
 
 import multiFormat from './time-format';
 import DataWorker from './data.worker.js';
@@ -17,6 +20,7 @@ import {
 	getChunksForDateRange,
 	createChunksChangedCalculator
 } from './chunk-utils';
+import {createSaver, parseHash} from './domain-save';
 
 const dataWorker = new DataWorker();
 
@@ -25,7 +29,7 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	[id]: colour
 }),{});
 
-function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom) {
+function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	const box = {
 		x0: 0,
 		x1: 1200,
@@ -112,6 +116,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 		.call(yAxisRight);
 
 	const zoom = d3Zoom()
+		.interpolate(interpolate)
 		.extent([[0,0],[width, height]])
 		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 		.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
@@ -120,8 +125,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 		.attr('width', width)
 		.attr('height', height)
 		.attr('opacity', '0.0001')
-		.call(zoom
-			.on('zoom', handleZoom));
+		.call(zoom);
 
 	return {
 		lineGenerator,
@@ -145,9 +149,9 @@ export default async function drawChart(element) {
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
 
-	// const initialMinDate = timeDay(new Date(2019, 5, 0));
-	const initialMinDate = timeDay(maxDate);
-	const initialMaxDate = timeDay.ceil(new Date(initialMinDate.getTime() + 1));
+	const defaultMinDate = timeDay(maxDate);
+	const defaultMaxDate = timeDay.ceil(new Date(defaultMinDate.getTime() + 1));
+	const [initialMinDate, initialMaxDate] = parseHash();
 
 	const {
 		lineGenerator,
@@ -155,21 +159,76 @@ export default async function drawChart(element) {
 		redrawXAxis, redrawYAxis,
 		chartArea,
 		zoom, zoomRect
-	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
+	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate);
 
 	let zoomedScale = xScale;
 	const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
 
 	const chunksChanged = createChunksChangedCalculator();
 
+	zoom.on('zoom', handleZoom);
 	dataWorker.addEventListener('message', handleNewData);
 	render(false);
+
+	let transitionDomain;
+	let transitionT;
+	let disableSave = false;
+	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
+		transitionDomain = newDomain || [defaultMinDate, defaultMaxDate];
+		transitionT = 0;
+		transitionToLocation();
+	});
+
+	function cropEase(ease, cropStart) {
+		if (cropStart === 0) return ease;
+
+		const x = scaleLinear()
+			.domain([0,1])
+			.range([cropStart, 1]);
+
+		const y = scaleLinear()
+			.domain([ease(cropStart), 1])
+			.range([0,1]);
+
+		return t => {
+			const newX = x(t);
+			return y(ease(newX));
+		};
+	}
+
+	function transitionToLocation() {
+		if (!transitionDomain || transitionT === 1)
+			return;
+
+		const newDomain = transitionDomain;
+		const oldTransform = zoomTransform(zoomRect.node());
+		// we could reset the zoom first, instead of transforming these points. This is better though
+		const oldRange = zoomedScale.range().map(oldTransform.invertX, oldTransform);
+		const newRange = newDomain.map(zoomedScale).map(oldTransform.invertX, oldTransform);
+
+		const scale = (oldRange[1] - oldRange[0]) / (newRange[1] - newRange[0]);
+		const translate = oldRange[0] - scale * newRange[0]; // from x′ = (x-t)/k
+
+		const transform = oldTransform.translate(translate, 0).scale(scale);
+
+		disableSave = true;
+		zoomRect
+			.transition()
+			.duration(500 * (1 - transitionT))
+			.ease(cropEase(easeCubic, transitionT))
+			.tween('custom', () => t => transitionT = t)
+			.on('end', () => disableSave = false)
+			.call(zoom.transform, transform);
+	}
 
 	function handleZoom() {
 		const t = d3Event.transform;
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
+
+		if (!disableSave)
+			saveDomain(zoomedScale.domain());
 
 		render(t.k < 0.67 || t.k > 1.5);
 	}
@@ -213,6 +272,8 @@ export default async function drawChart(element) {
 		// set extents
 		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
+
+		transitionToLocation();
 	}
 
 	function drawGraphs(chunks, redrawExistingGraphs) {
