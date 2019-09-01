@@ -4,7 +4,7 @@ import { getTemperatureExtent } from './utils';
 const nest = d3Nest()
 	.key(d => d.id);
 
-const socket = new self.WebSocket(`ws://${self.location.hostname}:8080`);
+const socket = new self.WebSocket(`ws://${self.location.host}`);
 let firstChunks = null;
 
 socket.onopen = function () {

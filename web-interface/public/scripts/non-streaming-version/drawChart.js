@@ -2,11 +2,11 @@ import { select, event as d3Event} from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import { line } from 'd3-shape';
 import { axisBottom, axisLeft, axisRight } from 'd3-axis';
-import { zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
+import { zoomTransform, zoom as d3Zoom, zoomIdentity } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 
 import multiFormat from '../time-format';
-import getTemperatureRaw, { getLimits, getTemperatureExtent } from './data-repository';
+import { getLimits } from './data-repository';
 import DataWorker from './data.worker.js';
 import {getZoomExtent} from './utils';
 import {throttleTime} from './throttler';
@@ -134,7 +134,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 
 export default async function drawChart(element) {
 	const {minDate, maxDate} = await getLimits();
-	const initialMinDate = timeDay(new Date());
+	const initialMinDate = timeDay(maxDate);
 	const initialMaxDate = timeDay.ceil(new Date());
 
 	const {
@@ -152,6 +152,7 @@ export default async function drawChart(element) {
 
 	function handleZoom() {
 		const t = d3Event.transform;
+		console.log(t.x);
 		chartArea.attr('transform', `translate(${t.x} 0) scale(${t.k}, 1)`);
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
@@ -160,8 +161,16 @@ export default async function drawChart(element) {
 	}
 
 	document.addEventListener('keydown', async e => {
-		if (e.key === 'Enter')
-			await triggerReload();
+		if (e.key === 'Enter') {
+			const oldTransform = zoomTransform(zoomRect.node());
+
+			const newTransform = oldTransform.scale(2);
+
+			zoomRect.call(zoom.transform, newTransform);
+
+
+
+		}
 	});
 
 	setInterval(() => {
@@ -174,18 +183,18 @@ export default async function drawChart(element) {
 
 	function handleNewData({data: {data, extent, startDate, endDate}}) {
 		// reset the zoom (without zooming)
-		zoom.on('zoom', null);
-		zoomRect.call(zoom.transform, zoomIdentity);
-		zoom.on('zoom', handleZoom);
+		// zoom.on('zoom', null);
+		// zoomRect.call(zoom.transform, zoomIdentity);
+		// zoom.on('zoom', handleZoom);
 
-		// reset the graph position
-		xScale.domain(zoomedScale.domain());
-		zoomedScale = xScale;
-		chartArea.attr('transform', null);
+		// // reset the graph position
+		// xScale.domain(zoomedScale.domain());
+		// zoomedScale = xScale;
+		// chartArea.attr('transform', null);
 
-		// reset the y-scale
-		yScale.domain(extent);
-		redrawYAxis();
+		// // reset the y-scale
+		// yScale.domain(extent);
+		// redrawYAxis();
 
 		// set extents
 		const minExtent = timeDay(minDate);
