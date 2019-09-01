@@ -149,9 +149,10 @@ export default async function drawChart(element) {
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
 
-	const defaultMinDate = timeDay(maxDate);
+	const defaultMinDate = timeDay(maxDate - 1);
 	const defaultMaxDate = timeDay.ceil(new Date(defaultMinDate.getTime() + 1));
-	const [initialMinDate, initialMaxDate] = parseHash();
+	const initialDomain = parseHash();
+	const [initialMinDate, initialMaxDate] = initialDomain || [defaultMinDate, defaultMaxDate];
 
 	const {
 		lineGenerator,
