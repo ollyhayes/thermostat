@@ -170,10 +170,19 @@ export default async function drawChart(element) {
 	dataWorker.addEventListener('message', handleNewData);
 	render(false);
 
-	// fix this
-	let disableSave = false;
-
+	let transitionDomain;
+	let transitionT;
 	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
+		transitionDomain = newDomain;
+		transitionT = 0;
+		transitionToLocation();
+	});
+
+	function transitionToLocation() {
+		if (!transitionDomain || transitionT === 1)
+			return;
+
+		const newDomain = transitionDomain;
 		const oldTransform = zoomTransform(zoomRect.node());
 		// could reset the zoom first, instead of transforming these points. This is better though
 		const oldRange = zoomedScale.range().map(oldTransform.invertX, oldTransform);
@@ -184,13 +193,12 @@ export default async function drawChart(element) {
 
 		const transform = oldTransform.translate(translate, 0).scale(scale);
 
-		disableSave = true;
 		zoomRect
 			.transition() // if we want transition, need to disable resetZoom whilst transitioning
-			.duration(500)
+			.duration(5000 * (1 - transitionT))
+			.tween('custom', () => t => transitionT = t)
 			.call(zoom.transform, transform);
-		disableSave = false;
-	});
+	}
 
 	function handleZoom() {
 		const t = d3Event.transform;
@@ -198,8 +206,7 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
-		if (!disableSave)
-			saveDomain(zoomedScale.domain());
+		// saveDomain(zoomedScale.domain());
 
 		render(t.k < 0.67 || t.k > 1.5);
 	}
@@ -214,8 +221,8 @@ export default async function drawChart(element) {
 				dataWorker.postMessage(missingChunks);
 		}
 
-		// if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
-		// 	resetZoom();
+		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
+			resetZoom();
 
 		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
 			drawGraphs(chunksInView, zoomChanged);
@@ -243,6 +250,8 @@ export default async function drawChart(element) {
 		// set extents
 		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
+
+		transitionToLocation();
 	}
 
 	function drawGraphs(chunks, redrawExistingGraphs) {
