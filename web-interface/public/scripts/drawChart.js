@@ -28,7 +28,7 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	[id]: colour
 }),{});
 
-function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom) {
+function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	const box = {
 		x0: 0,
 		x1: 1200,
@@ -124,8 +124,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, h
 		.attr('width', width)
 		.attr('height', height)
 		.attr('opacity', '0.0001')
-		.call(zoom
-			.on('zoom', handleZoom));
+		.call(zoom);
 
 	return {
 		lineGenerator,
@@ -160,13 +159,14 @@ export default async function drawChart(element) {
 		redrawXAxis, redrawYAxis,
 		chartArea,
 		zoom, zoomRect
-	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate, handleZoom);
+	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate);
 
 	let zoomedScale = xScale;
 	const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
 
 	const chunksChanged = createChunksChangedCalculator();
 
+	zoom.on('zoom', handleZoom);
 	dataWorker.addEventListener('message', handleNewData);
 	render(false);
 
