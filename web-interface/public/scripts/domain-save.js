@@ -14,14 +14,7 @@ export function createSaver(initialDomain, loadDomain) {
 	let lastTimeSaved = new Date();
 	let lastDomainSaved = initialDomain;
 
-	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,18,59,0), new Date(2019,7,29,20,1,0)]));
-	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,19,59,0), new Date(2019,7,29,21,1,0)]));
-	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,20,59,0), new Date(2019,7,29,22,1,0)]));
-	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,21,59,0), new Date(2019,7,29,23,1,0)]));
-	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,20,59,0), new Date(2019,7,29,23,1,0)]));
-	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,19,59,0), new Date(2019,7,29,22,1,0)]));
-	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,18,59,0), new Date(2019,7,29,21,1,0)]));
-	window.history.pushState(...getHistoryArgs([new Date(2019,7,29,17,59,0), new Date(2019,7,29,20,1,0)]));
+	window.history.replaceState(...getHistoryArgs(initialDomain));
 
 	return domain => {
 		const currentDate = new Date();
@@ -32,7 +25,7 @@ export function createSaver(initialDomain, loadDomain) {
 			console.log('state pushed');
 		}
 
-		// window.history.replaceState(...args);
+		window.history.replaceState(...args);
 
 		lastTimeSaved = currentDate;
 		lastDomainSaved = args;

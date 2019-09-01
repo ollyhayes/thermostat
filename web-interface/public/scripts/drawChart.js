@@ -173,6 +173,7 @@ export default async function drawChart(element) {
 
 	let transitionDomain;
 	let transitionT;
+	let disableSave = false;
 	const saveDomain = createSaver(zoomedScale.domain(), newDomain => {
 		transitionDomain = newDomain;
 		transitionT = 0;
@@ -202,20 +203,22 @@ export default async function drawChart(element) {
 
 		const newDomain = transitionDomain;
 		const oldTransform = zoomTransform(zoomRect.node());
-		// could reset the zoom first, instead of transforming these points. This is better though
+		// we could reset the zoom first, instead of transforming these points. This is better though
 		const oldRange = zoomedScale.range().map(oldTransform.invertX, oldTransform);
 		const newRange = newDomain.map(zoomedScale).map(oldTransform.invertX, oldTransform);
 
 		const scale = (oldRange[1] - oldRange[0]) / (newRange[1] - newRange[0]);
-		const translate = oldRange[0] - scale * newRange[0];
+		const translate = oldRange[0] - scale * newRange[0]; // from x′ = (x-t)/k
 
 		const transform = oldTransform.translate(translate, 0).scale(scale);
 
+		disableSave = true;
 		zoomRect
-			.transition() // if we want transition, need to disable resetZoom whilst transitioning
+			.transition()
 			.duration(500 * (1 - transitionT))
 			.ease(cropEase(easeCubic, transitionT))
 			.tween('custom', () => t => transitionT = t)
+			.on('end', () => disableSave = false)
 			.call(zoom.transform, transform);
 	}
 
@@ -225,7 +228,8 @@ export default async function drawChart(element) {
 		zoomedScale = t.rescaleX(xScale);
 		redrawXAxis(zoomedScale);
 
-		// saveDomain(zoomedScale.domain());
+		if (!disableSave)
+			saveDomain(zoomedScale.domain());
 
 		render(t.k < 0.67 || t.k > 1.5);
 	}
