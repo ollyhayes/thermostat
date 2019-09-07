@@ -11,15 +11,16 @@ export default function createChunkStore() {
 
 		},
 		storeChunk(chunk) {
-			chunk.chunkCode = chunk.chunkCode || chunkToCode(chunk);
+			chunk.chunkCode = chunkToCode(chunk);
 
 			const existingChunk = store.get(chunk.chunkCode);
 
 			if (existingChunk)
 				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
 					...newThermometer,
-					temperatures: newThermometer.temperatures.concat(
-						...getTemperaturesForThermometer(existingChunk.thermometers, newThermometer.thermometerId))
+					temperatures: getTemperaturesForThermometer(existingChunk.thermometers, newThermometer.thermometerId)
+						.concat(newThermometer.temperatures)
+						.sort(((first, second) => first.date - second.date))
 				}));
 
 			store.set(chunk.chunkCode, chunk);
