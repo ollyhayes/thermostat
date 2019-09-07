@@ -29,7 +29,7 @@ export default function createChunkStore() {
 				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
 					...newThermometer,
 					temperatures: newThermometer.temperatures.concat(
-						getTemperaturesForThermometer(nextChunk.thermometers, newThermometer.thermometerId)[0]
+						getTemperaturesForThermometer(nextChunk.thermometers, newThermometer.thermometerId).slice(0,1)
 					)
 				}));
 			}
@@ -39,7 +39,7 @@ export default function createChunkStore() {
 				previousChunk.thermometers = previousChunk.thermometers.map(previousThemometer => ({
 					...previousThemometer,
 					temperatures: previousThemometer.temperatures.concat(
-						getTemperaturesForThermometer(chunk.thermometers, previousThemometer.thermometerId)[0]
+						getTemperaturesForThermometer(chunk.thermometers, previousThemometer.thermometerId).slice(0,1)
 					)
 				}));
 			}

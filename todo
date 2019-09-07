@@ -49,3 +49,11 @@ config
 		or it writes on create
 	store in config file
 		have to keep config with db
+
+live updates
+	client requests a chunk with live flag
+	server gets chunk from db and sends it
+	registers emitter and sends updates
+
+	client tags chunks with 'joined' when they're joined
+	only join unjoined chunks
