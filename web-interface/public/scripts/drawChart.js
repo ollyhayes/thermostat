@@ -260,9 +260,9 @@ export default async function drawChart(element) {
 				...getChunkContaining(new Date())
 			};
 
-		storeChunk(chunk);
+		const chunkWasMerged = storeChunk(chunk);
 
-		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), chunk.special);
+		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), chunkWasMerged);
 	}
 
 	function resetZoom() {
