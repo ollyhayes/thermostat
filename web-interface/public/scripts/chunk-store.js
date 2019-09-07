@@ -18,9 +18,14 @@ export default function createChunkStore() {
 			if (existingChunk)
 				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
 					...newThermometer,
-					temperatures: getTemperaturesForThermometer(existingChunk.thermometers, newThermometer.thermometerId)
-						.concat(newThermometer.temperatures)
-						.sort(((first, second) => first.date - second.date))
+					temperatures: concat(
+						getTemperaturesForThermometer(existingChunk.thermometers, newThermometer.thermometerId),
+						newThermometer.temperatures,
+						chunk.special // if this is the _not_ special, it's the main chunk so it should go at the start
+					)
+					// temperatures: getTemperaturesForThermometer(existingChunk.thermometers, newThermometer.thermometerId)
+					// 	.concat(newThermometer.temperatures)
+					// 	.sort(((first, second) => first.date - second.date))
 				}));
 
 			store.set(chunk.chunkCode, chunk);
@@ -41,4 +46,10 @@ function getTemperaturesForThermometer(thermometers, thermometerId) {
 	return thermometer
 		? thermometer.temperatures
 		: [];
+}
+
+function concat(existingChunk, newChunk, append) {
+	return append
+		? existingChunk.concat(newChunk)
+		: newChunk.concat(existingChunk);
 }
