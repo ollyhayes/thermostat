@@ -4,11 +4,24 @@ export function chunkToCode({minDate, maxDate, precisionLevel}) {
 	return '' + minDate.getTime() + maxDate.getTime() + precisionLevel;
 }
 
+export function nextChunkCode({minDate, maxDate, precisionLevel}) {
+	return '' + maxDate.getTime() + (+maxDate + (maxDate - minDate)) + precisionLevel;
+	// this doesn't work because we need to take the steps into account
+	// const {interval} = getChunkInterval(precisionLevel);
+	// return '' + maxDate.getTime() + interval.ceil(+maxDate + 1).getTime() + precisionLevel;
+}
+
+export function previousChunkCode({minDate, maxDate, precisionLevel}) {
+	return '' + (minDate - (maxDate - minDate)) + minDate.getTime() + precisionLevel;
+	// const {interval} = getChunkInterval(precisionLevel);
+	// return '' + interval.floor(minDate.getTime() - 1) + minDate.getTime() + precisionLevel;
+}
+
 export function getChunkContaining(date) {
 	const interval = timeMinute.every(5);
 
 	const chunk = ({
-		minDate: interval(date),
+		minDate: interval.floor(date),
 		maxDate: interval.ceil(date),
 		precisionLevel: 0,
 	});
@@ -36,14 +49,6 @@ export function getChunksForDateRange(minDate, maxDate) {
 			chunkCode: chunkToCode(chunk)
 		}));
 
-	function getChunkInterval(precisionLevel) {
-		switch (precisionLevel) {
-		case 0: return {interval: timeMinute, step: 5};
-		case 1: return {interval: timeHour, step: 5};
-		case 2: return {interval: timeWeek, step: 1};
-		}
-	}
-
 	function getPrecisionLevelForDateRange(minDate, maxDate) {
 		const minuteLimit = (maxDate.getTime() - minDate.getTime()) / (1000 * 60); // how many minutes are we looking at
 		const hourLimit = minuteLimit / 60;
@@ -52,6 +57,14 @@ export function getChunksForDateRange(minDate, maxDate) {
 			: minuteLimit > 75
 				? 1
 				: 0;
+	}
+}
+
+function getChunkInterval(precisionLevel) {
+	switch (precisionLevel) {
+	case 0: return {interval: timeMinute, step: 5};
+	case 1: return {interval: timeHour, step: 5};
+	case 2: return {interval: timeWeek, step: 1};
 	}
 }
 

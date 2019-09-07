@@ -1,4 +1,4 @@
-import { chunkToCode } from './chunk-utils';
+import { chunkToCode, nextChunkCode, previousChunkCode } from './chunk-utils';
 
 export default function createChunkStore() {
 	const store = new Map();
@@ -14,7 +14,6 @@ export default function createChunkStore() {
 			chunk.chunkCode = chunkToCode(chunk);
 
 			const existingChunk = store.get(chunk.chunkCode);
-
 			if (existingChunk)
 				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
 					...newThermometer,
@@ -25,12 +24,33 @@ export default function createChunkStore() {
 					)
 				}));
 
+			const nextChunk = store.get(nextChunkCode(chunk));
+			if (nextChunk) {
+				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
+					...newThermometer,
+					temperatures: newThermometer.temperatures.concat(
+						getTemperaturesForThermometer(nextChunk.thermometers, newThermometer.thermometerId)[0]
+					)
+				}));
+			}
+
+			const previousChunk = store.get(previousChunkCode(chunk));
+			if (previousChunk) {
+				previousChunk.thermometers = previousChunk.thermometers.map(previousThemometer => ({
+					...previousThemometer,
+					temperatures: previousThemometer.temperatures.concat(
+						getTemperaturesForThermometer(chunk.thermometers, previousThemometer.thermometerId)[0]
+					)
+				}));
+			}
+
 			store.set(chunk.chunkCode, chunk);
 
 			if (store.size > 50)
 				store.delete(store.keys().next().value);
 
-			return existingChunk !== undefined;
+			return existingChunk !== undefined
+				|| previousChunk !== undefined;
 		},
 		getMissingChunks(chunks) {
 			return chunks.filter(({chunkCode}) => !store.has(chunkCode));
