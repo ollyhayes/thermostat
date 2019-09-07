@@ -22,7 +22,7 @@ function start(db, newDataEmitter = null) {
 	const server = http.createServer(app.callback());
 	server.listen(8080);
 
-	initDataSocket(server, initDataStream(db), newDataEmitter);
+	initDataSocket(server, initDataStream(db, newDataEmitter));
 
 	console.log('Listening on port 8080');
 

@@ -92,6 +92,7 @@ export function createChunksChangedCalculator() {
 		const chunksChanged = previousChunks === null
 			|| newChunks.length !== previousChunks.length
 			|| newChunks.some((chunk, index) => chunk.chunkCode !== previousChunks[index].chunkCode);
+
 		previousChunks = newChunks;
 		return chunksChanged;
 	};

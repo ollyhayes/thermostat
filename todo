@@ -51,7 +51,7 @@ config
 		have to keep config with db
 
 live updates
-	client requests a chunk with live flag
+	client requests a chunk with live flag - but then how to we turn live off? can't send an empty array because that doesn't make sense for the historic mode. may as well then have a separate process to turn live updates on or off.
 	server gets chunk from db and sends it
 	registers emitter and sends updates
 

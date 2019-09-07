@@ -76,7 +76,7 @@ class Database
 
 		const data = this.readCommand.all({
 			minDate: toUnix(minDate),
-			maxDate: toUnix(maxDate),
+			maxDate: toUnix(maxDate || new Date(9999, 0, 0)),
 			precisionLevel
 		});
 
