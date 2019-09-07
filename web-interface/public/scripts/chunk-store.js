@@ -14,7 +14,7 @@ export default function createChunkStore() {
 			chunk.chunkCode = chunkToCode(chunk);
 
 			const existingChunk = store.get(chunk.chunkCode);
-			if (existingChunk)
+			if (existingChunk) {
 				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
 					...newThermometer,
 					temperatures: concat(
@@ -23,25 +23,26 @@ export default function createChunkStore() {
 						chunk.special // if this is _not_ the special, it's the main chunk so it should go at the start
 					)
 				}));
+			} else {
+				const nextChunk = store.get(nextChunkCode(chunk));
+				if (nextChunk) {
+					chunk.thermometers = chunk.thermometers.map(newThermometer => ({
+						...newThermometer,
+						temperatures: newThermometer.temperatures.concat(
+							getTemperaturesForThermometer(nextChunk.thermometers, newThermometer.thermometerId).slice(0,1)
+						)
+					}));
+				}
 
-			const nextChunk = store.get(nextChunkCode(chunk));
-			if (nextChunk) {
-				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
-					...newThermometer,
-					temperatures: newThermometer.temperatures.concat(
-						getTemperaturesForThermometer(nextChunk.thermometers, newThermometer.thermometerId).slice(0,1)
-					)
-				}));
-			}
-
-			const previousChunk = store.get(previousChunkCode(chunk));
-			if (previousChunk) {
-				previousChunk.thermometers = previousChunk.thermometers.map(previousThemometer => ({
-					...previousThemometer,
-					temperatures: previousThemometer.temperatures.concat(
-						getTemperaturesForThermometer(chunk.thermometers, previousThemometer.thermometerId).slice(0,1)
-					)
-				}));
+				const previousChunk = store.get(previousChunkCode(chunk));
+				if (previousChunk) {
+					previousChunk.thermometers = previousChunk.thermometers.map(previousThemometer => ({
+						...previousThemometer,
+						temperatures: previousThemometer.temperatures.concat(
+							getTemperaturesForThermometer(chunk.thermometers, previousThemometer.thermometerId).slice(0,1)
+						)
+					}));
+				}
 			}
 
 			store.set(chunk.chunkCode, chunk);
