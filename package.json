@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "cpy common/config-template.json common/ --rename=config.json --no-overwrite"
+    "postinstall": "cpy common/config-template.json common/ --rename=config.json --no-overwrite",
+    "start": "node app.js",
+    "watch": "cd web-interface && webpack --watch",
+    "build": "cd web-interface && webpack --mode production"
   },
   "author": "",
   "license": "ISC",
