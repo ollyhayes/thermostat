@@ -1,3 +1,19 @@
+live reload, next version!!!
+	stop with all this multi request stuff,
+	when the client asks for a chunk which is partial, the server:
+		sends what is has straight away (it is now completed)
+		triggers the emitter to emit until max value of that chunk
+		when the emitter gets outside of that max value, it checks if there are any future (now current) chunks in the chunk list
+			if there are, it triggers line 5 again with new max value
+		
+		chunk is removed from the chunk list when it is picked up for emission
+		future chunks are left in the chunk list until they're picked up for emission
+
+		when it emits, it checks if it's still completed, if not cancel the subscription, we've forgotten about it
+			this is because the client might be scrolling away and stuff
+			if the client comes back, it'll just get the dump as if from the beginning
+
+
 live reload
 	only emit live stuff when we have the special chunk from the client
 	the start of the current chunk not loading on page load

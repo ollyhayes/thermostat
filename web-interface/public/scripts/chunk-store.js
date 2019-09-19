@@ -51,7 +51,7 @@ export default function createChunkStore() {
 				store.delete(store.keys().next().value);
 
 			return existingChunk !== undefined
-				|| previousChunk !== undefined;
+				// || previousChunk !== undefined;
 		},
 		getMissingChunks(chunks) {
 			return chunks.filter(({chunkCode}) => {

@@ -84,7 +84,6 @@ function createDataStreamCreator(database, dataEmitter) {
 			log(`receiving: ${chunksList.length} chunks, ` + 
 				`${chunksList.filter(chunk => chunk.isPartial).length} partial`);
 
-
 			if (triggerChunks)
 				processChunks();
 		};
