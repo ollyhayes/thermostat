@@ -60,9 +60,9 @@ function parseData(json) {
 		chunk: chunk.special
 			? chunk
 			: {
+				...chunk,
 				minDate: new Date(chunk.minDate),
 				maxDate: new Date(chunk.maxDate),
-				precisionLevel: chunk.precisionLevel
 			} 
 	};
 }

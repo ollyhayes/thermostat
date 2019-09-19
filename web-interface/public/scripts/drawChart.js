@@ -263,6 +263,13 @@ export default async function drawChart(element) {
 		const otherChunksWereMutated = storeChunk(chunk);
 
 		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), otherChunksWereMutated);
+
+		if (chunk.isPartial) {
+			const chunksInView = getChunksForDateRange(...zoomedScale.domain());
+			const missingChunks = getMissingChunks(chunksInView);
+			if (missingChunks.length > 0)
+				dataWorker.postMessage(missingChunks);
+		}
 	}
 
 	function resetZoom() {

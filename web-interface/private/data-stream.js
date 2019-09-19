@@ -4,8 +4,11 @@ const createChunksSet = require('./chunk-set');
 function createDataStreamCreator(database, dataEmitter) {
 	return function createDataStream(sendUpdate) {
 		let chunksList = [];
+		//let currentTime = // let's update this from the emitter and use that everywhere?
 		const completedChunks = createChunksSet();
-		let liveSubscription = null;
+		let emitNextValue = false; // will need to store the precisionLevel
+
+		const liveSubscription = dataEmitter.subscribe(handleNewEmission);
 
 		function processChunks() {
 			const newChunk = chunksList[0];
@@ -13,76 +16,77 @@ function createDataStreamCreator(database, dataEmitter) {
 			if (!newChunk)
 				return;
 
-			log('new chunk'.cyan + `: ${chunkToString(newChunk)},` +
-				'requsts'.cyan + `: ${chunksList.map(chunkToString)},` +
-				'completed'.cyan + `: ${completedChunks.size()}`);
+			if (newChunk.isPartial)
+				console.log('partial received!!!!!*******************');
 
-			completedChunks.add(newChunk);
+			if (!completedChunks.has(newChunk)) {
+				log('new chunk'.cyan + `: ${chunkToString(newChunk)},` +
+					'requsts'.cyan + `: ${chunksList.map(chunkToString)},` +
+					'completed'.cyan + `: ${completedChunks.size()}`);
+
+				completedChunks.add(newChunk);
+
+				const temperatures = database.read(
+					newChunk.minDate,
+					newChunk.maxDate,
+					newChunk.precisionLevel);
+				sendUpdate({temperatures, chunk: newChunk});
+			}
 
 			const newChunkIndex = chunksList.indexOf(newChunk);
 			if (newChunkIndex !== -1)
 				chunksList.splice(newChunkIndex, 1);
 
-			const temperatures = database.read(
-				newChunk.minDate,
-				newChunk.maxDate,
-				newChunk.precisionLevel);
-			sendUpdate({temperatures, chunk: newChunk});
+			emitNextValue = newChunk.isPartial; // only works because db reads are synchronous 😱
 
 			if (chunksList.length)
 				setTimeout(processChunks);
 		}
 
-		return {
-			updateChunkList(rawChunks) {
-			const chunks = rawChunks
-				.map(({minDate, maxDate, precisionLevel}) => ({
-					minDate: new Date(minDate),
-					maxDate: new Date(maxDate),
-					precisionLevel
-				}))
-				.filter(chunk => !completedChunks.has(chunk));
+		function handleNewEmission(temperatures) {
+			if (!emitNextValue)
+				return;
 
+			emitNextValue = false;
+			log('emitting');
+			sendUpdate({
+				temperatures: temperatures.map(
+					({temperature, id}) => ({
+						temperature,
+						id,
+						date: new Date() // prob best to use same date as in db
+					})),
+				chunk: {
+					special: true,
+					isPartial: true
+				}
+			});
+		}
+
+		return function updateChunkList(rawChunks) {
+			if (rawChunks === []) {
+				log('closing connection');
+				chunksList = rawChunks;
+				liveSubscription.unsubscribe();
+				return;
+			}
+
+			const currentDate = new Date();
 			const triggerChunks = chunksList.length === 0;
-			chunksList = chunks
+			chunksList = rawChunks
+				.map(chunk => ({
+					...chunk,
+					minDate: new Date(chunk.minDate),
+					maxDate: new Date(chunk.maxDate)
+				}))
+				.map(chunk => ({
+					...chunk,
+					isPartial: chunk.maxDate > currentDate,
+				}));
 
 			if (triggerChunks)
 				processChunks();
-			},
-
-			setLiveUpdates(config) {
-				if (liveSubscription) {
-					console.log('stopping updates');
-					liveSubscription.unsubscribe();
-					liveSubscription = null;
-				}
-
-				console.log('starting updates');
-
-				if (config && dataEmitter) {
-					const {startDate, precisionLevel} = config;
-					const temperatures = database.read(
-						startDate,
-						undefined,
-						precisionLevel);
-					sendUpdate({temperatures, chunk: {special: true}});
-					
-					liveSubscription = dataEmitter.subscribe(temperatures => {
-						console.log('emitting');
-						sendUpdate({
-							temperatures: temperatures.map(
-								({temperature, id}) => ({
-									temperature,
-									id,
-									date: new Date() // prob best to use same date as in db
-								})),
-							chunk: {
-								special: true
-							}
-						});
-					});
-				}
-			}
+		};
 	};
 }
 

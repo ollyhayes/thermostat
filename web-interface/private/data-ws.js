@@ -6,19 +6,14 @@ function init(server, createDataStream) {
 	wss.on('connection', async ws => {
 		console.log('connected');
 
-		const {updateChunkList, setLiveUpdates} = createDataStream(data => 
+		const updateChunkList = createDataStream(data => 
 			ws.send(JSON.stringify(data)));
 
 		ws.on('message', json => {
-			const {requestedChunks, liveUpdates} = JSON.parse(json);
+			const requestedChunks = JSON.parse(json);
 
-			if (requestedChunks !== undefined) {
-				console.log(`receiving: ${requestedChunks.length} chunks`);
-				updateChunkList(requestedChunks);
-			}
-
-			if (liveUpdates !== undefined)
-				setLiveUpdates(liveUpdates);
+			console.log(`receiving: ${requestedChunks.length} chunks`);
+			updateChunkList(requestedChunks);
 		});
 
 		ws.on('close', () => updateChunkList([]));
