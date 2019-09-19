@@ -9,13 +9,7 @@ function init(server, createDataStream) {
 		const updateChunkList = createDataStream(data => 
 			ws.send(JSON.stringify(data)));
 
-		ws.on('message', json => {
-			const requestedChunks = JSON.parse(json);
-
-			console.log(`receiving: ${requestedChunks.length} chunks`);
-			updateChunkList(requestedChunks);
-		});
-
+		ws.on('message', json => updateChunkList(JSON.parse(json)));
 		ws.on('close', () => updateChunkList([]));
 	});
 }

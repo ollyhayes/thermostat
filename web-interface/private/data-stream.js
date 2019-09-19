@@ -16,9 +16,6 @@ function createDataStreamCreator(database, dataEmitter) {
 			if (!newChunk)
 				return;
 
-			if (newChunk.isPartial)
-				console.log('partial received!!!!!*******************');
-
 			if (!completedChunks.has(newChunk)) {
 				log('new chunk'.cyan + `: ${chunkToString(newChunk)},` +
 					'requsts'.cyan + `: ${chunksList.map(chunkToString)},` +
@@ -83,6 +80,10 @@ function createDataStreamCreator(database, dataEmitter) {
 					...chunk,
 					isPartial: chunk.maxDate > currentDate,
 				}));
+
+			log(`receiving: ${chunksList.length} chunks, ` + 
+				`${chunksList.filter(chunk => chunk.isPartial).length} partial`);
+
 
 			if (triggerChunks)
 				processChunks();
