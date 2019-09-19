@@ -56,7 +56,7 @@ export default function createChunkStore() {
 		getMissingChunks(chunks) {
 			return chunks.filter(({chunkCode}) => {
 				const chunk = store.get(chunkCode);
-				return !chunk || chunk.isPartial;
+				return !chunk || chunk.maxDate > new Date();
 			});
 		}
 	};
