@@ -42,26 +42,6 @@ function createDataStreamCreator(database, dataEmitter) {
 				setTimeout(processChunks);
 		}
 
-		function handleNewEmission(temperatures) {
-			const currentDate = new Date();
-			if (currentDate > emitUntil)
-				return;
-
-			log('emitting');
-			sendUpdate({
-				temperatures: temperatures.map(
-					({temperature, id}) => ({
-						temperature,
-						id,
-						date: currentDate // prob best to use same date as in db
-					})),
-				chunk: {
-					special: true,
-					isPartial: true
-				}
-			});
-		}
-
 		return function updateChunkList(rawChunks) {
 			if (rawChunks.length === 0) {
 				log('closing connection');
@@ -93,6 +73,26 @@ function createDataStreamCreator(database, dataEmitter) {
 			if (triggerChunks)
 				processChunks();
 		};
+
+		function handleNewEmission(temperatures) {
+			const currentDate = new Date();
+			if (currentDate > emitUntil)
+				return;
+
+			log('emitting');
+			sendUpdate({
+				temperatures: temperatures.map(
+					({temperature, id}) => ({
+						temperature,
+						id,
+						date: currentDate // prob best to use same date as in db
+					})),
+				chunk: {
+					special: true,
+					isPartial: true
+				}
+			});
+		}
 	};
 }
 
