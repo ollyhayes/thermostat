@@ -69,16 +69,8 @@ class Database
 			this.readCommand = this.db.prepare(
 				`select date, temperature, thermometerId
 				from temperatures
-				where
-					date between @minDate and ifnull(
-						(
-							select min(date)
-							from temperatures
-							where date > @maxDate and precisionLevel = @precisionLevel
-						),
-						2223458463)
-					and precisionLevel = @precisionLevel
-				order by date`);
+				where date between @minDate and @maxDate and precisionLevel = @precisionLevel
+				order by date;`);
 
 		const time = Date.now();
 

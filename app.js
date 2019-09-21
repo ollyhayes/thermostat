@@ -6,8 +6,8 @@ const log = require('./common/log');
 const db = new Database('./database.db');
 db.open();
 
-const stopThermometer = thermometer.start(db);
-webInterface.start(db);
+const {stopThermometer, newDataEmitter} = thermometer.start(db);
+webInterface.start(db, newDataEmitter);
 
 process.on('exit', () => {
 	log('process exited');

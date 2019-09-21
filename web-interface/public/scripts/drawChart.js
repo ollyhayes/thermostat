@@ -18,7 +18,8 @@ import {thermometers} from '../../../common/config.json';
 import {
 	flattenChunks,
 	getChunksForDateRange,
-	createChunksChangedCalculator
+	createChunksChangedCalculator,
+	getChunkContaining
 } from './chunk-utils';
 import {createSaver, parseHash} from './domain-save';
 
@@ -235,6 +236,7 @@ export default async function drawChart(element) {
 	}
 
 	function render(zoomChanged) {
+		// get the special chunk from here if we're viewing the present?
 		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
 		const chunksHaveChanged = chunksChanged(chunksInView);
 
@@ -252,11 +254,15 @@ export default async function drawChart(element) {
 	}
 
 	function handleNewData({data: chunk}) {
-		storeChunk(chunk);
+		if (chunk.special) 
+			chunk = {
+				...chunk,
+				...getChunkContaining(new Date())
+			};
 
-		// also need to allow autoupdate to work again
+		const otherChunksWereMutated = storeChunk(chunk);
 
-		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), false);
+		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), otherChunksWereMutated);
 	}
 
 	function resetZoom() {
