@@ -7,7 +7,7 @@ function init(server, createDataStream) {
 		console.log('connected');
 
 		const updateChunkList = createDataStream(data => 
-			ws.send(JSON.stringify(data)));
+			ws.send(JSON.stringify(data))); // erro rhandler? ws doesn't close
 
 		ws.on('message', json => updateChunkList(JSON.parse(json)));
 		ws.on('close', () => updateChunkList([]));

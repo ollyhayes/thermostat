@@ -54,10 +54,7 @@ export default function createChunkStore() {
 				// || previousChunk !== undefined;
 		},
 		getMissingChunks(chunks) {
-			return chunks.filter(({chunkCode}) => {
-				const chunk = store.get(chunkCode);
-				return !chunk || chunk.maxDate > new Date();
-			});
+			return chunks.filter(({chunkCode}) => !store.has(chunkCode));
 		}
 	};
 }

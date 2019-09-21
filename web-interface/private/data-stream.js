@@ -4,9 +4,10 @@ const createChunksSet = require('./chunk-set');
 function createDataStreamCreator(database, dataEmitter) {
 	return function createDataStream(sendUpdate) {
 		let chunksList = [];
+		let futureChunks = [];
 		//let currentTime = // let's update this from the emitter and use that everywhere?
 		const completedChunks = createChunksSet();
-		let emitNextValue = false; // will need to store the precisionLevel
+		let emitUntil = null; // will need to store the precisionLevel
 
 		const liveSubscription = dataEmitter.subscribe(handleNewEmission);
 
@@ -34,24 +35,25 @@ function createDataStreamCreator(database, dataEmitter) {
 			if (newChunkIndex !== -1)
 				chunksList.splice(newChunkIndex, 1);
 
-			emitNextValue = newChunk.isPartial; // only works because db reads are synchronous 😱
+			if (newChunk.isPartial && newChunk.precisionLevel === 0)
+				emitUntil = newChunk.maxDate;
 
 			if (chunksList.length)
 				setTimeout(processChunks);
 		}
 
 		function handleNewEmission(temperatures) {
-			if (!emitNextValue)
+			const currentDate = new Date();
+			if (currentDate > emitUntil)
 				return;
 
-			emitNextValue = false;
 			log('emitting');
 			sendUpdate({
 				temperatures: temperatures.map(
 					({temperature, id}) => ({
 						temperature,
 						id,
-						date: new Date() // prob best to use same date as in db
+						date: currentDate // prob best to use same date as in db
 					})),
 				chunk: {
 					special: true,
@@ -61,7 +63,7 @@ function createDataStreamCreator(database, dataEmitter) {
 		}
 
 		return function updateChunkList(rawChunks) {
-			if (rawChunks === []) {
+			if (rawChunks.length === 0) {
 				log('closing connection');
 				chunksList = rawChunks;
 				liveSubscription.unsubscribe();
@@ -70,7 +72,7 @@ function createDataStreamCreator(database, dataEmitter) {
 
 			const currentDate = new Date();
 			const triggerChunks = chunksList.length === 0;
-			chunksList = rawChunks
+			const chunks = rawChunks
 				.map(chunk => ({
 					...chunk,
 					minDate: new Date(chunk.minDate),
@@ -80,9 +82,13 @@ function createDataStreamCreator(database, dataEmitter) {
 					...chunk,
 					isPartial: chunk.maxDate > currentDate,
 				}));
+			
+			chunksList = chunks.filter(chunk => chunk.minDate < currentDate);
+			futureChunks = chunks.filter(chunk => chunk.minDate > currentDate);
 
-			log(`receiving: ${chunksList.length} chunks, ` + 
-				`${chunksList.filter(chunk => chunk.isPartial).length} partial`);
+			log(`receiving: ${chunks.length} chunks, ` + 
+				`${chunksList.filter(chunk => chunk.isPartial).length} partial, ` +
+				`${futureChunks.length} future`);
 
 			if (triggerChunks)
 				processChunks();
