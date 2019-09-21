@@ -198,6 +198,24 @@ export default async function drawChart(element) {
 		};
 	}
 
+	let liveUpdate = false;
+	document.addEventListener('keydown', async e => {
+		if (e.key === 'f') {
+			liveUpdate = !liveUpdate;
+			if (liveUpdate)
+				tick();
+		}
+	});
+
+	function tick() {
+		const centerOfScreen = 550;
+		const positionOfNow = zoomedScale(new Date());
+		zoom.translateBy(zoomRect, centerOfScreen - positionOfNow, 0);
+
+		if (liveUpdate)
+			requestAnimationFrame(tick);
+	}
+
 	function transitionToLocation() {
 		if (!transitionDomain || transitionT === 1)
 			return;
