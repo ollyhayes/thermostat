@@ -13,7 +13,7 @@ function createDataStreamCreator(database, dataEmitters) {
 			2: null
 		};
 
-		const liveSubscription = dataEmitters.map((dataEmitter, index) =>
+		const liveSubscriptions = dataEmitters.map((dataEmitter, index) =>
 			dataEmitter.subscribe(handleNewEmission(index)));
 
 		function processChunks() {
@@ -51,7 +51,7 @@ function createDataStreamCreator(database, dataEmitters) {
 			if (rawChunks.length === 0) {
 				log('closing connection');
 				chunksList = rawChunks;
-				liveSubscription.unsubscribe();
+				liveSubscriptions.forEach(subscription => subscription.unsubscribe());
 				return;
 			}
 
