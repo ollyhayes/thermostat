@@ -97,7 +97,8 @@ function createDataStreamCreator(database, dataEmitters) {
 						})),
 					chunk: {
 						special: true,
-						isPartial: true
+						isPartial: true,
+						precisionLevel
 					}
 				});
 			};

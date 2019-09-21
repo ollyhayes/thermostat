@@ -277,7 +277,7 @@ export default async function drawChart(element) {
 		if (chunk.special) 
 			chunk = {
 				...chunk,
-				...getChunkContaining(new Date())
+				...getChunkContaining(new Date(), chunk.precisionLevel)
 			};
 
 		const otherChunksWereMutated = storeChunk(chunk);

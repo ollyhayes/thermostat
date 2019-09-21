@@ -17,13 +17,14 @@ export function previousChunkCode({minDate, maxDate, precisionLevel}) {
 	// return '' + interval.floor(minDate.getTime() - 1) + minDate.getTime() + precisionLevel;
 }
 
-export function getChunkContaining(date) {
-	const interval = timeMinute.every(5);
+export function getChunkContaining(date, precisionLevel) {
+	const {interval: unstepped, step} = getChunkInterval(precisionLevel);
+	const interval = unstepped.every(step);
 
 	const chunk = ({
 		minDate: interval.floor(date),
 		maxDate: interval.ceil(date),
-		precisionLevel: 0,
+		precisionLevel,
 	});
 
 	return {
