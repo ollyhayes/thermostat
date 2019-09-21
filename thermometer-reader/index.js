@@ -27,6 +27,14 @@ function start(database) {
 				})))).pipe(
 		publishReplay(1),
 		refCount());
+	const minutelyTemperatures = temperatures.pipe(
+		performAveraging(60 * 1000),
+		publishReplay(1),
+		refCount());
+	const hourlyTemperatures = temperatures.pipe(
+		performAveraging(3600 * 1000),
+		publishReplay(1),
+		refCount());
 
 	const subscriptions = [];
 
@@ -37,16 +45,19 @@ function start(database) {
 				error => log('temperature error: ' + error)));
 
 	subscriptions.push(
-		temperatures.pipe(performAveraging(60 * 1000))
+		minutelyTemperatures
 			.subscribe(temperature => database.insert(temperature, 1)));
 
 	subscriptions.push(
-		temperatures.pipe(performAveraging(3600 * 1000))
+		hourlyTemperatures
 			.subscribe(temperature => database.insert(temperature, 2)));
 
 	return {
 		stopThermometer: () => subscriptions.forEach(subscription => subscription.unsubscribe()),
-		newDataEmitter: temperatures
+		newDataEmitter: [
+			temperatures,
+			minutelyTemperatures,
+			hourlyTemperatures]
 	};
 }
 

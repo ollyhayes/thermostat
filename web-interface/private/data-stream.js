@@ -1,15 +1,20 @@
 const log = require('../../common/log');
 const createChunksSet = require('./chunk-set');
 
-function createDataStreamCreator(database, dataEmitter) {
+function createDataStreamCreator(database, dataEmitters) {
 	return function createDataStream(sendUpdate) {
 		let chunksList = [];
 		let futureChunks = [];
 		//let currentTime = // let's update this from the emitter and use that everywhere?
 		const completedChunks = createChunksSet();
-		let emitUntil = null; // will need to store the precisionLevel
+		const emitUntil = {
+			0: null,
+			1: null,
+			2: null
+		};
 
-		const liveSubscription = dataEmitter.subscribe(handleNewEmission);
+		const liveSubscription = dataEmitters.map((dataEmitter, index) =>
+			dataEmitter.subscribe(handleNewEmission(index)));
 
 		function processChunks() {
 			const newChunk = chunksList[0];
@@ -35,8 +40,8 @@ function createDataStreamCreator(database, dataEmitter) {
 			if (newChunkIndex !== -1)
 				chunksList.splice(newChunkIndex, 1);
 
-			if (newChunk.isPartial && newChunk.precisionLevel === 0)
-				emitUntil = newChunk.maxDate;
+			if (newChunk.isPartial)
+				emitUntil[newChunk.precisionLevel] = newChunk.maxDate;
 
 			if (chunksList.length)
 				setTimeout(processChunks);
@@ -74,26 +79,28 @@ function createDataStreamCreator(database, dataEmitter) {
 				processChunks();
 		};
 
-		function handleNewEmission(temperatures) {
-			const currentDate = new Date();
-			if (currentDate > emitUntil) {
-				processFutureChunks();
-				return;
-			}
-
-			log('emitting');
-			sendUpdate({
-				temperatures: temperatures.map(
-					({temperature, id}) => ({
-						temperature,
-						id,
-						date: currentDate // prob best to use same date as in db
-					})),
-				chunk: {
-					special: true,
-					isPartial: true
+		function handleNewEmission(precisionLevel) {
+			return temperatures => {
+				const currentDate = new Date();
+				if (currentDate > emitUntil[precisionLevel]) {
+					processFutureChunks();
+					return;
 				}
-			});
+
+				log(`emitting at precision level: ${precisionLevel}`);
+				sendUpdate({
+					temperatures: temperatures.map(
+						({temperature, id}) => ({
+							temperature,
+							id,
+							date: currentDate // prob best to use same date as in db
+						})),
+					chunk: {
+						special: true,
+						isPartial: true
+					}
+				});
+			};
 		}
 
 		function processFutureChunks() {
