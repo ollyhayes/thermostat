@@ -95,14 +95,16 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	
 	g.append('rect')
 		.classed('chart-clipper', true)
-		.attr('x', -margin.left)
-		.attr('width', margin.left)
-		.attr('height', height);
+		.attr('x', -10000)
+		.attr('y', -10000)
+		.attr('width', 10000)
+		.attr('height', 20000);
 	g.append('rect')
 		.classed('chart-clipper', true)
 		.attr('x', width)
-		.attr('width', margin.right)
-		.attr('height', height);
+		.attr('y', -10000)
+		.attr('width', 10000)
+		.attr('height', 20000);
 
 	const gXAxis = g.append('g')
 		.attr('transform', `translate(0, ${height})`)
