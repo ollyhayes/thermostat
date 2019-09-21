@@ -54,8 +54,8 @@ export default function createChunkStore() {
 			if (store.size > 50)
 				store.delete(store.keys().next().value);
 
-			return existingChunk !== undefined
-				// || previousChunk !== undefined;
+			return existingChunk !== undefined;
+			// || previousChunk !== undefined; // think this needs to go back in, if we see gaps appearing
 		},
 		getMissingChunks(chunks) {
 			return chunks.filter(({chunkCode}) => !store.has(chunkCode));
