@@ -12,8 +12,8 @@ live reload, next version!!!
 		when it emits, it checks if it's still completed, if not cancel the subscription, we've forgotten about it
 			this is because the client might be scrolling away and stuff
 			if the client comes back, it'll just get the dump as if from the beginning
-	* implement the completed list check above
-		I think actually, always move merged chunks to the top of the list so they never get forgotten about
+	//* implement the completed list check above
+		//I think actually, always move merged chunks to the top of the list so they never get forgotten about
 	* send [] when stopping looking at a future chunk (need to switch ws.close to send null instead)
 	* why the kink over the chunk borders
 	* live updates for other precision levels

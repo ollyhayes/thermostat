@@ -45,6 +45,7 @@ export default function createChunkStore() {
 				}
 			}
 
+			store.delete(chunk.chunkCode); // always ensure new chunk is at front of queue
 			store.set(chunk.chunkCode, chunk);
 
 			if (store.size > 50)
