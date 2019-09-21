@@ -17,15 +17,15 @@ live reload, next version!!!
 	* send [] when stopping looking at a future chunk (need to switch ws.close to send null instead)
 	* why the kink over the chunk borders
 	* live updates for other precision levels
+	* use the date from the emitter
+	* the merging logic doesn't really belong in the chunk-store
 
-
-live reload
-	only emit live stuff when we have the special chunk from the client
-	the start of the current chunk not loading on page load
-	gap between chunks
-	y-axis
-	not using correct date
-	the merging logic doesn't really belong in the chunk-store
+//live reload
+	//only emit live stuff when we have the special chunk from the client
+	//the start of the current chunk not loading on page load
+	//gap between chunks
+	//y-axis
+	//not using correct date
 	
 
 zoom in url
