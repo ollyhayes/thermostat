@@ -76,8 +76,10 @@ function createDataStreamCreator(database, dataEmitter) {
 
 		function handleNewEmission(temperatures) {
 			const currentDate = new Date();
-			if (currentDate > emitUntil)
+			if (currentDate > emitUntil) {
+				processFutureChunks();
 				return;
+			}
 
 			log('emitting');
 			sendUpdate({
@@ -92,6 +94,18 @@ function createDataStreamCreator(database, dataEmitter) {
 					isPartial: true
 				}
 			});
+		}
+
+		function processFutureChunks() {
+			const currentDate = new Date();
+			const newCurrentChunk = futureChunks.find(chunk => chunk.minDate < currentDate);
+
+			if (newCurrentChunk) {
+				futureChunks.splice(futureChunks.indexOf(newCurrentChunk), 1);
+				chunksList.push(newCurrentChunk);
+
+				processChunks();
+			}
 		}
 	};
 }
