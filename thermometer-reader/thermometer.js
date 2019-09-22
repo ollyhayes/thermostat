@@ -12,15 +12,29 @@ module.exports = function(serial)
 			fs.readFile(`/sys/bus/w1/devices/${serial}/w1_slave`, 'utf8', (error, data) =>
 			{
 				if (error)
-					reject(error);
+					return reject(error);
 				
-				const t = regex.exec(data)[1];
+				const result = regex.exec(data);
+
+				if (!result)
+					return reject();
+
+				const t = result[1];
 				const temperature = t / 1000;
 
-				resolve(temperature);
+				return resolve(temperature);
 			});
+		}).catch(error => {
+			const thermometer = getThermometer(serial);
+			console.log(`Error reading ${thermometer.name} thermometer`);
+			return 0;
 		});
 };
+
+function getThermometer(serial) {
+	return thermometers
+		.find(thermometer => thermometer.serial === serial);
+}
 
 async function getFakeTemperature(serial) {
 	const thermometerIndex = thermometers
