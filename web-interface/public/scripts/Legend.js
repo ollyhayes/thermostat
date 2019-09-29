@@ -1,8 +1,7 @@
 import * as React from "react";
 import {thermometers} from '../../../common/config.json';
 
-export default function Legend() {
-	
+export default function Legend(currentTemperatures) {
 	return <div className='legend'>
 		<table>
 			<tbody>
@@ -12,7 +11,6 @@ export default function Legend() {
 					return <tr>
 						<td style={{color: thermometer.colour}}>{thermometer.name}</td>
 						<td style={{color: thermometer.colour}}>35°</td>
-
 					</tr>;
 				}) }
 			</tbody>

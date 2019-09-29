@@ -9,21 +9,11 @@ import { interpolate } from 'd3-interpolate';
 import { easeCubic } from 'd3-ease';
 
 import multiFormat from './time-format';
-import DataWorker from './data.worker.js';
 import {getZoomExtent, getLimits} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
-import createChunkStore from './chunk-store';
 import {thermometers} from '../../../common/config.json';
-import {
-	flattenChunks,
-	getChunksForDateRange,
-	createChunksChangedCalculator,
-	getChunkContaining
-} from './chunk-utils';
 import {createSaver, parseHash} from './domain-save';
-
-const dataWorker = new DataWorker();
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -147,7 +137,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	};
 }
 
-export default async function drawChart(element) {
+export default async function drawChart(element, requstChunks) {
 	const {minDate: minDateLimit, maxDate: maxDateLimit} = await getLimits();
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
@@ -261,16 +251,17 @@ export default async function drawChart(element) {
 		const chunksHaveChanged = chunksChanged(chunksInView);
 
 		if (chunksHaveChanged) { // tell the server we need new chunks
-			const missingChunks = getMissingChunks(chunksInView);
-			if (missingChunks.length > 0)
-				dataWorker.postMessage(missingChunks);
+			requestChunks(chunksInView)
+			// const missingChunks = getMissingChunks(chunksInView);
+			// if (missingChunks.length > 0)
+			// 	dataWorker.postMessage(missingChunks);
 		}
 
 		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			resetZoom();
 
-		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
-			drawGraphs(chunksInView, zoomChanged);
+		// if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
+		// 	drawGraphs(chunksInView, zoomChanged);
 	}
 
 	function handleNewData({data: chunk}) {
@@ -300,10 +291,11 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
 
+		// if we're currently transitioning, continue the transition
 		transitionToLocation();
 	}
 
-	function drawGraphs(chunks, redrawExistingGraphs) {
+	return function drawGraphs(chunks, redrawExistingGraphs) {
 		const {thermometerReadings, minTemperature, maxTemperature} = 
 			flattenChunks(getChunkData(chunks));
 
