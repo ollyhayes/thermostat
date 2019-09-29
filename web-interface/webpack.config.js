@@ -14,6 +14,7 @@ module.exports = function()
 		},
 		module: {
 			rules: [
+				{ test: /\.jsx?$/, exclude: /node_modules/, loader: "babel-loader" },
 				{ test: /\.less$/, exclude: /node_modules/, loader: 'style-loader!css-loader!less-loader' },
 				{ test: /\.worker\.js/, loader: 'worker-loader' }
 			]
