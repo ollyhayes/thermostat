@@ -2,7 +2,7 @@ import '../less/page.less';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import drawChart from './drawChart';
-import Legend from './Legend.jsx';
+import Legend from './Legend';
 
 if ('ontouchstart' in window)
 	document.addEventListener('touchstart', () => {});
