@@ -14,9 +14,8 @@ document.addEventListener('DOMContentLoaded', () =>
 
 	// Should probably make a common react root
 	ReactDOM.render(
-		React.createElement(
-			Legend),
-		document.querySelector('.legend'));
+		<Legend></Legend>,
+		document.querySelector('.react-root'));
 
 	// socketTest();
 });
