@@ -9,11 +9,12 @@ import { interpolate } from 'd3-interpolate';
 import { easeCubic } from 'd3-ease';
 
 import multiFormat from './time-format';
-import {getZoomExtent, getLimits} from './utils';
+import {getZoomExtent, getLimits, cropEase} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import {thermometers} from '../../../common/config.json';
 import {createSaver, parseHash} from './domain-save';
+import { flattenChunks, getChunksForDateRange, createChunksChangedCalculator } from './chunk-utils';
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -137,7 +138,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	};
 }
 
-export default async function drawChart(element, requstChunks) {
+export default async function drawChart(element, requestChunks) {
 	const {minDate: minDateLimit, maxDate: maxDateLimit} = await getLimits();
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
@@ -156,12 +157,9 @@ export default async function drawChart(element, requstChunks) {
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate);
 
 	let zoomedScale = xScale;
-	const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
-
 	const chunksChanged = createChunksChangedCalculator();
 
 	zoom.on('zoom', handleZoom);
-	dataWorker.addEventListener('message', handleNewData);
 	render(false);
 
 	let transitionDomain;
@@ -173,23 +171,6 @@ export default async function drawChart(element, requstChunks) {
 		transitionToLocation();
 	});
 
-	function cropEase(ease, cropStart) {
-		if (cropStart === 0) return ease;
-
-		const x = scaleLinear()
-			.domain([0,1])
-			.range([cropStart, 1]);
-
-		const y = scaleLinear()
-			.domain([ease(cropStart), 1])
-			.range([0,1]);
-
-		return t => {
-			const newX = x(t);
-			return y(ease(newX));
-		};
-	}
-
 	let liveUpdate = false;
 	document.addEventListener('keydown', async e => {
 		if (e.key === 'f') {
@@ -198,6 +179,8 @@ export default async function drawChart(element, requstChunks) {
 				tick();
 		}
 	});
+
+	return drawGraphs;
 
 	function tick() {
 		const centerOfScreen = 550;
@@ -246,34 +229,22 @@ export default async function drawChart(element, requstChunks) {
 	}
 
 	function render(zoomChanged) {
-		// get the special chunk from here if we're viewing the present?
-		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
-		const chunksHaveChanged = chunksChanged(chunksInView);
-
-		if (chunksHaveChanged) { // tell the server we need new chunks
-			requestChunks(chunksInView)
-			// const missingChunks = getMissingChunks(chunksInView);
-			// if (missingChunks.length > 0)
-			// 	dataWorker.postMessage(missingChunks);
-		}
-
 		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			resetZoom();
 
+		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
+		const chunksHaveChanged = chunksChanged(chunksInView);
+
+		if (zoomChanged || chunksHaveChanged) { // tell the server we need new chunks
+			drawGraphs(zoomChanged);
+		}
+
+		// 	// const missingChunks = getMissingChunks(chunksInView);
+		// 	// if (missingChunks.length > 0)
+		// 	// 	dataWorker.postMessage(missingChunks);
+
 		// if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
-		// 	drawGraphs(chunksInView, zoomChanged);
-	}
 
-	function handleNewData({data: chunk}) {
-		if (chunk.special) 
-			chunk = {
-				...chunk,
-				...getChunkContaining(new Date(), chunk.precisionLevel)
-			};
-
-		const otherChunksWereMutated = storeChunk(chunk);
-
-		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), otherChunksWereMutated);
 	}
 
 	function resetZoom() {
@@ -295,9 +266,13 @@ export default async function drawChart(element, requstChunks) {
 		transitionToLocation();
 	}
 
-	return function drawGraphs(chunks, redrawExistingGraphs) {
+	function drawGraphs(redrawExistingGraphs) {
+		// const {thermometerReadings, minTemperature, maxTemperature} = 
+		// 	flattenChunks(getChunkData(chunks));
+		const chunks = requestChunks(getChunksForDateRange(...zoomedScale.domain()));
+
 		const {thermometerReadings, minTemperature, maxTemperature} = 
-			flattenChunks(getChunkData(chunks));
+			flattenChunks(chunks);
 
 		// reset the y-scale
 		// be nice to have a better equality here

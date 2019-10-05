@@ -1,5 +1,6 @@
 import { extent } from 'd3-array';
 import ajax from './ajax';
+import {scaleLinear } from 'd3-scale';
 
 export function getZoomExtent(scale, currentMin, currentMax, absoluteMin, absoluteMax) {
 	const minZoom = scale(new Date(10000)) - scale(new Date(0));
@@ -29,5 +30,22 @@ export async function getLimits() {
 	return {
 		minDate: new Date(minDate),
 		maxDate: new Date(maxDate)
+	};
+}
+
+export function cropEase(ease, cropStart) {
+	if (cropStart === 0) return ease;
+
+	const x = scaleLinear()
+		.domain([0,1])
+		.range([cropStart, 1]);
+
+	const y = scaleLinear()
+		.domain([ease(cropStart), 1])
+		.range([0,1]);
+
+	return t => {
+		const newX = x(t);
+		return y(ease(newX));
 	};
 }

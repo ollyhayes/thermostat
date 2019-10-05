@@ -16,7 +16,7 @@ live reload, next version!!!
 		//I think actually, always move merged chunks to the top of the list so they never get forgotten about
 	* send [] when stopping looking at a future chunk (need to switch ws.close to send null instead)
 	* why the kink over the chunk borders
-	* live updates for other precision levels
+	//* live updates for other precision levels
 	* use the date from the emitter
 	* the merging logic doesn't really belong in the chunk-store
 
