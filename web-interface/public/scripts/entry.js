@@ -40,11 +40,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	function handleNewData({data: chunk}) {
-		if (chunk.special) 
+		if (chunk.special) {
 			chunk = {
 				...chunk,
 				...getChunkContaining(new Date(), chunk.precisionLevel)
 			};
+
+			if (chunk.precisionLevel === 0) {
+				ReactDOM.render(
+					<Legend currentTemperatures={chunk.thermometers}></Legend>,
+					document.querySelector('.react-root'));
+			}
+		}
 
 		const otherChunksWereMutated = storeChunk(chunk);
 

@@ -33,7 +33,7 @@ socket.onmessage = function ({data}) {
 
 	const groupedByThermometer = nest.entries(temperatures)
 		.map(({key, values}) => ({
-			thermometerId: key,
+			thermometerId: +key,
 			temperatures: values
 		}));
 
