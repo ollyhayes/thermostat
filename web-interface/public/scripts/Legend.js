@@ -3,17 +3,23 @@ import {thermometers} from '../../../common/config.json';
 import {format} from 'd3-format';
 
 export default function Legend({currentTemperatures}) {
+	const data = thermometers
+		.filter(thermometer => !thermometer.disabled)
+		.map(thermometer => ({
+			...thermometer,
+			temperature: getTemperature(currentTemperatures, thermometer.id)
+		}))
+		.sort((l, r) => l.temperature > r.temperature ? -1 : 1);
+
 	return <div className='legend'>
 		<table>
 			<tbody>
-				{thermometers
-					.filter(thermometer => !thermometer.disabled)
-					.map(thermometer => {
-						return <tr key={thermometer.id}>
-							<td style={{color: thermometer.colour}}>{thermometer.name}</td>
-							<td style={{color: thermometer.colour}}>{getTemperature(currentTemperatures, thermometer.id)}</td>
-						</tr>;
-					}) }
+				{data.map(({name, colour, temperature, id}) =>
+					<tr key={id}>
+						<td style={{color: colour}}>{name}</td>
+						<td style={{color: colour}}>{temperature}</td>
+					</tr>
+				)}
 			</tbody>
 		</table>
 	</div>;

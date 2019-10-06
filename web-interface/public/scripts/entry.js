@@ -6,12 +6,7 @@ import Legend from './Legend';
 
 import DataWorker from './data.worker.js';
 import createChunkStore from './chunk-store';
-import {
-	flattenChunks,
-	getChunksForDateRange,
-	createChunksChangedCalculator,
-	getChunkContaining
-} from './chunk-utils';
+import { getChunkContaining } from './chunk-utils';
 
 const dataWorker = new DataWorker();
 const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
