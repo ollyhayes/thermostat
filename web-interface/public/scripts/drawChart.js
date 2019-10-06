@@ -160,7 +160,7 @@ export default async function drawChart(element, requestChunks) {
 	const chunksChanged = createChunksChangedCalculator();
 
 	zoom.on('zoom', handleZoom);
-	render(false);
+	drawGraphs(true);
 
 	let transitionDomain;
 	let transitionT;
@@ -225,26 +225,14 @@ export default async function drawChart(element, requestChunks) {
 		if (!disableSave)
 			saveDomain(zoomedScale.domain());
 
-		render(t.k < 0.67 || t.k > 1.5);
-	}
+		const zoomChanged = t.k < 0.67 || t.k > 1.5;
 
-	function render(zoomChanged) {
 		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			resetZoom();
 
-		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
-		const chunksHaveChanged = chunksChanged(chunksInView);
-
-		if (zoomChanged || chunksHaveChanged) { // tell the server we need new chunks
+		if (zoomChanged
+			|| chunksChanged(getChunksForDateRange(...zoomedScale.domain())))
 			drawGraphs(zoomChanged);
-		}
-
-		// 	// const missingChunks = getMissingChunks(chunksInView);
-		// 	// if (missingChunks.length > 0)
-		// 	// 	dataWorker.postMessage(missingChunks);
-
-		// if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
-
 	}
 
 	function resetZoom() {
@@ -267,10 +255,7 @@ export default async function drawChart(element, requestChunks) {
 	}
 
 	function drawGraphs(redrawExistingGraphs) {
-		// const {thermometerReadings, minTemperature, maxTemperature} = 
-		// 	flattenChunks(getChunkData(chunks));
 		const chunks = requestChunks(getChunksForDateRange(...zoomedScale.domain()));
-
 		const {thermometerReadings, minTemperature, maxTemperature} = 
 			flattenChunks(chunks);
 
