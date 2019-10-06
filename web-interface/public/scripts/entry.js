@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 		const otherChunksWereMutated = storeChunk(chunk);
 
+		// don't redraw if special chunk isn't in view?
 		redraw(otherChunksWereMutated);
 	}
 });

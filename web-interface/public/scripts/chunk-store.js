@@ -2,6 +2,7 @@ import { chunkToCode, nextChunkCode, previousChunkCode } from './chunk-utils';
 
 export default function createChunkStore() {
 	const store = new Map();
+	window.store = store;
 
 	return {
 		getChunks(chunks) {
@@ -26,6 +27,9 @@ export default function createChunkStore() {
 				chunk.minTemperature = Math.min(chunk.minTemperature, existingChunk.minTemperature);
 				chunk.maxTemperature = Math.max(chunk.maxTemperature, existingChunk.maxTemperature);
 
+				if (!existingChunk.special)
+					chunk.special = false;
+
 			} else {
 				const nextChunk = store.get(nextChunkCode(chunk));
 				if (nextChunk) {
@@ -37,6 +41,12 @@ export default function createChunkStore() {
 					}));
 				}
 
+				// ****
+				// issue with the below is that we can't know if this is the first in the chunk or the middle (unless we later update???)
+
+				// the other issue, is how do we know we have a complete chunk and that we can stop requesting it? FIXED!!!
+				// ****
+
 				const previousChunk = store.get(previousChunkCode(chunk));
 				if (previousChunk) {
 					previousChunk.thermometers = previousChunk.thermometers.map(previousThemometer => ({
@@ -46,6 +56,7 @@ export default function createChunkStore() {
 						)
 					}));
 				}
+
 			}
 
 			store.delete(chunk.chunkCode); // always ensure new chunk is at front of queue
@@ -58,7 +69,10 @@ export default function createChunkStore() {
 			// || previousChunk !== undefined; // think this needs to go back in, if we see gaps appearing
 		},
 		getMissingChunks(chunks) {
-			return chunks.filter(({chunkCode}) => !store.has(chunkCode));
+			return chunks.filter(({chunkCode}) => {
+				const chunk = store.get(chunkCode);
+				return !chunk || chunk.special;
+			});
 		}
 	};
 }
