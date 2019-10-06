@@ -1,6 +1,6 @@
 import '../less/page.less';
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import React from 'react';
+import ReactDOM from 'react-dom';
 import drawChart from './drawChart';
 import Legend from './Legend';
 
@@ -13,7 +13,7 @@ import {
 	getChunkContaining
 } from './chunk-utils';
 
-	const dataWorker = new DataWorker();
+const dataWorker = new DataWorker();
 const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
 
 if ('ontouchstart' in window)
@@ -49,5 +49,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 		const otherChunksWereMutated = storeChunk(chunk);
 
 		redraw(otherChunksWereMutated);
-	};
+	}
 });
