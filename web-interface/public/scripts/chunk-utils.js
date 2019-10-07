@@ -64,7 +64,7 @@ export function getChunksForDateRange(minDate, maxDate) {
 function getChunkInterval(precisionLevel) {
 	switch (precisionLevel) {
 	case 0: return {interval: timeMinute, step: 5};
-	case 1: return {interval: timeHour, step: 5};
+	case 1: return {interval: timeHour, step: 6};
 	case 2: return {interval: timeWeek, step: 1};
 	}
 }

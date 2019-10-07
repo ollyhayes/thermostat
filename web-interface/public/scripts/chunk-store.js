@@ -2,7 +2,6 @@ import { chunkToCode, nextChunkCode, previousChunkCode } from './chunk-utils';
 
 export default function createChunkStore() {
 	const store = new Map();
-	window.store = store;
 
 	return {
 		getChunks(chunks) {
