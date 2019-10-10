@@ -11,7 +11,6 @@ export function getZoomExtent(scale, currentMin, currentMax, absoluteMin, absolu
 }
 
 export function getTemperatureExtent(data) {
-
 	const [minTemperature, maxTemperature] = extent(data, d => d.temperature);
 	const minWidth = 10;
 
