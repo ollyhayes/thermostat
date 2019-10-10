@@ -230,9 +230,8 @@ export default async function drawChart(element, requestChunks) {
 		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			resetZoom();
 
-		if (zoomChanged
-			|| chunksChanged(getChunksForDateRange(...zoomedScale.domain())))
-			drawGraphs(zoomChanged);
+		if (zoomChanged || chunksChanged(getChunksForDateRange(...zoomedScale.domain())))
+			drawGraphs();
 	}
 
 	function resetZoom() {
@@ -254,10 +253,20 @@ export default async function drawChart(element, requestChunks) {
 		transitionToLocation();
 	}
 
-	function drawGraphs(redrawExistingGraphs) {
+	function drawGraphs() {
 		const chunks = requestChunks(getChunksForDateRange(...zoomedScale.domain()));
 		const {thermometerReadings, minTemperature, maxTemperature} = 
 			flattenChunks(chunks);
+
+		// Move this bit into flatten chunks
+		const data = thermometers.map(({id}) => ({
+			thermometerId: id,
+			key: id,
+			temperatures: thermometerReadings
+				.filter(readings => readings.thermometerId === id)
+				.map(readings => readings.temperatures)
+				.reduce((prev, next) => prev.concat(next), [])
+		}));
 
 		// reset the y-scale
 		// be nice to have a better equality here
@@ -271,15 +280,12 @@ export default async function drawChart(element, requestChunks) {
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(thermometerReadings, d => d.key)
+			.data(data, d => d.key)
 			.join(
 				enter => enter
 					.append('path')
 					.attr('fill', 'none')
-					.attr('stroke', d => thermometerColours[d.thermometerId])
-					.attr('d', d => lineGenerator(d.temperatures)),
-				update => yScaleUpdated || redrawExistingGraphs
-					? update.attr('d', d => lineGenerator(d.temperatures))
-					: update);
+					.attr('stroke', d => thermometerColours[d.thermometerId]))
+			.attr('d', d => lineGenerator(d.temperatures));
 	}
 }
