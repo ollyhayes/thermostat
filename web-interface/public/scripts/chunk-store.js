@@ -24,8 +24,11 @@ export default function createChunkStore() {
 						chunk.special // if this is _not_ the special, it's the main chunk so it should go at the start
 					)
 				}));
-				chunk.minTemperature = Math.min(chunk.minTemperature, existingChunk.minTemperature);
-				chunk.maxTemperature = Math.max(chunk.maxTemperature, existingChunk.maxTemperature);
+
+				if (!isNaN(existingChunk.minTemperature)) {
+					chunk.minTemperature = Math.min(chunk.minTemperature, existingChunk.minTemperature);
+					chunk.maxTemperature = Math.max(chunk.maxTemperature, existingChunk.maxTemperature);
+				}
 
 				if (!existingChunk.special)
 					chunk.special = false;
