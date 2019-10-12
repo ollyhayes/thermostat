@@ -15,11 +15,13 @@ if ('ontouchstart' in window)
 	document.addEventListener('touchstart', () => {});
 
 document.addEventListener('DOMContentLoaded', async () => {
+	let isReady = false;
 	const requestChunks = initialiseDataSocket(handleNewData);
 	const chunkSet = createChunkSet(50, dropChunk);
 
 	const root = document.querySelector('.root');
 	const redraw = await drawChart(root, requestData);
+	isReady = true;
 
 	// Should probably make a common react root
 	ReactDOM.render(
@@ -53,7 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 		storeData(temperatures, chunk.precisionLevel);
 
 		// don't redraw if special chunk isn't in view?
-		redraw();
+		if (isReady)
+			redraw();
 	}
 
 	function dropChunk(chunkCode) {
