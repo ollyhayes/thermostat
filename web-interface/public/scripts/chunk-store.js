@@ -68,8 +68,8 @@ function getInterval(precisionLevel) {
 
 function getStep(precisionLevel) {
 	switch (precisionLevel) {
-	case 0: return 1;
-	case 1: return 60;
-	case 2: return 60 * 60;
+	case 0: return 1 * 1000;
+	case 1: return 60 * 1000;
+	case 2: return 60 * 60 * 1000;
 	}
 }
