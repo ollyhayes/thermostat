@@ -1,33 +1,31 @@
 import {thermometers} from '../../../common/config.json';
+import {timeSecond, timeMinute, timeHour} from 'd3-time';
 
 export default function createChunkStore() {
-	const storesPerThermometer = [];
-	thermometers.forEach(thermometer => storesPerThermometer[thermometer.id] = new Map());
-
+	function createStore() {
+		const storesPerThermometer = [];
+		thermometers.forEach(thermometer => storesPerThermometer[thermometer.id] = new Map());
+		return storesPerThermometer;
+	}
 
 	const stores = [
-		storesPerThermometer
-		// thermometers.map(thermometer => ({
-		// 	id: thermometer.id,
-		// 	data: new Map()
-		// })),
-		// thermometers.map(thermometer => ({
-		// 	id: thermometer.id,
-		// 	data: new Map()
-		// }))
+		createStore(),
+		createStore(),
+		createStore()
 	];
 
 	// const store = new Map();
 	function getDataByThermometer(startTime, endTime, precisionLevel, id) {
-		if (precisionLevel != 0)
-			return [];
-
 		const store = stores[precisionLevel][id];
-		const start = Math.round(startTime.getTime() / 1000);
-		const end = Math.round(endTime.getTime() / 1000);
+
+		const interval = getInterval(precisionLevel);
+		const start = interval.floor(startTime).getTime();
+		const end = interval.ceil(endTime).getTime();
+		const step = getStep(precisionLevel);
+
 		const data = [];
 
-		for (let t = start; t <= end; t++) {
+		for (let t = start; t <= end; t += step) {
 			const temperature = store.get(t);
 			if (temperature)
 				data.push(temperature);
@@ -44,13 +42,10 @@ export default function createChunkStore() {
 			}));
 		},
 		storeData(data, precisionLevel) {
-			if (precisionLevel != 0)
-				return;
-
 			const store = stores[precisionLevel];
 
 			data.forEach(reading => store[reading.id].set(
-				Math.round(reading.date.getTime() / 1000), // start using rounded date for the special, so we can remove the rounding
+				getInterval(precisionLevel).floor(reading.date).getTime(),
 				reading));
 		}
 		// getMissingChunks(chunks) {
@@ -61,4 +56,20 @@ export default function createChunkStore() {
 		// 	});
 		// }
 	};
+}
+
+function getInterval(precisionLevel) {
+	switch (precisionLevel) {
+	case 0: return timeSecond;
+	case 1: return timeMinute;
+	case 2: return timeHour;
+	}
+}
+
+function getStep(precisionLevel) {
+	switch (precisionLevel) {
+	case 0: return 1;
+	case 1: return 60;
+	case 2: return 60 * 60;
+	}
 }
