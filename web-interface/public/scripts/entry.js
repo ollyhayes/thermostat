@@ -6,10 +6,10 @@ import Legend from './Legend';
 
 import initialiseDataSocket from './data-socket';
 import createChunkStore from './chunk-store';
-import { getChunkContaining, getChunksForDateRange, createChunksChangedCalculator } from './chunk-utils';
+import { getChunkContaining, getChunksForDateRange } from './chunk-utils';
 import createChunkSet from '../../private/chunk-set';
 
-const {getData, storeData} = createChunkStore();
+const {getData, storeData, dropData} = createChunkStore();
 
 if ('ontouchstart' in window)
 	document.addEventListener('touchstart', () => {});
@@ -57,6 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	function dropChunk(chunkCode) {
-
+		dropData(
+			new Date(+chunkCode.substring(0, 13)),
+			new Date(+chunkCode.substring(13, 26)),
+			+chunkCode.substring(26, 27));
 	}
 });

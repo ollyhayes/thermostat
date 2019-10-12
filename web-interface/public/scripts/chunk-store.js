@@ -14,7 +14,6 @@ export default function createChunkStore() {
 		createStore()
 	];
 
-	// const store = new Map();
 	function getDataByThermometer(startTime, endTime, precisionLevel, id) {
 		const store = stores[precisionLevel][id];
 
@@ -34,6 +33,23 @@ export default function createChunkStore() {
 		return data;
 	}
 
+	function dropDataByThermometer(startTime, endTime, precisionLevel, id) {
+		const store = stores[precisionLevel][id];
+
+		const interval = getInterval(precisionLevel);
+		const start = interval.floor(startTime).getTime();
+		const end = interval.ceil(endTime).getTime();
+		const step = getStep(precisionLevel);
+
+		const data = [];
+
+		for (let t = start; t <= end; t += step) {
+			store.delete(t);
+		}
+
+		return data;
+	}
+
 	return {
 		getData(startTime, endTime, precisionLevel) {
 			return thermometers.map(({id}) => ({
@@ -47,14 +63,11 @@ export default function createChunkStore() {
 			data.forEach(reading => store[reading.id].set(
 				getInterval(precisionLevel).floor(reading.date).getTime(),
 				reading));
+		},
+		dropData(startTime, endTime, precisionLevel) {
+			thermometers.forEach(({id}) => 
+				dropDataByThermometer(startTime, endTime, precisionLevel, id));
 		}
-		// getMissingChunks(chunks) {
-		// 	// this'll have to be done separately, we'll need to keep a list of the chunks we requested
-		// 	return chunks.filter(({chunkCode}) => {
-		// 		const chunk = store.get(chunkCode);
-		// 		return !chunk || chunk.special;
-		// 	});
-		// }
 	};
 }
 
