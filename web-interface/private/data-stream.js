@@ -5,7 +5,7 @@ function createDataStreamCreator(database, dataEmitters) {
 	return function createDataStream(sendUpdate) {
 		let chunksList = [];
 		//let currentTime = // let's update this from the emitter and use that everywhere?
-		const completedChunks = createChunksSet();
+		const completedChunks = createChunksSet(25);
 
 		const liveSubscriptions = dataEmitters.map((dataEmitter, index) =>
 			dataEmitter.subscribe(handleNewEmission(index)));

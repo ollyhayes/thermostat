@@ -44,7 +44,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		.rangeRound([0, width]);
 
 	const yScale = scaleLinear()
-		.domain([10, 20])
+		.domain([10, 60])
 		.rangeRound([height, 0]);
 
 	const lineGenerator = line()
