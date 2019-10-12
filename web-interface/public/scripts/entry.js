@@ -6,7 +6,8 @@ import Legend from './Legend';
 
 import initialiseDataSocket from './data-socket';
 import createChunkStore from './chunk-store';
-import { getChunkContaining, getChunksForDateRange } from './chunk-utils';
+import { getChunkContaining, getChunksForDateRange, createChunksChangedCalculator } from './chunk-utils';
+import createChunkSet from '../../private/chunk-set';
 
 const {getData, storeData} = createChunkStore();
 
@@ -15,6 +16,7 @@ if ('ontouchstart' in window)
 
 document.addEventListener('DOMContentLoaded', async () => {
 	const requestChunks = initialiseDataSocket(handleNewData);
+	const chunkSet = createChunkSet(50, dropChunk);
 
 	const root = document.querySelector('.root');
 	const redraw = await drawChart(root, requestData);
@@ -27,9 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	function requestData(domain) {
 		const chunks = getChunksForDateRange(...domain);
 
-		// const missingChunks = getMissingChunks(chunks);
-		// if (missingChunks.length)
-		requestChunks(chunks);
+		requestChunks(chunks.filter(chunk => !chunkSet.has(chunk)));
 
 		return getData(...domain, chunks[0].precisionLevel);
 	}
@@ -46,11 +46,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 					<Legend currentTemperatures={chunk.thermometers}></Legend>,
 					document.querySelector('.react-root'));
 			}
+		} else {
+			chunkSet.add(chunk);
 		}
 
 		storeData(temperatures, chunk.precisionLevel);
 
 		// don't redraw if special chunk isn't in view?
 		redraw();
+	}
+
+	function dropChunk(chunkCode) {
+
 	}
 });
