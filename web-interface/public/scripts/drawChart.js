@@ -14,7 +14,6 @@ import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import {thermometers} from '../../../common/config.json';
 import {createSaver, parseHash} from './domain-save';
-import { flattenChunks, getChunksForDateRange, createChunksChangedCalculator } from './chunk-utils';
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -138,7 +137,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	};
 }
 
-export default async function drawChart(element, requestChunks) {
+export default async function drawChart(element, requestData) {
 	const {minDate: minDateLimit, maxDate: maxDateLimit} = await getLimits();
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
@@ -157,7 +156,6 @@ export default async function drawChart(element, requestChunks) {
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate);
 
 	let zoomedScale = xScale;
-	const chunksChanged = createChunksChangedCalculator();
 
 	zoom.on('zoom', handleZoom);
 	drawGraphs(true);
@@ -230,7 +228,7 @@ export default async function drawChart(element, requestChunks) {
 		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			resetZoom();
 
-		if (zoomChanged || chunksChanged(getChunksForDateRange(...zoomedScale.domain())))
+		if (zoomChanged || t.x < -1 || t.x > 1)
 			drawGraphs();
 	}
 
@@ -254,28 +252,18 @@ export default async function drawChart(element, requestChunks) {
 	}
 
 	function drawGraphs() {
-		const chunks = requestChunks(getChunksForDateRange(...zoomedScale.domain()));
-		const {thermometerReadings, minTemperature, maxTemperature} = 
-			flattenChunks(chunks);
+		const data = requestData(zoomedScale.domain());
 
-		// Move this bit into flatten chunks
-		const data = thermometers.map(({id}) => ({
-			thermometerId: id,
-			key: id,
-			temperatures: thermometerReadings
-				.filter(readings => readings.thermometerId === id)
-				.map(readings => readings.temperatures)
-				.reduce((prev, next) => prev.concat(next), [])
-		}));
+		// data is a list of thermometers, each with a list readings
 
 		// reset the y-scale
 		// be nice to have a better equality here
 		// also to do this asynchronously after a bit of time so we only do it once
-		const yScaleUpdated = minTemperature !== yScale.domain()[0] || maxTemperature !== yScale.domain()[1];
-		if (yScaleUpdated) {
-			yScale.domain([minTemperature, maxTemperature]);
-			redrawYAxis();
-		}
+		// const yScaleUpdated = minTemperature !== yScale.domain()[0] || maxTemperature !== yScale.domain()[1];
+		// if (yScaleUpdated) {
+		// 	yScale.domain([minTemperature, maxTemperature]);
+		// 	redrawYAxis();
+		// }
 
 		// set the paths
 		chartArea

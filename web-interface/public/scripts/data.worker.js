@@ -31,22 +31,22 @@ socket.onerror = function (error) {
 socket.onmessage = function ({data}) {
 	const {temperatures, chunk} = parseData(data);
 
-	const groupedByThermometer = nest.entries(temperatures)
-		.map(({key, values}) => ({
-			thermometerId: +key,
-			temperatures: values
-		}));
+	// const groupedByThermometer = nest.entries(temperatures)
+	// 	.map(({key, values}) => ({
+	// 		thermometerId: +key,
+	// 		temperatures: values
+	// 	}));
 
-	const [minTemperature, maxTemperature] = getTemperatureExtent(temperatures);
+	// const [minTemperature, maxTemperature] = getTemperatureExtent(temperatures);
 
-	const chunkComplete = {
-		thermometers: groupedByThermometer,
-		minTemperature,
-		maxTemperature,
-		...chunk
-	};
+	// const chunkComplete = {
+	// 	thermometers: groupedByThermometer,
+	// 	minTemperature,
+	// 	maxTemperature,
+	// 	...chunk
+	// };
 
-	self.postMessage(chunkComplete);
+	self.postMessage({chunk, temperatures});
 };
 
 function parseData(json) {

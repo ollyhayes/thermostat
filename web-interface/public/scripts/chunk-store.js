@@ -1,66 +1,64 @@
-import { chunkToCode, nextChunkCode, previousChunkCode } from './chunk-utils';
+import {thermometers} from '../../../common/config.json';
 
 export default function createChunkStore() {
-	const store = new Map();
-	window.store = store;
+	const storesPerThermometer = [];
+	thermometers.forEach(thermometer => storesPerThermometer[thermometer.id] = new Map());
+
+
+	const stores = [
+		storesPerThermometer
+		// thermometers.map(thermometer => ({
+		// 	id: thermometer.id,
+		// 	data: new Map()
+		// })),
+		// thermometers.map(thermometer => ({
+		// 	id: thermometer.id,
+		// 	data: new Map()
+		// }))
+	];
+
+	// const store = new Map();
+	function getDataByThermometer(startTime, endTime, precisionLevel, id) {
+		if (precisionLevel != 0)
+			return [];
+
+		const store = stores[precisionLevel][id];
+		const start = Math.round(startTime.getTime() / 1000);
+		const end = Math.round(endTime.getTime() / 1000);
+		const data = [];
+
+		for (let t = start; t <= end; t++) {
+			const temperature = store.get(t);
+			if (temperature)
+				data.push(temperature);
+		}
+
+		return data;
+	}
 
 	return {
-		getChunks(chunks) {
-			return chunks
-				.map(({chunkCode}) => store.get(chunkCode))
-				.filter(chunk => chunk && chunk.thermometers.length > 0);
-
+		getData(startTime, endTime, precisionLevel) {
+			return thermometers.map(({id}) => ({
+				thermometerId: id,
+				temperatures: getDataByThermometer(startTime, endTime, precisionLevel, id)
+			}));
 		},
-		storeChunk(chunk) {
-			chunk.chunkCode = chunkToCode(chunk);
+		storeData(data, precisionLevel) {
+			if (precisionLevel != 0)
+				return;
 
-			const existingChunk = store.get(chunk.chunkCode);
-			if (existingChunk) {
-				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
-					...newThermometer,
-					temperatures: concat(
-						getTemperaturesForThermometer(existingChunk.thermometers, newThermometer.thermometerId),
-						newThermometer.temperatures,
-						chunk.special // if this is _not_ the special, it's the main chunk so it should go at the start
-					)
-				}));
+			const store = stores[precisionLevel];
 
-				if (!isNaN(existingChunk.minTemperature)) {
-					chunk.minTemperature = Math.min(chunk.minTemperature, existingChunk.minTemperature);
-					chunk.maxTemperature = Math.max(chunk.maxTemperature, existingChunk.maxTemperature);
-				}
-
-				if (!existingChunk.special)
-					chunk.special = false;
-
-			}
-
-			store.delete(chunk.chunkCode); // always ensure new chunk is at front of queue
-			store.set(chunk.chunkCode, chunk);
-
-			if (store.size > 50)
-				store.delete(store.keys().next().value);
-		},
-		getMissingChunks(chunks) {
-			return chunks.filter(({chunkCode}) => {
-				const chunk = store.get(chunkCode);
-				return !chunk || chunk.special;
-			});
+			data.forEach(reading => store[reading.id].set(
+				Math.round(reading.date.getTime() / 1000), // start using rounded date for the special, so we can remove the rounding
+				reading));
 		}
+		// getMissingChunks(chunks) {
+		// 	// this'll have to be done separately, we'll need to keep a list of the chunks we requested
+		// 	return chunks.filter(({chunkCode}) => {
+		// 		const chunk = store.get(chunkCode);
+		// 		return !chunk || chunk.special;
+		// 	});
+		// }
 	};
-}
-
-function getTemperaturesForThermometer(thermometers, thermometerId) {
-	const thermometer = thermometers.find(existingThermometer => 
-		existingThermometer.thermometerId === thermometerId);
-
-	return thermometer
-		? thermometer.temperatures
-		: [];
-}
-
-function concat(existingChunk, newChunk, append) {
-	return append
-		? existingChunk.concat(newChunk)
-		: newChunk.concat(existingChunk);
 }

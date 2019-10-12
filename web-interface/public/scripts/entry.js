@@ -6,10 +6,10 @@ import Legend from './Legend';
 
 import DataWorker from './data.worker.js';
 import createChunkStore from './chunk-store';
-import { getChunkContaining } from './chunk-utils';
+import { getChunkContaining, getChunksForDateRange } from './chunk-utils';
 
 const dataWorker = new DataWorker();
-const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
+const {getData, storeData} = createChunkStore();
 
 if ('ontouchstart' in window)
 	document.addEventListener('touchstart', () => {});
@@ -17,7 +17,7 @@ if ('ontouchstart' in window)
 document.addEventListener('DOMContentLoaded', async () => {
 
 	const root = document.querySelector('.root');
-	const redraw = await drawChart(root, requestChunks);
+	const redraw = await drawChart(root, requestData);
 	
 	dataWorker.addEventListener('message', handleNewData);
 
@@ -26,15 +26,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 		<Legend></Legend>,
 		document.querySelector('.react-root'));
 
-	function requestChunks(chunks) {
-		const missingChunks = getMissingChunks(chunks);
-		if (missingChunks.length)
-			dataWorker.postMessage(missingChunks);
+	function requestData(domain) {
+		const chunks = getChunksForDateRange(...domain);
 
-		return getChunkData(chunks);
+		// const missingChunks = getMissingChunks(chunks);
+		// if (missingChunks.length)
+		dataWorker.postMessage(chunks);
+
+		return getData(...domain, chunks[0].precisionLevel);
 	}
 
-	function handleNewData({data: chunk}) {
+	function handleNewData({data: {chunk, temperatures}}) {
 		if (chunk.special) {
 			chunk = {
 				...chunk,
@@ -48,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 			}
 		}
 
-		storeChunk(chunk);
+		storeData(temperatures, chunk.precisionLevel);
 
 		// don't redraw if special chunk isn't in view?
 		redraw();
