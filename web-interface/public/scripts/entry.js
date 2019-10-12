@@ -4,22 +4,20 @@ import ReactDOM from 'react-dom';
 import drawChart from './drawChart';
 import Legend from './Legend';
 
-import DataWorker from './data.worker.js';
+import initialiseDataSocket from './data-socket';
 import createChunkStore from './chunk-store';
 import { getChunkContaining, getChunksForDateRange } from './chunk-utils';
 
-const dataWorker = new DataWorker();
 const {getData, storeData} = createChunkStore();
 
 if ('ontouchstart' in window)
 	document.addEventListener('touchstart', () => {});
 
 document.addEventListener('DOMContentLoaded', async () => {
+	const requestChunks = initialiseDataSocket(handleNewData);
 
 	const root = document.querySelector('.root');
 	const redraw = await drawChart(root, requestData);
-	
-	dataWorker.addEventListener('message', handleNewData);
 
 	// Should probably make a common react root
 	ReactDOM.render(
@@ -31,12 +29,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 		// const missingChunks = getMissingChunks(chunks);
 		// if (missingChunks.length)
-		dataWorker.postMessage(chunks);
+		requestChunks(chunks);
 
 		return getData(...domain, chunks[0].precisionLevel);
 	}
 
-	function handleNewData({data: {chunk, temperatures}}) {
+	function handleNewData(chunk, temperatures) {
 		if (chunk.special) {
 			chunk = {
 				...chunk,

@@ -35,7 +35,6 @@
     "rxjs": "^6.0.0",
     "style-loader": "^0.23.1",
     "webpack": "^4.30.0",
-    "worker-loader": "^2.0.0",
     "ws": "^7.0.0"
   },
   "devDependencies": {
