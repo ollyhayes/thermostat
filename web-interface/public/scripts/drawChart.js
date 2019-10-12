@@ -157,6 +157,8 @@ export default async function drawChart(element, requestData) {
 
 	let zoomedScale = xScale;
 
+	let lastDrawnDomain = zoomedScale.domain();
+
 	zoom.on('zoom', handleZoom);
 	drawGraphs(true);
 
@@ -228,7 +230,7 @@ export default async function drawChart(element, requestData) {
 		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			resetZoom();
 
-		if (zoomChanged || t.x < -1 || t.x > 1)
+		if (zoomChanged || hasDomainChanged(lastDrawnDomain, zoomedScale.domain()))
 			drawGraphs();
 	}
 
@@ -252,9 +254,9 @@ export default async function drawChart(element, requestData) {
 	}
 
 	function drawGraphs() {
-		const data = requestData(zoomedScale.domain());
+		lastDrawnDomain = zoomedScale.domain();
 
-		// data is a list of thermometers, each with a list readings
+		const data = requestData(extendDomain(zoomedScale.domain()));
 
 		// reset the y-scale
 		// be nice to have a better equality here
@@ -276,4 +278,18 @@ export default async function drawChart(element, requestData) {
 					.attr('stroke', d => thermometerColours[d.thermometerId]))
 			.attr('d', d => lineGenerator(d.temperatures));
 	}
+}
+
+function extendDomain([minDate, maxDate]) {
+	const extension = (maxDate - minDate) / 4;
+	return [
+		new Date(minDate.getTime() - extension),
+		new Date(maxDate.getTime() + extension),
+	];
+}
+
+function hasDomainChanged(oldDomain, newDomain) {
+	const domainWidth = newDomain[1] - newDomain[0];
+
+	return Math.abs(oldDomain[0] - newDomain[0]) > domainWidth / 4;
 }
