@@ -1,8 +1,20 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {thermometers} from '../../../common/config.json';
 import {format} from 'd3-format';
 
-export default function Legend({currentTemperatures}) {
+export default function Legend({currentTemperatures, dataTime}) {
+	const [currentTime, setCurrentTime] = useState(new Date());
+	const isCurrent = currentTime - dataTime < 2000;
+	console.log('rendering');
+
+	useEffect(() => {
+		if (isCurrent) {
+			const timeoutId = setTimeout(() => setCurrentTime(Date.now()), 2500);
+			console.log('hooking');
+			return () => clearTimeout(timeoutId);
+		}
+	});
+
 	const data = thermometers
 		.filter(thermometer => !thermometer.disabled)
 		.map(thermometer => ({
@@ -17,7 +29,7 @@ export default function Legend({currentTemperatures}) {
 				{data.map(({name, colour, temperature, id}) =>
 					<tr key={id}>
 						<td style={{color: colour}}>{name}</td>
-						<td style={{color: colour}}>{temperature}</td>
+						<td style={{color: isCurrent ? colour : 'grey' }}>{temperature}</td>
 					</tr>
 				)}
 			</tbody>
