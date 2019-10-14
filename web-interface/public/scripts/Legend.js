@@ -5,12 +5,10 @@ import {format} from 'd3-format';
 export default function Legend({currentTemperatures, dataTime}) {
 	const [currentTime, setCurrentTime] = useState(new Date());
 	const isCurrent = currentTime - dataTime < 2000;
-	console.log('rendering');
 
 	useEffect(() => {
 		if (isCurrent) {
 			const timeoutId = setTimeout(() => setCurrentTime(Date.now()), 2500);
-			console.log('hooking');
 			return () => clearTimeout(timeoutId);
 		}
 	});
