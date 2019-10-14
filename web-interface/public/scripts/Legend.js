@@ -39,9 +39,9 @@ export default function Legend({currentTemperatures, dataTime}) {
 
 const formatTemperature = format('.1f');
 function getTemperature(temperatures, id) {
-	const thermometer = temperatures && temperatures.find(thermometer => thermometer.thermometerId === id);
+	const thermometer = temperatures && temperatures.find(thermometer => thermometer.id === id);
 
 	return thermometer
-		? `${formatTemperature(thermometer.temperatures[0].temperature)}°C`
+		? `${formatTemperature(thermometer.temperature)}°C`
 		: '?';
 }
