@@ -1,79 +1,90 @@
-import { chunkToCode, nextChunkCode, previousChunkCode } from './chunk-utils';
+import {thermometers} from '../../../common/config.json';
+import {timeSecond, timeMinute, timeHour} from 'd3-time';
 
 export default function createChunkStore() {
-	const store = new Map();
+	function createStore() {
+		const storesPerThermometer = [];
+		thermometers.forEach(thermometer => storesPerThermometer[thermometer.id] = new Map());
+		return storesPerThermometer;
+	}
+
+	const stores = [
+		createStore(),
+		createStore(),
+		createStore()
+	];
+
+	function getDataByThermometer(startTime, endTime, precisionLevel, id) {
+		const store = stores[precisionLevel][id];
+
+		const interval = getInterval(precisionLevel);
+		const start = interval.floor(startTime).getTime();
+		const end = interval.ceil(endTime).getTime();
+		const step = getStep(precisionLevel);
+
+		const data = [];
+
+		for (let t = start; t <= end; t += step) {
+			const temperature = store.get(t);
+			if (temperature)
+				data.push(temperature);
+		}
+
+		return data;
+	}
+
+	function dropDataByThermometer(startTime, endTime, precisionLevel, id) {
+		const store = stores[precisionLevel][id];
+
+		const interval = getInterval(precisionLevel);
+		const start = interval.floor(startTime).getTime();
+		const end = interval.ceil(endTime).getTime();
+		const step = getStep(precisionLevel);
+
+		const data = [];
+
+		for (let t = start; t <= end; t += step) {
+			store.delete(t);
+		}
+
+		return data;
+	}
 
 	return {
-		getChunks(chunks) {
-			return chunks
-				.map(({chunkCode}) => store.get(chunkCode))
-				.filter(chunk => chunk && chunk.thermometers.length > 0);
-
-		},
-		storeChunk(chunk) {
-			chunk.chunkCode = chunkToCode(chunk);
-
-			const existingChunk = store.get(chunk.chunkCode);
-			if (existingChunk) {
-				chunk.thermometers = chunk.thermometers.map(newThermometer => ({
-					...newThermometer,
-					temperatures: concat(
-						getTemperaturesForThermometer(existingChunk.thermometers, newThermometer.thermometerId),
-						newThermometer.temperatures,
-						chunk.special // if this is _not_ the special, it's the main chunk so it should go at the start
-					)
+		getData(startTime, endTime, precisionLevel) {
+			return thermometers
+				.filter(thermometer => !thermometer.disabled && !thermometer.hidden)
+				.map(({id}) => ({
+					thermometerId: id,
+					temperatures: getDataByThermometer(startTime, endTime, precisionLevel, id)
 				}));
-				chunk.minTemperature = Math.min(chunk.minTemperature, existingChunk.minTemperature);
-				chunk.maxTemperature = Math.max(chunk.maxTemperature, existingChunk.maxTemperature);
-
-			} else {
-				const nextChunk = store.get(nextChunkCode(chunk));
-				if (nextChunk) {
-					chunk.thermometers = chunk.thermometers.map(newThermometer => ({
-						...newThermometer,
-						temperatures: newThermometer.temperatures.concat(
-							getTemperaturesForThermometer(nextChunk.thermometers, newThermometer.thermometerId).slice(0,1)
-						)
-					}));
-				}
-
-				const previousChunk = store.get(previousChunkCode(chunk));
-				if (previousChunk) {
-					previousChunk.thermometers = previousChunk.thermometers.map(previousThemometer => ({
-						...previousThemometer,
-						temperatures: previousThemometer.temperatures.concat(
-							getTemperaturesForThermometer(chunk.thermometers, previousThemometer.thermometerId).slice(0,1)
-						)
-					}));
-				}
-			}
-
-			store.delete(chunk.chunkCode); // always ensure new chunk is at front of queue
-			store.set(chunk.chunkCode, chunk);
-
-			if (store.size > 50)
-				store.delete(store.keys().next().value);
-
-			return existingChunk !== undefined;
-			// || previousChunk !== undefined; // think this needs to go back in, if we see gaps appearing
 		},
-		getMissingChunks(chunks) {
-			return chunks.filter(({chunkCode}) => !store.has(chunkCode));
+		storeData(data, precisionLevel) {
+			const store = stores[precisionLevel];
+
+			data.forEach(reading => store[reading.id].set(
+				getInterval(precisionLevel).floor(reading.date).getTime(),
+				reading));
+		},
+		dropData(startTime, endTime, precisionLevel) {
+			thermometers.forEach(({id}) => 
+				dropDataByThermometer(startTime, endTime, precisionLevel, id));
 		}
 	};
 }
 
-function getTemperaturesForThermometer(thermometers, thermometerId) {
-	const thermometer = thermometers.find(existingThermometer => 
-		existingThermometer.thermometerId === thermometerId);
-
-	return thermometer
-		? thermometer.temperatures
-		: [];
+function getInterval(precisionLevel) {
+	switch (precisionLevel) {
+	case 0: return timeSecond;
+	case 1: return timeMinute;
+	case 2: return timeHour;
+	}
 }
 
-function concat(existingChunk, newChunk, append) {
-	return append
-		? existingChunk.concat(newChunk)
-		: newChunk.concat(existingChunk);
+function getStep(precisionLevel) {
+	switch (precisionLevel) {
+	case 0: return 1 * 1000;
+	case 1: return 60 * 1000;
+	case 2: return 60 * 60 * 1000;
+	}
 }

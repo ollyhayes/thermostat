@@ -1,37 +1,11 @@
-live reload, next version!!!
-	stop with all this multi request stuff,
-	when the client asks for a chunk which is partial, the server:
-		sends what is has straight away (it is now completed)
-		triggers the emitter to emit until max value of that chunk
-		when the emitter gets outside of that max value, it checks if there are any future (now current) chunks in the chunk list
-			if there are, it triggers line 5 again with new max value
-		
-		chunk is removed from the chunk list when it is picked up for emission
-		future chunks are left in the chunk list until they're picked up for emission
-
-		when it emits, it checks if it's still completed, if not cancel the subscription, we've forgotten about it
-			this is because the client might be scrolling away and stuff
-			if the client comes back, it'll just get the dump as if from the beginning
-	//* implement the completed list check above
-		//I think actually, always move merged chunks to the top of the list so they never get forgotten about
-	* send [] when stopping looking at a future chunk (need to switch ws.close to send null instead)
-	* why the kink over the chunk borders
-	* live updates for other precision levels
-	* use the date from the emitter
-	* the merging logic doesn't really belong in the chunk-store
-
-//live reload
-	//only emit live stuff when we have the special chunk from the client
-	//the start of the current chunk not loading on page load
-	//gap between chunks
-	//y-axis
-	//not using correct date
-	
+* fix the kink on page load - is it that we're not using the date from the database? maybe create the date in index.js
+* the merging logic doesn't really belong in the chunk-store
+make the legend show grey when it hasn't received an update
+make the legend in a better position
 
 zoom in url
 	better names for saver
 	get rid of those mutations
-
 
 wierd stuff where we're getting two results per second, see: 22:18 on Sat 17th August, when I switched out the Rpi
 have websocket reconnect

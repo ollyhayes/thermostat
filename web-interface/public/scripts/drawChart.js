@@ -7,23 +7,14 @@ import { zoom as d3Zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 import { interpolate } from 'd3-interpolate';
 import { easeCubic } from 'd3-ease';
+import { extent } from 'd3-array';
 
 import multiFormat from './time-format';
-import DataWorker from './data.worker.js';
-import {getZoomExtent, getLimits} from './utils';
+import {getZoomExtent, getLimits, cropEase} from './utils';
 import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
-import createChunkStore from './chunk-store';
 import {thermometers} from '../../../common/config.json';
-import {
-	flattenChunks,
-	getChunksForDateRange,
-	createChunksChangedCalculator,
-	getChunkContaining
-} from './chunk-utils';
 import {createSaver, parseHash} from './domain-save';
-
-const dataWorker = new DataWorker();
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -33,15 +24,15 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	const box = {
 		x0: 0,
-		x1: 1200,
+		x1: element.clientWidth,
 		y0: 0,
-		y1: 600
+		y1: element.clientHeight
 	};
 	const margin = {
-		left: 50,
-		right: 50,
+		left: 25,
+		right: 25,
 		top: 20,
-		bottom: 30
+		bottom: 25
 	};
 
 	box.width = box.x1 - box.x0;
@@ -54,7 +45,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		.rangeRound([0, width]);
 
 	const yScale = scaleLinear()
-		.domain([10, 20])
+		.domain([10, 60])
 		.rangeRound([height, 0]);
 
 	const lineGenerator = line()
@@ -62,8 +53,8 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		.y(d => yScale(d.temperature));
 
 	const svg = select(element)
-		.append('svg')
-		.attr('viewBox', `${box.x0} ${box.y0} ${box.width} ${box.height}`);
+		.append('svg');
+		// .attr('viewBox', `${box.x0} ${box.y0} ${box.width} ${box.height}`);
 
 	const g = svg
 		.append('g')
@@ -124,11 +115,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 		.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
 
-	const zoomRect = g.append('rect')
-		.attr('width', width)
-		.attr('height', height)
-		.attr('opacity', '0.0001')
-		.call(zoom);
+	svg.call(zoom);
 
 	return {
 		lineGenerator,
@@ -143,11 +130,11 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 			gYGrid.call(yAxisGrid.scale(scale));
 		},
 		chartArea,
-		zoom, zoomRect
+		zoom, svg
 	};
 }
 
-export default async function drawChart(element) {
+export default async function drawChart(element, requestData) {
 	const {minDate: minDateLimit, maxDate: maxDateLimit} = await getLimits();
 	const minDate = timeDay(minDateLimit);
 	const maxDate = timeDay.ceil(maxDateLimit);
@@ -162,17 +149,15 @@ export default async function drawChart(element) {
 		xScale, yScale,
 		redrawXAxis, redrawYAxis,
 		chartArea,
-		zoom, zoomRect
+		zoom, svg
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate);
 
 	let zoomedScale = xScale;
-	const {getChunks: getChunkData, storeChunk, getMissingChunks} = createChunkStore();
 
-	const chunksChanged = createChunksChangedCalculator();
+	let lastDrawnDomain = zoomedScale.domain();
 
 	zoom.on('zoom', handleZoom);
-	dataWorker.addEventListener('message', handleNewData);
-	render(false);
+	drawGraphs(true);
 
 	let transitionDomain;
 	let transitionT;
@@ -183,23 +168,6 @@ export default async function drawChart(element) {
 		transitionToLocation();
 	});
 
-	function cropEase(ease, cropStart) {
-		if (cropStart === 0) return ease;
-
-		const x = scaleLinear()
-			.domain([0,1])
-			.range([cropStart, 1]);
-
-		const y = scaleLinear()
-			.domain([ease(cropStart), 1])
-			.range([0,1]);
-
-		return t => {
-			const newX = x(t);
-			return y(ease(newX));
-		};
-	}
-
 	let liveUpdate = false;
 	document.addEventListener('keydown', async e => {
 		if (e.key === 'f') {
@@ -209,10 +177,12 @@ export default async function drawChart(element) {
 		}
 	});
 
+	return drawGraphs;
+
 	function tick() {
 		const centerOfScreen = 550;
 		const positionOfNow = zoomedScale(new Date());
-		zoom.translateBy(zoomRect, centerOfScreen - positionOfNow, 0);
+		zoom.translateBy(svg, centerOfScreen - positionOfNow, 0);
 
 		if (liveUpdate)
 			requestAnimationFrame(tick);
@@ -223,7 +193,7 @@ export default async function drawChart(element) {
 			return;
 
 		const newDomain = transitionDomain;
-		const oldTransform = zoomTransform(zoomRect.node());
+		const oldTransform = zoomTransform(svg.node());
 		// we could reset the zoom first, instead of transforming these points. This is better though
 		const oldRange = zoomedScale.range().map(oldTransform.invertX, oldTransform);
 		const newRange = newDomain.map(zoomedScale).map(oldTransform.invertX, oldTransform);
@@ -234,7 +204,7 @@ export default async function drawChart(element) {
 		const transform = oldTransform.translate(translate, 0).scale(scale);
 
 		disableSave = true;
-		zoomRect
+		svg
 			.transition()
 			.duration(500 * (1 - transitionT))
 			.ease(cropEase(easeCubic, transitionT))
@@ -252,43 +222,19 @@ export default async function drawChart(element) {
 		if (!disableSave)
 			saveDomain(zoomedScale.domain());
 
-		render(t.k < 0.67 || t.k > 1.5);
-	}
-
-	function render(zoomChanged) {
-		// get the special chunk from here if we're viewing the present?
-		const chunksInView = getChunksForDateRange(...zoomedScale.domain());
-		const chunksHaveChanged = chunksChanged(chunksInView);
-
-		if (chunksHaveChanged) { // tell the server we need new chunks
-			const missingChunks = getMissingChunks(chunksInView);
-			if (missingChunks.length > 0)
-				dataWorker.postMessage(missingChunks);
-		}
+		const zoomChanged = t.k < 0.67 || t.k > 1.5;
 
 		if (zoomChanged) // if the zoom changes a lot, reset the zoom so the svgs don't get all scaley
 			resetZoom();
 
-		if (zoomChanged || chunksHaveChanged) // if the current view has changed, or we've zoomed, draw new/all graphs
-			drawGraphs(chunksInView, zoomChanged);
-	}
-
-	function handleNewData({data: chunk}) {
-		if (chunk.special) 
-			chunk = {
-				...chunk,
-				...getChunkContaining(new Date(), chunk.precisionLevel)
-			};
-
-		const otherChunksWereMutated = storeChunk(chunk);
-
-		drawGraphs(getChunksForDateRange(...zoomedScale.domain()), otherChunksWereMutated);
+		if (zoomChanged || hasDomainChanged(lastDrawnDomain, zoomedScale.domain()))
+			drawGraphs();
 	}
 
 	function resetZoom() {
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
-		zoomRect.call(zoom.transform, zoomIdentity);
+		svg.call(zoom.transform, zoomIdentity);
 		zoom.on('zoom', handleZoom);
 
 		// reset the graph position
@@ -300,12 +246,18 @@ export default async function drawChart(element) {
 		zoom.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 			.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
 
+		// if we're currently transitioning, continue the transition
 		transitionToLocation();
 	}
 
-	function drawGraphs(chunks, redrawExistingGraphs) {
-		const {thermometerReadings, minTemperature, maxTemperature} = 
-			flattenChunks(getChunkData(chunks));
+	function drawGraphs() {
+		lastDrawnDomain = zoomedScale.domain();
+
+		const [minDate, maxDate] = zoomedScale.domain();
+
+		const data = requestData(extendDomain(minDate, maxDate));
+
+		const [minTemperature, maxTemperature] = getTemperatureExtent(data, minDate, maxDate);
 
 		// reset the y-scale
 		// be nice to have a better equality here
@@ -319,15 +271,46 @@ export default async function drawChart(element) {
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(thermometerReadings, d => d.key)
+			.data(data, d => d.thermometerId)
 			.join(
 				enter => enter
 					.append('path')
 					.attr('fill', 'none')
-					.attr('stroke', d => thermometerColours[d.thermometerId])
-					.attr('d', d => lineGenerator(d.temperatures)),
-				update => yScaleUpdated || redrawExistingGraphs
-					? update.attr('d', d => lineGenerator(d.temperatures))
-					: update);
+					.attr('stroke', d => thermometerColours[d.thermometerId]))
+			.attr('d', d => lineGenerator(d.temperatures));
 	}
+}
+
+function extendDomain(minDate, maxDate) {
+	const extension = (maxDate - minDate) / 4;
+	return [
+		new Date(minDate.getTime() - extension),
+		new Date(maxDate.getTime() + extension),
+	];
+}
+
+function hasDomainChanged(oldDomain, newDomain) {
+	const domainWidth = newDomain[1] - newDomain[0];
+
+	return Math.abs(oldDomain[0] - newDomain[0]) > domainWidth / 4;
+}
+
+function getTemperatureExtent(data, minDate, maxDate) {
+	const [minTemperature, maxTemperature] = extent(data
+		.map(({temperatures}) => temperatures)
+		.flat()
+		.filter(({date}) => minDate < date && date < maxDate)
+		.map(({temperature}) => temperature));
+
+	if (!minTemperature)
+		return [0, 100];
+
+	const minWidth = 10;
+
+	if (maxTemperature - minTemperature < minWidth) {
+		const midPoint = (maxTemperature + minTemperature) / 2;
+		return [midPoint - minWidth / 2, midPoint + minWidth / 2];
+	}
+
+	return [minTemperature - 3, maxTemperature + 3];
 }

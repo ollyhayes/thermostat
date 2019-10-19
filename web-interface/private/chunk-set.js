@@ -1,12 +1,16 @@
-function createChunksSet() {
+function createChunksSet(size, handleDropChunk) {
 	const set = new Set();
 
 	return {
 		add(chunk) {
 			set.add(chunkToCode(chunk));
 
-			if (set.size > 25)
-				set.delete(set.keys().next().value);
+			if (set.size > size) {
+				const droppedChunk = set.keys().next().value;
+				set.delete(droppedChunk);
+				if (handleDropChunk)
+					handleDropChunk(droppedChunk);
+			}
 		},
 		has(chunk) {
 			return set.has(chunkToCode(chunk));

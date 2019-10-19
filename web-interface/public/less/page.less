@@ -5,14 +5,16 @@
 
 body
 {
+	margin: 10px;
 	background: @background;
 }
 
 div.root
 {
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	margin: 0;
+	// display: flex;
+	// align-items: center;
+	// justify-content: center;
 	height: 100%;
 	width: 100%;
 }
@@ -20,9 +22,12 @@ div.root
 svg
 {
 	border: 1px @border solid;
-	margin: 20px;
-	max-height: 100%;
-	flex-grow: 1;
+	height: 100%;
+	width: 100%;
+
+	// margin: 20px;
+	// max-height: 100%;
+	// flex-grow: 1;
 }
 
 rect.chart-clipper {
@@ -60,5 +65,42 @@ rect.chart-clipper {
 	}
 	line {
 		stroke: @major-border;
+	}
+}
+
+.legend {
+	border: 1px @border solid;
+	background: fade(@background, 80%);
+	padding: 8px;
+	position: absolute;
+	top: 20px;
+	left: 45px;
+
+	table {
+		border-collapse: collapse;
+	}
+
+	tr {
+		cursor: pointer;
+		&:hover {
+			background: #5d5c5c;
+		}
+
+		td {
+			font-size: 15px;
+			font-family: sans-serif;
+			padding: 3px 6px;
+		}
+	}
+}
+
+@media (max-width: 800px) {
+	.legend {
+		padding: 4px;
+
+		tr td {
+			font-size: 10px;
+			padding: 2px 3px;
+		}
 	}
 }
