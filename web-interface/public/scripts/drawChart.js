@@ -271,7 +271,7 @@ export default async function drawChart(element, requestData) {
 		// set the paths
 		chartArea
 			.selectAll('path')
-			.data(data, d => d.key)
+			.data(data, d => d.thermometerId)
 			.join(
 				enter => enter
 					.append('path')
