@@ -42,7 +42,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 			if (chunk.precisionLevel === 0) {
 				ReactDOM.render(
-					<Legend currentTemperatures={temperatures} dataTime={new Date()}></Legend>,
+					<Legend 
+						currentTemperatures={temperatures} 
+						dataTime={new Date()}
+						triggerRedraw={redraw}
+					></Legend>,
 					document.querySelector('.react-root'));
 			}
 		} else {

@@ -52,10 +52,12 @@ export default function createChunkStore() {
 
 	return {
 		getData(startTime, endTime, precisionLevel) {
-			return thermometers.map(({id}) => ({
-				thermometerId: id,
-				temperatures: getDataByThermometer(startTime, endTime, precisionLevel, id)
-			}));
+			return thermometers
+				.filter(thermometer => !thermometer.disabled && !thermometer.hidden)
+				.map(({id}) => ({
+					thermometerId: id,
+					temperatures: getDataByThermometer(startTime, endTime, precisionLevel, id)
+				}));
 		},
 		storeData(data, precisionLevel) {
 			const store = stores[precisionLevel];

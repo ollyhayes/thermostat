@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {thermometers} from '../../../common/config.json';
 import {format} from 'd3-format';
 
-export default function Legend({currentTemperatures, dataTime}) {
+export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 	const [currentTime, setCurrentTime] = useState(new Date());
 	const isCurrent = currentTime - dataTime < 2000;
 
@@ -12,6 +12,8 @@ export default function Legend({currentTemperatures, dataTime}) {
 			return () => clearTimeout(timeoutId);
 		}
 	});
+	const [, updateState] = useState();
+	const forceUpdate = () => updateState({});
 
 	const data = thermometers
 		.filter(thermometer => !thermometer.disabled)
@@ -24,10 +26,18 @@ export default function Legend({currentTemperatures, dataTime}) {
 	return <div className='legend'>
 		<table>
 			<tbody>
-				{data.map(({name, colour, temperature, id}) =>
-					<tr key={id}>
-						<td style={{color: colour}}>{name}</td>
-						<td style={{color: isCurrent ? colour : 'grey' }}>{temperature}</td>
+				{data.map(thermometer =>
+					<tr key={thermometer.id} onClick={() => {
+						const inner = thermometers.find(inner => inner.id === thermometer.id);
+						inner.hidden = !inner.hidden;
+						triggerRedraw();
+						forceUpdate();
+					}}>
+						<td style={{color: thermometer.colour}}>{thermometer.name}</td>
+						<td style={{color: isCurrent ? thermometer.colour : 'grey' }}>{thermometer.temperature}</td>
+						<td style={{color: thermometer.colour}}>
+							{thermometer.hidden ? '' : '✓'}
+						</td>
 					</tr>
 				)}
 			</tbody>
