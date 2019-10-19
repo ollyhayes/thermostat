@@ -19,6 +19,7 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 		.filter(thermometer => !thermometer.disabled)
 		.map(thermometer => ({
 			...thermometer,
+			colour: thermometer.hidden ? 'grey' : thermometer.colour,
 			temperature: getTemperature(currentTemperatures, thermometer.id)
 		}))
 		.sort((l, r) => l.temperature > r.temperature ? -1 : 1);
@@ -35,9 +36,6 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 					}}>
 						<td style={{color: thermometer.colour}}>{thermometer.name}</td>
 						<td style={{color: isCurrent ? thermometer.colour : 'grey' }}>{thermometer.temperature}</td>
-						<td style={{color: thermometer.colour}}>
-							{thermometer.hidden ? '' : '✓'}
-						</td>
 					</tr>
 				)}
 			</tbody>
