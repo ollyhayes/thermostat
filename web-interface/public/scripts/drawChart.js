@@ -15,6 +15,7 @@ import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import {thermometers} from '../../../common/config.json';
 import {createSaver, parseHash} from './domain-save';
+import getTemperature from './non-streaming-version/data-repository';
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -257,13 +258,7 @@ export default async function drawChart(element, requestData) {
 
 		const data = requestData(extendDomain(minDate, maxDate));
 
-		// be nice to have a better equality here
-		// also to do this asynchronously after a bit of time so we only do it once
-		const [minTemperature, maxTemperature] = extent(data
-			.map(({temperatures}) => temperatures)
-			.flat()
-			.filter(({date}) => minDate < date && date < maxDate)
-			.map(({temperature}) => temperature));
+		const [minTemperature, maxTemperature] = getTemperatureExtent(data, minDate, maxDate);
 
 		// reset the y-scale
 		// be nice to have a better equality here
@@ -299,4 +294,24 @@ function hasDomainChanged(oldDomain, newDomain) {
 	const domainWidth = newDomain[1] - newDomain[0];
 
 	return Math.abs(oldDomain[0] - newDomain[0]) > domainWidth / 4;
+}
+
+function getTemperatureExtent(data, minDate, maxDate) {
+	const [minTemperature, maxTemperature] = extent(data
+		.map(({temperatures}) => temperatures)
+		.flat()
+		.filter(({date}) => minDate < date && date < maxDate)
+		.map(({temperature}) => temperature));
+
+	if (!minTemperature)
+		return [0, 100];
+
+	const minWidth = 10;
+
+	if (maxTemperature - minTemperature < minWidth) {
+		const midPoint = (maxTemperature + minTemperature) / 2;
+		return [midPoint - minWidth / 2, midPoint + minWidth / 2];
+	}
+
+	return [minTemperature - 3, maxTemperature + 3];
 }
