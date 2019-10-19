@@ -11,9 +11,6 @@ import createChunkSet from '../../private/chunk-set';
 
 const {getData, storeData, dropData} = createChunkStore();
 
-if ('ontouchstart' in window)
-	document.addEventListener('touchstart', () => {});
-
 document.addEventListener('DOMContentLoaded', async () => {
 	let isReady = false;
 	const requestChunks = initialiseDataSocket(handleNewData);

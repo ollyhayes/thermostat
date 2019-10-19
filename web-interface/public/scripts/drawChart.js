@@ -114,11 +114,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		.translateExtent([[xScale(minDate), 0], [xScale(maxDate), 1]])
 		.scaleExtent(getZoomExtent(xScale, ...xScale.domain(), minDate, maxDate));
 
-	const zoomRect = g.append('rect')
-		.attr('width', width)
-		.attr('height', height)
-		.attr('opacity', '0.0001')
-		.call(zoom);
+	svg.call(zoom);
 
 	return {
 		lineGenerator,
@@ -133,7 +129,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 			gYGrid.call(yAxisGrid.scale(scale));
 		},
 		chartArea,
-		zoom, zoomRect
+		zoom, svg
 	};
 }
 
@@ -152,7 +148,7 @@ export default async function drawChart(element, requestData) {
 		xScale, yScale,
 		redrawXAxis, redrawYAxis,
 		chartArea,
-		zoom, zoomRect
+		zoom, svg
 	} = initialise(element, initialMinDate, initialMaxDate, minDate, maxDate);
 
 	let zoomedScale = xScale;
@@ -185,7 +181,7 @@ export default async function drawChart(element, requestData) {
 	function tick() {
 		const centerOfScreen = 550;
 		const positionOfNow = zoomedScale(new Date());
-		zoom.translateBy(zoomRect, centerOfScreen - positionOfNow, 0);
+		zoom.translateBy(svg, centerOfScreen - positionOfNow, 0);
 
 		if (liveUpdate)
 			requestAnimationFrame(tick);
@@ -196,7 +192,7 @@ export default async function drawChart(element, requestData) {
 			return;
 
 		const newDomain = transitionDomain;
-		const oldTransform = zoomTransform(zoomRect.node());
+		const oldTransform = zoomTransform(svg.node());
 		// we could reset the zoom first, instead of transforming these points. This is better though
 		const oldRange = zoomedScale.range().map(oldTransform.invertX, oldTransform);
 		const newRange = newDomain.map(zoomedScale).map(oldTransform.invertX, oldTransform);
@@ -207,7 +203,7 @@ export default async function drawChart(element, requestData) {
 		const transform = oldTransform.translate(translate, 0).scale(scale);
 
 		disableSave = true;
-		zoomRect
+		svg
 			.transition()
 			.duration(500 * (1 - transitionT))
 			.ease(cropEase(easeCubic, transitionT))
@@ -237,7 +233,7 @@ export default async function drawChart(element, requestData) {
 	function resetZoom() {
 		// reset the zoom (without zooming)
 		zoom.on('zoom', null);
-		zoomRect.call(zoom.transform, zoomIdentity);
+		svg.call(zoom.transform, zoomIdentity);
 		zoom.on('zoom', handleZoom);
 
 		// reset the graph position
