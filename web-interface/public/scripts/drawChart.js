@@ -29,10 +29,10 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		y1: element.clientHeight
 	};
 	const margin = {
-		left: 30,
-		right: 30,
+		left: 25,
+		right: 25,
 		top: 20,
-		bottom: 30
+		bottom: 25
 	};
 
 	box.width = box.x1 - box.x0;
