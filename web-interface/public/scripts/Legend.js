@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {thermometers} from '../../../common/config.json';
 import {format} from 'd3-format';
+import {saveHiddenThermometers} from './storage';
 
 export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 	const [currentTime, setCurrentTime] = useState(new Date());
@@ -33,6 +34,7 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 						inner.hidden = !inner.hidden;
 						triggerRedraw();
 						forceUpdate();
+						saveHiddenThermometers();
 					}}>
 						<td style={{color: thermometer.colour}}>{thermometer.name}</td>
 						<td style={{color: isCurrent ? thermometer.colour : 'grey' }}>{thermometer.temperature}</td>

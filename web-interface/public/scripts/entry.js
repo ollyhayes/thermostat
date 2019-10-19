@@ -8,8 +8,11 @@ import initialiseDataSocket from './data-socket';
 import createChunkStore from './chunk-store';
 import { getChunkContaining, getChunksForDateRange } from './chunk-utils';
 import createChunkSet from '../../private/chunk-set';
+import { loadHiddenThermometers } from './storage';
 
 const {getData, storeData, dropData} = createChunkStore();
+
+loadHiddenThermometers();
 
 document.addEventListener('DOMContentLoaded', async () => {
 	let isReady = false;
