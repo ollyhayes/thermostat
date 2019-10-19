@@ -15,7 +15,6 @@ import applyMajorTickClasses from './majorAxis';
 import ticker from './ticker';
 import {thermometers} from '../../../common/config.json';
 import {createSaver, parseHash} from './domain-save';
-import getTemperature from './non-streaming-version/data-repository';
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -25,13 +24,13 @@ const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	const box = {
 		x0: 0,
-		x1: 1200,
+		x1: element.clientWidth,
 		y0: 0,
-		y1: 600
+		y1: element.clientHeight
 	};
 	const margin = {
-		left: 50,
-		right: 50,
+		left: 30,
+		right: 30,
 		top: 20,
 		bottom: 30
 	};
@@ -54,8 +53,8 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		.y(d => yScale(d.temperature));
 
 	const svg = select(element)
-		.append('svg')
-		.attr('viewBox', `${box.x0} ${box.y0} ${box.width} ${box.height}`);
+		.append('svg');
+		// .attr('viewBox', `${box.x0} ${box.y0} ${box.width} ${box.height}`);
 
 	const g = svg
 		.append('g')
