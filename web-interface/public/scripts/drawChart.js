@@ -7,6 +7,7 @@ import { zoom as d3Zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
 import { timeDay } from 'd3-time';
 import { interpolate } from 'd3-interpolate';
 import { easeCubic } from 'd3-ease';
+import { extent } from 'd3-array';
 
 import multiFormat from './time-format';
 import {getZoomExtent, getLimits, cropEase} from './utils';
@@ -252,16 +253,26 @@ export default async function drawChart(element, requestData) {
 	function drawGraphs() {
 		lastDrawnDomain = zoomedScale.domain();
 
-		const data = requestData(extendDomain(zoomedScale.domain()));
+		const [minDate, maxDate] = zoomedScale.domain();
+
+		const data = requestData(extendDomain(minDate, maxDate));
+
+		// be nice to have a better equality here
+		// also to do this asynchronously after a bit of time so we only do it once
+		const [minTemperature, maxTemperature] = extent(data
+			.map(({temperatures}) => temperatures)
+			.flat()
+			.filter(({date}) => minDate < date && date < maxDate)
+			.map(({temperature}) => temperature));
 
 		// reset the y-scale
 		// be nice to have a better equality here
 		// also to do this asynchronously after a bit of time so we only do it once
-		// const yScaleUpdated = minTemperature !== yScale.domain()[0] || maxTemperature !== yScale.domain()[1];
-		// if (yScaleUpdated) {
-		// 	yScale.domain([minTemperature, maxTemperature]);
-		// 	redrawYAxis();
-		// }
+		const yScaleUpdated = minTemperature !== yScale.domain()[0] || maxTemperature !== yScale.domain()[1];
+		if (yScaleUpdated) {
+			yScale.domain([minTemperature, maxTemperature]);
+			redrawYAxis();
+		}
 
 		// set the paths
 		chartArea
@@ -276,7 +287,7 @@ export default async function drawChart(element, requestData) {
 	}
 }
 
-function extendDomain([minDate, maxDate]) {
+function extendDomain(minDate, maxDate) {
 	const extension = (maxDate - minDate) / 4;
 	return [
 		new Date(minDate.getTime() - extension),
