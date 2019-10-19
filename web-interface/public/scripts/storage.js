@@ -9,7 +9,7 @@ export function saveHiddenThermometers() {
 }
 
 export function loadHiddenThermometers() {
-	const hiddenThermometers = localStorage.getItem('hidden-thermometers');
+	const hiddenThermometers = localStorage.getItem('hidden-thermometers') || [];
 
 	thermometers.forEach(thermometer =>
 		thermometer.hidden = hiddenThermometers.includes(thermometer.id));
