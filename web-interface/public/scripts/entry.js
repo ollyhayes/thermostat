@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 					<Legend 
 						currentTemperatures={temperatures} 
 						dataTime={new Date()}
-						triggerRedraw={redraw}
+						triggerRedraw={isReady ? redraw : () => {}}
 					></Legend>,
 					document.querySelector('.react-root'));
 			}
