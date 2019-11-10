@@ -302,7 +302,7 @@ function getTemperatureExtent(data, minDate, maxDate) {
 		.filter(({date}) => minDate < date && date < maxDate)
 		.map(({temperature}) => temperature));
 
-	if (!minTemperature)
+	if (minTemperature == null)
 		return [0, 100];
 
 	const minWidth = 10;
