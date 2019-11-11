@@ -40,7 +40,7 @@ async function getFakeTemperature(serial) {
 	const thermometerIndex = thermometers
 		.findIndex(thermometer => thermometer.serial === serial);
 
-	const temperature = Math.sin((Date.now() / 10000) + thermometerIndex) * 5 + 15;
+	const temperature = Math.sin((Date.now() / 10000) + thermometerIndex) * 20 + 5;
 
 	return Math.round(temperature * 100) / 100;
 }
