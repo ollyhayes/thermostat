@@ -37,7 +37,7 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 						saveHiddenThermometers();
 					}}>
 						<td style={{color: thermometer.colour}}>{thermometer.name}</td>
-						<td style={{color: isCurrent ? thermometer.colour : 'grey' }}>{thermometer.temperature}</td>
+						<td style={{color: isCurrent ? thermometer.colour : 'grey' }}>{formatTemperature(thermometer.temperature)}</td>
 					</tr>
 				)}
 			</tbody>
@@ -45,11 +45,15 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 	</div>;
 }
 
-const formatTemperature = format('.1f');
 function getTemperature(temperatures, id) {
 	const thermometer = temperatures && temperatures.find(thermometer => thermometer.id === id);
 
-	return thermometer
-		? `${formatTemperature(thermometer.temperature)}°C`
+	return thermometer && thermometer.temperature;
+}
+
+const temperatureFormatter = format('.1f');
+function formatTemperature(temperature) {
+	return temperature != null
+		? `${temperatureFormatter(temperature)}°C`
 		: '?';
 }
