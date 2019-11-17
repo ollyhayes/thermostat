@@ -37,7 +37,7 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 						saveHiddenThermometers();
 					}}>
 						<td style={{color: thermometer.colour}}>{thermometer.name}</td>
-						<td style={{color: isCurrent ? thermometer.colour : 'grey' }}>{formatTemperature(thermometer.temperature)}</td>
+						<td className="numeric" style={{color: isCurrent ? thermometer.colour : 'grey' }}>{formatTemperature(thermometer.temperature)}</td>
 					</tr>
 				)}
 			</tbody>
