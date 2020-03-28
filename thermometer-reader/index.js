@@ -26,7 +26,7 @@ function start(database) {
 					...thermometer,
 					temperature: await getTemperature(thermometer.serial),
 				})))).pipe(
-		filter(thermometer => thermometer.temperature !== null),
+		map(thermometers => thermometers.filter(thermometer => thermometer.temperature !== null)),
 		publishReplay(1),
 		refCount());
 	const minutelyTemperatures = temperatures.pipe(
