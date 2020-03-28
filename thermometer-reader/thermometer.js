@@ -26,7 +26,7 @@ module.exports = function(serial)
 			});
 		}).catch(error => {
 			const thermometer = getThermometer(serial);
-			console.log(`Error reading ${thermometer.name} thermometer`);
+			console.log(`Error reading ${thermometer.name} thermometer: ${error}`);
 			return null;
 		});
 };

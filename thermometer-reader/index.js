@@ -71,16 +71,23 @@ function performAveraging(time) {
 			windowTime(time),
 			switchMap(window => 
 				combineLatest(
-					...thermometers.map((_, index) =>
+					...thermometers.map(thermometer =>
 						window.pipe(
-							map(windowArray => windowArray[index].temperature),
+							ofThermometer(thermometer.serial),
+							filter(thermometer => thermometer !== undefined),
+							map(thermometer => thermometer.temperature),
 							averageOver(),
-							withLatestFrom(window.pipe(map(windowArray => windowArray[index]))),
+							withLatestFrom(window.pipe(ofThermometer(thermometer.serial))),
 							map(([average, latest]) =>
 								({
 									...latest,
 									temperature: average
 								})))))));
+
+	function ofThermometer(serial) {
+		return observable => observable.pipe(
+			map(windowArray => windowArray.find(({innerSerial}) => innerSerial === serial)));
+	}
 
 	function averageOver() {
 		return ovseravable => combineLatest(
