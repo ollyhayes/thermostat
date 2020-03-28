@@ -6,6 +6,7 @@ const {
 	map,
 	publishReplay,
 	refCount,
+	filter,
 	windowTime,
 	switchMap,
 	withLatestFrom,
@@ -25,6 +26,7 @@ function start(database) {
 					...thermometer,
 					temperature: await getTemperature(thermometer.serial),
 				})))).pipe(
+		filter(thermometer => thermometer.temperature !== null),
 		publishReplay(1),
 		refCount());
 	const minutelyTemperatures = temperatures.pipe(
