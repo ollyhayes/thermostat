@@ -5,7 +5,7 @@
 
 html,body {
 	margin: 0;
-	background: gainsboro;
+	background: #18181A;
 }
 
 body {
@@ -17,11 +17,11 @@ body {
 
 div.react-root {
 
-	background: white;
+	background: @background;
 	width: 500px;
 	font-size: 20px;
 	font-family: monospace;
-	border: 1px solid gray;
+	border: 1px solid @border;
 	padding: 20px;
 }
 
@@ -29,51 +29,54 @@ div.react-root {
 table {
 	border-collapse: collapse;
 
+	thead {
+		color: @foreground;
+	}
 }
 
 th,td {
-	border: black 1px solid;
+	border: @border 1px solid;
 	min-width: 10px;
 	padding: 2px 5px;
 }
 
-.legend {
-	border: 1px @border solid;
-	background: fade(@background, 80%);
-	padding: 8px;
-	position: absolute;
-	top: 20px;
-	left: 45px;
+// .legend {
+// 	border: 1px @border solid;
+// 	background: fade(@background, 80%);
+// 	padding: 8px;
+// 	position: absolute;
+// 	top: 20px;
+// 	left: 45px;
 
-	table {
-		border-collapse: collapse;
-	}
+// 	table {
+// 		border-collapse: collapse;
+// 	}
 
-	tr {
-		cursor: pointer;
-		&:hover {
-			background: #5d5c5c;
-		}
+// 	tr {
+// 		cursor: pointer;
+// 		&:hover {
+// 			background: #5d5c5c;
+// 		}
 
-		td {
-			font-size: 15px;
-			font-family: sans-serif;
-			padding: 3px 6px;
-		}
+// 		td {
+// 			font-size: 15px;
+// 			font-family: sans-serif;
+// 			padding: 3px 6px;
+// 		}
 
-		td.numeric {
-			text-align: right;
-		}
-	}
-}
+// 		td.numeric {
+// 			text-align: right;
+// 		}
+// 	}
+// }
 
-@media (max-width: 800px) {
-	.legend {
-		padding: 4px;
+// @media (max-width: 800px) {
+// 	.legend {
+// 		padding: 4px;
 
-		tr td {
-			font-size: 10px;
-			padding: 2px 3px;
-		}
-	}
-}
+// 		tr td {
+// 			font-size: 10px;
+// 			padding: 2px 3px;
+// 		}
+// 	}
+// }

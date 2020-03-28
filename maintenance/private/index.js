@@ -4,6 +4,7 @@ const compress = require('koa-compress');
 const Router = require('koa-router');
 const serve = require('koa-static');
 const path = require('path');
+const {data} = require('./data');
 const app = new Koa();
 const router = new Router();
 
@@ -11,7 +12,7 @@ const port = 8081;
 
 // function start() {
 
-// router.get('/data', data(db));
+router.get('/data', data());
 // router.get('/limits', limits(db));
 
 app.use(compress());

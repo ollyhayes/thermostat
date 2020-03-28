@@ -2,30 +2,47 @@ import '../less/page.less';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import config from '../../../common/config.json';
+import Thermometers from './Thermometers';
 
 document.addEventListener('DOMContentLoaded', async () => {
-	ReactDOM.render(
-		<table>
-			<thead>
-				<tr>
-					<th>ID</th>
-					<th>Name</th>
-					<th>Serial</th>
-					<th>Type</th>
-					<th>Disabled</th>
-				</tr>
-			</thead>
-			<tbody>
-				{config.thermometers.map(thermometer => 
-					<tr key={thermometer.id}>
-						<td>{thermometer.id}</td>
-						<td>{thermometer.name}</td>
-						<td>{thermometer.serial}</td>
-						<td>{thermometer.type}</td>
-						<td>{thermometer.disabled ? 'true' : 'false'}</td>
-					</tr>
-				)}
-			</tbody>
-		</table>,
-		document.querySelector('.react-root'));
+	// ReactDOM.render(
+	// 	<Thermometers thermometers={config.thermometers}/>,
+	// 	document.querySelector('.react-root'));
+
+	setInterval(async () => {
+		const {data: {thermometers}, error} = await getData();
+
+		const actualThermometers = !error && thermometers.map(serial => ({
+			serial,
+			name: '?',
+			id: serial,
+			type: 'thermometer',
+			disabled: '?'
+		}));
+		const configThermometers = config.thermometers;
+		
+		ReactDOM.render(
+			<>
+				<Thermometers thermometers={configThermometers}/>
+				{actualThermometers
+					? <Thermometers thermometers={actualThermometers}/>
+					: <span>{error.message}</span>}
+			</>,
+			document.querySelector('.react-root'));
+
+	},
+	1000);
 });
+
+async function getData() {
+	try {
+		const response = await fetch('/data', {
+		});
+
+		const data = await response.json();
+
+		return {data};
+	} catch (error) {
+		return {error};
+	}
+}

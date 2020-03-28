@@ -11,7 +11,7 @@
     "build": "cd web-interface && webpack --mode production",
     "watch-maintenance": "cd maintenance && webpack --watch",
     "build-maintenance": "cd maintenance && webpack --mode production",
-    "start-maintenance": "cd maintenance && node private"
+    "start-maintenance": "cd maintenance/private && node ."
   },
   "author": "",
   "license": "ISC",
