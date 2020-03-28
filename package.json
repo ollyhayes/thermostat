@@ -8,7 +8,10 @@
     "postinstall": "cpy common/config-template.json common/ --rename=config.json --no-overwrite",
     "start": "node app.js",
     "watch": "cd web-interface && webpack --watch",
-    "build": "cd web-interface && webpack --mode production"
+    "build": "cd web-interface && webpack --mode production",
+    "watch-maintenance": "cd maintenance && webpack --watch",
+    "build-maintenance": "cd maintenance && webpack --mode production",
+    "start-maintenance": "cd maintenance && node private"
   },
   "author": "",
   "license": "ISC",
