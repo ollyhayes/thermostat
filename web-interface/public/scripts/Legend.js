@@ -23,7 +23,7 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 			colour: thermometer.hidden ? 'grey' : thermometer.colour,
 			temperature: getTemperature(currentTemperatures, thermometer.id)
 		}))
-		.sort((l, r) => l.temperature > r.temperature ? -1 : 1);
+		.sort((l, r) => (r.temperature || -99) - (l.temperature || -99));
 
 	return <div className='legend'>
 		<table>
