@@ -83,7 +83,7 @@ function performAveraging(time) {
 									...latest,
 									temperature: average
 								}))))).pipe(
-					map(averagedThemometers => averagedThemometers.filter(thermometer => thermometer !== null)) // filter out the dud thermometers
+					map(averagedThemometers => averagedThemometers.filter(thermometer => !isNaN(thermometer.temperature))) // filter out the dud thermometers
 				)));
 
 	function ofThermometer(serial) {
