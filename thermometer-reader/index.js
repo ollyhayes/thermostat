@@ -75,18 +75,21 @@ function performAveraging(time) {
 						window.pipe(
 							ofThermometer(thermometer.serial),
 							filter(thermometer => thermometer !== undefined),
-							map(thermometer => thermometer.temperature),
+							map(thermometer => thermometer.temperature), // dud thermometer. I think we should iterate over values and find the the matchin one in the config after
 							averageOver(),
 							withLatestFrom(window.pipe(ofThermometer(thermometer.serial))),
 							map(([average, latest]) =>
 								({
 									...latest,
 									temperature: average
-								})))))));
+								}))))).pipe(
+					map(averagedThemometers => averagedThemometers.filter(thermometer => thermometer !== null)) // filter out the dud thermometers
+				)));
 
 	function ofThermometer(serial) {
 		return observable => observable.pipe(
-			map(windowArray => windowArray.find(({innerSerial}) => innerSerial === serial)));
+			map(windowArray => windowArray.find(({serial: innerSerial}) => innerSerial === serial))
+		);
 	}
 
 	function averageOver() {
