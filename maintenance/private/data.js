@@ -41,7 +41,7 @@ function data() {
 			}
 
 			context.body = {
-				thermometers: config
+				config
 			};
 
 		} catch (error) {
