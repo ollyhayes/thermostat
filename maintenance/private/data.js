@@ -1,39 +1,53 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+const configFile = path.join(__dirname, '../../common/config.json');
+const thermometersDirectory = '/home/olly/tools/thermometers';
+// const thermometersDirectory = '/sys/bus/w1/devices/';
+
 function data() {
 	return async function(context)
 	{
-		// const query = context.request.query;
 
-		// const thermometers = await fs.readdir('/sys/bus/w1/devices/', 'utf8');
-		const [actualSerials,config] = Promise.all(
-			await fs.readdir('/home/olly/tools/thermometers'),
-			JSON.parse(await fs.readFile(path.join(__dirname, '../common/config.json', 'utf8')))
-		);
+		try {
+			const [actualSerials,config] = await Promise.all([
+				fs.readdir(thermometersDirectory),
+				// (async () => JSON.parse(await fs.readFile(configFile)))(),
+				fs.readFile(configFile, {encoding: 'utf8'}).then(JSON.parse)
+			]);
 
-		const configSerials = config.thermometers.map(({serial}) => serial);
-		// if (!actualSerials.all(thermometer => configSerials.includes(thermometer))) {
-		// 	// update config object
-		// 	// save it to the config
-		// 	// in this GET, return it from the new config
-		// }
+			const configSerials = config.thermometers.map(({serial}) => serial);
 
-		actualSerials.forEach(actualSerial => {
-			if (!configSerials.includes(actualSerial)) {
-				config.thermometer.push({
-					name: '',
-					serial: actualSerial,
-					id: 10,
-					disabled: false,
-					type: 'thermometer'
-				});
+			const isConfigUpdated = actualSerials.reduce((isUpdated, actualSerial) => {
+				if (!configSerials.includes(actualSerial)) {
+					const name = '';
+					console.log(`New thermometer detected: ${actualSerial}. Named it: ${name}`);
+					config.thermometers.push({
+						name,
+						serial: actualSerial,
+						id: 10,
+						disabled: false,
+						type: 'thermometer'
+					});
+
+					return true;
+				}
+				return isUpdated;
+			}, false);
+
+			if (isConfigUpdated) {
+				console.log('Writing config file');
+				await fs.writeFile(configFile, JSON.stringify(config, undefined, 4));
 			}
-		});
 
-		context.body = {
-			thermometers: actualSerials
-		};
+			context.body = {
+				thermometers: config
+			};
+
+		} catch (error) {
+			console.log(`Error: ${error}`);
+			context.status = 500;
+		}
 	};
 }
 
