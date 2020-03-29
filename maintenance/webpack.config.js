@@ -2,7 +2,7 @@ module.exports = function()
 {
 	const config = {
 		mode: 'development',
-		devtool: 'eval-source-map',
+		// devtool: 'eval-source-map',
 		entry: './public/scripts/entry.js' ,
 		output: {
 			filename: '[name].bundle.js',

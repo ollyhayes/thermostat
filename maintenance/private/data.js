@@ -4,8 +4,8 @@ const path = require('path');
 const readThermometer = require('../../thermometer-reader/thermometer');
 
 const configFile = path.join(__dirname, '../../common/config.json');
-const thermometersDirectory = '/home/olly/tools/thermometers';
-// const thermometersDirectory = '/sys/bus/w1/devices/';
+// const thermometersDirectory = '/home/olly/tools/thermometers';
+const thermometersDirectory = '/sys/bus/w1/devices/';
 
 function data() {
 	return async function(context)
