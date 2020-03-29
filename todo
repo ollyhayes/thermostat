@@ -51,3 +51,9 @@ live updates
 
 	client tags chunks with 'joined' when they're joined
 	only join unjoined chunks
+
+
+
+maintenance
+	thermometers
+		create random name,colour,id
