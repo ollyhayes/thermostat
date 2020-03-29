@@ -51,9 +51,14 @@ live updates
 
 	client tags chunks with 'joined' when they're joined
 	only join unjoined chunks
-
+1399.08
 
 
 maintenance
 	thermometers
-		create random name,colour,id
+		cross/tick
+		download config
+		live updates indicator
+		temperature reading
+	rpi off/restart button
+	reset server button? not unless we need it

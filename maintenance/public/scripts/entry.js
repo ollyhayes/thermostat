@@ -1,27 +1,25 @@
 import '../less/page.less';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Thermometers from './Thermometers';
+import App from './App';
+import { Provider, createStore } from './store.js';
+import { fetchData } from './actions';
+
+const store = createStore({
+	config: undefined,
+	fetchingData: false,
+	error: false
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
-	// ReactDOM.render(
-	// 	<Thermometers thermometers={config.thermometers}/>,
-	// 	document.querySelector('.react-root'));
+	ReactDOM.render(
+		<Provider store={store}>
+			<App/>
+		</Provider>,
+		document.querySelector('.react-root'));
 
-	setInterval(async () => {
-		try {
-			const {config} = await (await fetch('/data')).json();
-			
-			ReactDOM.render(
-				<>
-					<Thermometers thermometers={config.thermometers}/>
-				</>,
-				document.querySelector('.react-root'));
-		} catch (error) {
-			ReactDOM.render(
-				<span>Error: {error.toString()}</span>,
-				document.querySelector('.react-root'));
-		}
-	},
-	1000);
+	(async function fetchLoop() {
+		await fetchData(store);
+		setTimeout(fetchLoop, 5000);
+	})();
 });

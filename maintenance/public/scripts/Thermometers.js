@@ -1,15 +1,19 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
+import { useState } from './store';
 
-export default function Thermometers({thermometers, dataTime}) {
-	const [currentTime, setCurrentTime] = useState(new Date());
-	const isCurrent = currentTime - dataTime < 2000;
+export default function Thermometers() {
+	const {config} = useState();
+	const thermometers = config && config.thermometers || [];
 
-	useEffect(() => {
-		if (isCurrent) {
-			const timeoutId = setTimeout(() => setCurrentTime(Date.now()), 2500);
-			return () => clearTimeout(timeoutId);
-		}
-	});
+	// const [currentTime, setCurrentTime] = useState(new Date());
+	// const isCurrent = currentTime - dataTime < 2000;
+
+	// useEffect(() => {
+	// 	if (isCurrent) {
+	// 		const timeoutId = setTimeout(() => setCurrentTime(Date.now()), 2500);
+	// 		return () => clearTimeout(timeoutId);
+	// 	}
+	// });
 	// const [, updateState] = useState();
 	// const forceUpdate = () => updateState({});
 
