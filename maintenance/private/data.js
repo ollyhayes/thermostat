@@ -36,6 +36,8 @@ function data() {
 				await fs.writeFile(configFile, JSON.stringify(config, undefined, 4));
 			}
 
+			await new Promise(resolve => setTimeout(resolve, 1000));
+
 			context.body = {
 				config
 			};

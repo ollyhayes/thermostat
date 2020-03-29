@@ -20,6 +20,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	(async function fetchLoop() {
 		await fetchData(store);
-		setTimeout(fetchLoop, 5000);
+		setTimeout(fetchLoop, 1000);
 	})();
 });

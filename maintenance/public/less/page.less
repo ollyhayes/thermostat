@@ -21,22 +21,40 @@ div.react-root {
 	font-size: 20px;
 	font-family: monospace;
 	border: 1px solid @border;
-	padding: 20px;
 }
 
+div.icon-wrapper {
+	margin: 20px;
+	display: flex;
+	justify-content: flex-end;
 
-table {
-	border-collapse: collapse;
+	svg {
+		padding: 5px;
+		transition: fill 0.1s;
+		fill: lime;
 
-	thead {
-		color: @foreground;
+		&:not(.paused) {
+			fill: red;
+		}
 	}
 }
 
-th,td {
-	border: @border 1px solid;
-	min-width: 10px;
-	padding: 3px 5px;
+div.thermometers {
+	margin: 20px;
+
+	table {
+		border-collapse: collapse;
+
+		thead {
+			color: @foreground;
+		}
+	}
+
+	th,td {
+		border: @border 1px solid;
+		min-width: 10px;
+		padding: 3px 5px;
+	}
 }
 
 // .legend {
@@ -79,3 +97,27 @@ th,td {
 // 		}
 // 	}
 // }
+
+svg.icon {
+	height: 16px;
+	width: 16px;
+	display: block;
+
+	&.spinning {
+		animation: 2s linear infinite spinning;
+	}
+
+	&.paused {
+		animation-play-state: paused;
+	}
+}
+
+@keyframes spinning {
+	from {
+		transform: rotate(0);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
