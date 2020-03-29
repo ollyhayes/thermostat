@@ -1,6 +1,8 @@
 import React from 'react';
 import { useState } from './store';
 
+import {format} from 'd3-format';
+
 export default function Thermometers() {
 	const {config} = useState();
 	const thermometers = config && config.thermometers || [];
@@ -35,6 +37,7 @@ export default function Thermometers() {
 					<th>Serial</th>
 					<th>Type</th>
 					<th>Disabled</th>
+					<th>Temp</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -45,6 +48,7 @@ export default function Thermometers() {
 						<td>{thermometer.serial}</td>
 						<td>{thermometer.type}</td>
 						<td>{thermometer.disabled ? 'true' : 'false'}</td>
+						<td>{`${formatTemperature(thermometer.temperature)}`}</td>
 					</tr>
 				)}
 			</tbody>
@@ -78,3 +82,9 @@ export default function Thermometers() {
 // 		? `${temperatureFormatter(temperature)}°C`
 // 		: '?';
 // }
+const temperatureFormatter = format('.1f');
+export function formatTemperature(temperature) {
+	return temperature != null
+		? `${temperatureFormatter(temperature)}°C`
+		: '?';
+}

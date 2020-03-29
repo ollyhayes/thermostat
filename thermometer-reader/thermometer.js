@@ -40,6 +40,8 @@ async function getFakeTemperature(serial) {
 	// if (serial === '28-031097791c99')
 	// 	return null;
 
+	await new Promise(resolve => setTimeout(resolve, 1000));
+
 	const thermometerIndex = thermometers
 		.findIndex(thermometer => thermometer.serial === serial);
 

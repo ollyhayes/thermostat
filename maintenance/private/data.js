@@ -1,6 +1,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+const readThermometer = require('../../thermometer-reader/thermometer');
+
 const configFile = path.join(__dirname, '../../common/config.json');
 const thermometersDirectory = '/home/olly/tools/thermometers';
 // const thermometersDirectory = '/sys/bus/w1/devices/';
@@ -36,7 +38,11 @@ function data() {
 				await fs.writeFile(configFile, JSON.stringify(config, undefined, 4));
 			}
 
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await Promise.all(actualSerials.map(serial => 
+				readThermometer(serial).then(temperature => 
+					config.thermometers
+						.find(thermometer => thermometer.serial === serial)
+						.temperature = temperature)));
 
 			context.body = {
 				config
@@ -48,6 +54,7 @@ function data() {
 		}
 	};
 }
+
 
 function createNewThermometer(serial, config) {
 	const newNameRegex = /^new-thermometer (\d+)$/;

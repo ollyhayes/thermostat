@@ -58,7 +58,7 @@ maintenance
 	thermometers
 		cross/tick
 		download config
-		live updates indicator
+		*live updates indicator
 		temperature reading
 	rpi off/restart button
 	reset server button? not unless we need it

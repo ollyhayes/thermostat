@@ -52,7 +52,7 @@ function getTemperature(temperatures, id) {
 }
 
 const temperatureFormatter = format('.1f');
-function formatTemperature(temperature) {
+export function formatTemperature(temperature) {
 	return temperature != null
 		? `${temperatureFormatter(temperature)}°C`
 		: '?';
