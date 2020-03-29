@@ -65,7 +65,8 @@ function createNewThermometer(serial, config) {
 		id: Math.max(latestNewId + 1, 10),
 		name: 'new-thermometer ' + (latestNewThermometer + 1),
 		dsabled: false,
-		type: 'thermometer'
+		type: 'thermometer',
+		colour: 'white'
 	};
 }
 
