@@ -60,5 +60,6 @@ maintenance
 		download config
 		*live updates indicator
 		*temperature reading
+	timeout on temperature reading
 	rpi off/restart button
 	reset server button? not unless we need it
