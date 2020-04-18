@@ -7,6 +7,14 @@
 		{
 			"type": "node",
 			"request": "launch",
+			"name": "serialiser",
+			"program": "${workspaceFolder}/encoding-test/serialising-test.js",
+			"cwd": "${workspaceFolder}/encoding-test"
+		},
+	
+		{
+			"type": "node",
+			"request": "launch",
 			"name": "web-interface",
 			"program": "${workspaceFolder}/web-interface/private/app.js",
 			"cwd": "${workspaceFolder}/web-interface"

@@ -63,3 +63,26 @@ maintenance
 	timeout on temperature reading
 	rpi off/restart button
 	reset server button? not unless we need it
+
+
+
+backups
+	* sql backups
+		* every night the pi backs up the last day and saves it in the home dir
+		* every night bob scp's the back up from the server, then writes it into it's own database
+			* mount a second sql file
+			* insert into select from
+			* what if we run out of space
+			* bash command to tgz shh it off the pi
+			* signal thermostat to mount the file
+			* insert into select from
+
+	* non-streaming backups
+		* every night bob loads a chunk every x minutes or so from getData()
+		* parse the json and insert it into the database
+			* use node-cron to start a job every x minutes between nighttime period: https://github.com/kelektiv/node-cron/blob/master/examples/every_30_minutes_between_9_and_5.js
+			* check the database for the latest data, and size up a chunk on the end
+			* request chunk from pi, receive and parse json
+			* insert chunk into database
+				* would take 48 minutes, loading 1 100kb (5 minutes, uncompressed) chunk every 10 seconds
+				* each chunk takes 0.6s, but actually the db read time is 45ms for 1272 values
