@@ -1,6 +1,9 @@
+import {dataType} from '../../../common/config.json';
+import {deserialiseTemperatures} from './temperature-serialiser';
 
 export default function initialise(handleData) {
-	const socket = new WebSocket(`ws://${window.location.host}`);
+	const socket = new WebSocket(`ws://${window.location.host}?content-type=${dataType}`);
+	socket.binaryType = 'arraybuffer';
 	let firstChunks = null;
 
 	socket.onopen = function () {
@@ -16,7 +19,9 @@ export default function initialise(handleData) {
 	};
 
 	socket.onmessage = function ({data}) {
-		const {temperatures, chunk} = parseData(data);
+		const {temperatures, chunk} = dataType === 'binary'
+			? deserialiseTemperatures(data)
+			: parseData(data);
 
 		handleData(chunk, temperatures);
 	};

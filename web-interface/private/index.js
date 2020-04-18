@@ -10,8 +10,9 @@ const router = new Router();
 const {data, limits} = require('./data');
 const initDataSocket = require('./data-ws');
 const initDataStream = require('./data-stream');
+const port = 8081;
 
-function start(db, newDataEmitter = null) {
+function start(db, newDataEmitter = []) {
 	router.get('/data', data(db));
 	router.get('/limits', limits(db));
 
@@ -20,11 +21,11 @@ function start(db, newDataEmitter = null) {
 	app.use(router.routes());
 
 	const server = http.createServer(app.callback());
-	server.listen(8080);
+	server.listen(port);
 
 	initDataSocket(server, initDataStream(db, newDataEmitter));
 
-	console.log('Listening on port 8080');
+	console.log(`Listening on port ${port}`);
 
 }
 

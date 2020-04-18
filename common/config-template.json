@@ -1,5 +1,6 @@
 {
 	"mockThermometers": true,
+	"dataType": "binary",
 	"thermometers": [
 		{
 			"name": "chip-1",
