@@ -44,10 +44,10 @@ class Database
 				`insert into temperatures (date, temperature, precisionLevel, thermometerId)
 				values (@date, @temperature, @precisionLevel, @thermometerId);`);
 
-			this.insertCommand = this.db.transaction((temperatures, date, precisionLevel) =>
-				temperatures.forEach(({temperature, id}) =>
+			this.insertCommand = this.db.transaction((temperatures, unixDate, precisionLevel) =>
+				temperatures.forEach(({temperature, id, date: individualDate}) =>
 					singleInsert.run({
-						date: toUnix(date),
+						date: toUnix(individualDate) || unixDate,
 						temperature: toDbTemp(temperature),
 						precisionLevel,
 						thermometerId: id
@@ -56,11 +56,11 @@ class Database
 
 		const date = new Date();
 
-		this.insertCommand(temperatures, date, precisionLevel);
+		this.insertCommand(temperatures, toUnix(date), precisionLevel);
 
 		const duration = Date.now() - date.getTime();
 
-		log(`logging temp - ${temperatures.map(t => t.temperature)} in ${duration}ms`, 'green');
+		log(`logging temp - ${temperatures.length > 10 ? '-' : temperatures.map(t => t.temperature)} in ${duration}ms`, 'green');
 	}
 
 	read(minDate, maxDate, precisionLevel)
