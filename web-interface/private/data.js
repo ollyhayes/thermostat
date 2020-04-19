@@ -10,7 +10,8 @@ function data(db) {
 
 		const data = db.read(minDate, maxDate, query.precisionLevel);
 
-		if (context.request.headers.accept === 'application/octet-stream') {
+		if (context.request.headers.accept === 'application/octet-stream'
+			|| query.binary) {
 			const arrayBuffer = serialiseTemperatures({temperatures: data});
 
 			context.body = Buffer.from(arrayBuffer.buffer);
