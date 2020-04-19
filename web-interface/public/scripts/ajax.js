@@ -1,9 +1,6 @@
-import {dataType} from '../../../common/config.json';
-import {deserialiseTemperatures} from './temperature-serialiser';
-
-export default function ajax(url, method, json)
+export default function ajax(url, method, json, dataType)
 {
-	const isBinary = /^\/data/.exec(url) && dataType === 'binary';
+	const isBinary = dataType === 'binary';
 
 	return new Promise((resolve, reject) =>
 	{
@@ -18,7 +15,7 @@ export default function ajax(url, method, json)
 				if (request.status == 200)
 				{
 					const response = isBinary
-						? deserialiseTemperatures(request.response).temperatures
+						? request.response
 						: request.responseText !== ''
 							? JSON.parse(request.responseText)
 							: undefined;

@@ -2,7 +2,8 @@ import { nest as d3Nest } from 'd3-collection';
 import { extent } from 'd3-array';
 
 import ajax from '../ajax';
-import {thermometers} from '../../../../common/config.json';
+import {thermometers, dataType} from '../../../../common/config.json';
+import {deserialiseTemperatures} from '../temperature-serialiser';
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,
@@ -25,14 +26,19 @@ export default async function getTemperature(minDate, maxDate)
 			? 1
 			: 0;
 	
-	const data = await ajax(`/data?minDate=${min}&maxDate=${max}&precisionLevel=${precisionLevel}`);
+	const isBinary = dataType === 'binary';
+	const data = await ajax(
+		`/data?minDate=${min}&maxDate=${max}&precisionLevel=${precisionLevel}`,
+		undefined,
+		undefined,
+		isBinary ? 'binary' : undefined);
 
-	//console.log(`Precision: ${precisionLevel}, Datapoints: ${data.length}`);
-	
-	const parsedData = data.map(dataPoint => ({
-		...dataPoint,
-		date: new Date(dataPoint.date),
-	}));
+	const parsedData = isBinary
+		? deserialiseTemperatures(data).temperatures
+		: data.map(dataPoint => ({
+			...dataPoint,
+			date: new Date(dataPoint.date),
+		}));
 
 	const nestedData = nest.entries(parsedData)
 		.map(({key, values}) => ({
