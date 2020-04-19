@@ -25,8 +25,7 @@ function serialiseTemperatures({temperatures, chunk}) {
 	return intArray;
 }
 
-function deserialiseTemperatures(arrayBuffer) {
-	const intArray = new Int32Array(arrayBuffer);
+function deserialiseTemperatures(intArray) {
 	const tempReadings = (intArray.length - chunkInfoSize) / tempSize;
 
 	const temperatures = [];

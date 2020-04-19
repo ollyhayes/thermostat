@@ -7,6 +7,13 @@
 		{
 			"type": "node",
 			"request": "launch",
+			"name": "grabber",
+			"program": "${workspaceFolder}/grabber/app.js",
+			"cwd": "${workspaceFolder}/grabber"
+		},
+		{
+			"type": "node",
+			"request": "launch",
 			"name": "serialiser",
 			"program": "${workspaceFolder}/encoding-test/serialising-test.js",
 			"cwd": "${workspaceFolder}/encoding-test"
@@ -23,7 +30,7 @@
 			"type": "node",
 			"request": "launch",
 			"name": "maintenance",
-			"program": "${workspaceFolder}/maintenance/private/index.js",
+			"program": "${workspaceFolder}/maintenance/private/app.js",
 			"cwd": "${workspaceFolder}/maintenance"
 		},
 		{

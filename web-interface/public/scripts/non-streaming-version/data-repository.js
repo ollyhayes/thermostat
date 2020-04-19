@@ -34,7 +34,7 @@ export default async function getTemperature(minDate, maxDate)
 		isBinary ? 'binary' : undefined);
 
 	const parsedData = isBinary
-		? deserialiseTemperatures(data).temperatures
+		? deserialiseTemperatures(new Int32Array(data)).temperatures
 		: data.map(dataPoint => ({
 			...dataPoint,
 			date: new Date(dataPoint.date),
