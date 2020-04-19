@@ -10,20 +10,17 @@ const router = new Router();
 
 const port = 8081;
 
-// function start() {
+function start() {
+	router.get('/data', data());
 
-router.get('/data', data());
-// router.get('/limits', limits(db));
+	app.use(compress());
+	app.use(serve(path.join(__dirname, '../public')));
+	app.use(router.routes());
 
-app.use(compress());
-app.use(serve(path.join(__dirname, '../public')));
-app.use(router.routes());
+	const server = http.createServer(app.callback());
+	server.listen(port);
 
-const server = http.createServer(app.callback());
-server.listen(port);
+	console.log(`Listening on port ${port}`);
+}
 
-console.log(`Listening on port ${port}`);
-
-// }
-
-// module.exports = {start};
+module.exports = {start};

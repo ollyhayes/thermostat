@@ -1,5 +1,6 @@
 const thermometer = require('./thermometer-reader/index');
 const webInterface = require('./web-interface/private/index');
+const maintenance = require('./maintenance/private/index');
 const Database = require('./common/database');
 const log = require('./common/log');
 
@@ -8,6 +9,7 @@ db.open();
 
 const {stopThermometer, newDataEmitter} = thermometer.start(db);
 webInterface.start(db, newDataEmitter);
+maintenance.start();
 
 process.on('exit', () => {
 	log('process exited');
