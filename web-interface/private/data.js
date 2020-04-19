@@ -1,3 +1,6 @@
+// const Buffer = require('buffer');
+const {serialiseTemperatures} = require('../public/scripts/temperature-serialiser');
+
 function data(db) {
 	return async function(context)
 	{
@@ -7,7 +10,13 @@ function data(db) {
 		const maxDate = new Date(Number(query.maxDate));
 
 		const data = db.read(minDate, maxDate, query.precisionLevel);
-		context.body = data;
+		// context.body = data;
+
+		const arrayBuffer = serialiseTemperatures({temperatures: data});
+
+		console.log(typeof arrayBuffer);
+
+		context.body = Buffer.from(arrayBuffer.buffer);
 	};
 }
 
