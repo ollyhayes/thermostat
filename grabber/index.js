@@ -4,6 +4,9 @@ const fetch = require('node-fetch');
 const log = require('../common/log');
 const {deserialiseTemperatures} = require('../web-interface/public/scripts/temperature-serialiser');
 
+let totalRequestTime = 0;
+let numberOfRequests = 0;
+
 function start(db) {
 	const job = new CronJob(
 		'*/10 * 9-17 * * *',
@@ -17,7 +20,9 @@ function start(db) {
 	// const stopJob = () => job.stop()
 }
 
+// have separate jobs for the other precision levels that run first
 // have another job that kicks off the first one at a certain time
+// record averages
 
 async function tick(db, stopJob) {
 	try {
@@ -25,14 +30,13 @@ async function tick(db, stopJob) {
 		const limits = db.getLimits();
 		const limitDuration = Date.now() - limitStart;
 
-		console.log(limits)
-
 		const minDate = limits.maxDate ? limits.maxDate.getTime() : new Date(2020, 3, 19).getTime();
 		const maxDate = minDate + 5 * 60 * 1000;
 
 		if (maxDate > new Date()) {
 			stopJob();
 			log(`stopping job, reached ${printChunk({minDate, maxDate})}`, 'red');
+			log(`total time: ${totalRequestTime}, average: ${totalRequestTime / numberOfRequests}, number of requests: ${numberOfRequests}`);
 		}
 
 		const url = `http://192.168.0.9:8081/data?minDate=${minDate}&maxDate=${maxDate}&precisionLevel=0`;
@@ -41,12 +45,15 @@ async function tick(db, stopJob) {
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
 		const buffer = await response.buffer();
 		const requestDuration = Date.now() - requestStart;
+		totalRequestTime += requestDuration;
+		numberOfRequests++;
 
 		const deserialiseStart = Date.now();
 		const intArray = new Int32Array(
 			buffer.buffer,
 			buffer.byteOffset,
 			buffer.length / Int32Array.BYTES_PER_ELEMENT);
+		
 		const data = deserialiseTemperatures(intArray);
 		const deserialiseDuration = Date.now() - deserialiseStart;
 
@@ -55,7 +62,7 @@ async function tick(db, stopJob) {
 		const insertDuration = Date.now() - insertStart;
 
 		log(`logged ${data.temperatures.length} values. ${printChunk({minDate, maxDate})}, ` + 
-			`limit: ${limitDuration}, request: ${requestDuration}, serialise: ${deserialiseDuration} insert: ${insertDuration}`, 'green');
+			`limit: ${limitDuration}, request: ${requestDuration}, serialise: ${deserialiseDuration} insert: ${insertDuration}, request-size: ${intArray.byteLength}`, 'green');
 
 		// if total time > 1s stop job
 
