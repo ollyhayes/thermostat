@@ -5,8 +5,6 @@ export default function ajax(url, method, json, dataType)
 	return new Promise((resolve, reject) =>
 	{
 		const request = new XMLHttpRequest();
-		if (isBinary)
-			request.responseType = 'arraybuffer';
 
 		request.onreadystatechange = () =>
 		{
@@ -29,6 +27,11 @@ export default function ajax(url, method, json, dataType)
 
 		method = method || 'GET';
 		request.open(method, url, true);
+
+		if (isBinary) {
+			request.responseType = 'arraybuffer';
+			request.setRequestHeader('Accept', 'application/octet-stream');
+		}
 
 		if (json)
 		{

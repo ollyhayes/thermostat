@@ -1,4 +1,3 @@
-// const Buffer = require('buffer');
 const {serialiseTemperatures} = require('../public/scripts/temperature-serialiser');
 
 function data(db) {
@@ -10,13 +9,14 @@ function data(db) {
 		const maxDate = new Date(Number(query.maxDate));
 
 		const data = db.read(minDate, maxDate, query.precisionLevel);
-		// context.body = data;
 
-		const arrayBuffer = serialiseTemperatures({temperatures: data});
+		if (context.request.headers.accept === 'application/octet-stream') {
+			const arrayBuffer = serialiseTemperatures({temperatures: data});
 
-		console.log(typeof arrayBuffer);
-
-		context.body = Buffer.from(arrayBuffer.buffer);
+			context.body = Buffer.from(arrayBuffer.buffer);
+		} else {
+			context.body = data;
+		}
 	};
 }
 
