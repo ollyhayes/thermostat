@@ -26,9 +26,7 @@ function start(db) {
 
 async function tick(db, stopJob) {
 	try {
-		const limitStart = Date.now();
 		const limits = db.getLimits();
-		const limitDuration = Date.now() - limitStart;
 
 		const minDate = limits.maxDate ? limits.maxDate.getTime() : new Date(2020, 3, 19).getTime();
 		const maxDate = minDate + 5 * 60 * 1000;
@@ -44,25 +42,22 @@ async function tick(db, stopJob) {
 		const requestStart = Date.now();
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
 		const buffer = await response.buffer();
+
 		const requestDuration = Date.now() - requestStart;
 		totalRequestTime += requestDuration;
 		numberOfRequests++;
 
-		const deserialiseStart = Date.now();
 		const intArray = new Int32Array(
 			buffer.buffer,
 			buffer.byteOffset,
 			buffer.length / Int32Array.BYTES_PER_ELEMENT);
 		
 		const data = deserialiseTemperatures(intArray);
-		const deserialiseDuration = Date.now() - deserialiseStart;
 
-		const insertStart = Date.now();
 		db.insert(data.temperatures, 0);
-		const insertDuration = Date.now() - insertStart;
 
 		log(`logged ${data.temperatures.length} values. ${printChunk({minDate, maxDate})}, ` + 
-			`limit: ${limitDuration}, request: ${requestDuration}, serialise: ${deserialiseDuration} insert: ${insertDuration}, request-size: ${intArray.byteLength}`, 'green');
+			`request: ${requestDuration}ms, request-size: ${intArray.byteLength} bytes`, 'green');
 
 		// if total time > 1s stop job
 
