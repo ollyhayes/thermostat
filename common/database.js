@@ -96,7 +96,12 @@ class Database
 				union select max(date) as date from temperatures
 				order by date`);
 
-		const [{date: minDate}, {date: maxDate}] = this.limitCommand.all();
+		const results = this.limitCommand.all();
+
+		if (results.length !== 2)
+			return {minDate: undefined, maxDate: undefined};
+
+		const [{date: minDate}, {date: maxDate}] = results;
 
 		return {
 			minDate: fromUnix(minDate),

@@ -19,17 +19,15 @@ function start(db) {
 // have another job that kicks off the first one at a certain time
 
 async function tick(db, stopJob) {
-	// check db to see what is the latest timestamp we have
-	// get the next chunk after that
-	// if that chunk holds the current time, then stop the job
-	// load that chunk from the pi
-	// insert it into the database
+	// getting there, next check the dates and things
 	try {
 
 		const limits = db.getLimits();
 
-		const minDate = limits.maxDate.getTime();
-		const maxDate = limits.maxDate.getTime() + 5 * 60 * 60;
+		const minDate = limits.maxDate
+			? limits.maxDate.getTime()
+			: new Date(2020, 3, 19).getTime();
+		const maxDate = minDate + 5 * 60 * 1000;
 
 		if (maxDate > new Date()) {
 			stopJob();
@@ -48,7 +46,8 @@ async function tick(db, stopJob) {
 
 		const data = deserialiseTemperatures(intArray);
 
-		log(typeof buffer, 'green');
+		db.insert(data.temperatures, 0);
+
 
 
 
@@ -57,6 +56,7 @@ async function tick(db, stopJob) {
 	} catch(error) {
 		stopJob();
 		log(`Error in tick: ${error}`, 'red');
+		throw error;
 	}
 }
 
