@@ -66,6 +66,13 @@ maintenance
 
 
 
+next up:
+	* start grabber only if enabled in config
+	* upgrade pi
+	* test grabber on pc getting from pi (saving log hasn't been tested yet
+	* run on bob grabbing from pi
+	* run on bob grabbing from darron
+
 backups
 	* sql backups
 		* every night the pi backs up the last day and saves it in the home dir

@@ -4,13 +4,16 @@ const maintenance = require('./maintenance/private/index');
 const grabber = require('./grabber/index');
 const Database = require('./common/database');
 const log = require('./common/log');
+const config = require('./common/config.json');
 
 const db = new Database('./database.db');
 db.open();
 
 const {stopThermometer, newDataEmitter} = thermometer.start(db);
 webInterface.start(db, newDataEmitter);
-const stopGrabber = grabber.start(db);
+const stopGrabber = config.grabber
+	? grabber.start(db)
+	: () => {};
 maintenance.start();
 
 process.on('exit', () => {
