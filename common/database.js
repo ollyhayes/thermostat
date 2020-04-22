@@ -47,7 +47,9 @@ class Database
 			this.insertCommand = this.db.transaction((temperatures, unixDate, precisionLevel) =>
 				temperatures.forEach(({temperature, id, date: individualDate}) =>
 					singleInsert.run({
-						date: toUnix(individualDate) || unixDate,
+						date: individualDate !== undefined
+							? toUnix(individualDate)
+							: unixDate,
 						temperature: toDbTemp(temperature),
 						precisionLevel,
 						thermometerId: id
