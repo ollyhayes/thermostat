@@ -1,7 +1,7 @@
 const moment = require('moment');
 const CronJob = require('cron').CronJob;
 const fetch = require('node-fetch');
-const fs = require('fs').promises;
+const fs = require('fs');
 const path = require('path');
 
 const log = require('../common/log');
@@ -40,7 +40,7 @@ async function tick(db, jobLog, stopJob) {
 		const minDate = limits.maxDate ? limits.maxDate.getTime() : new Date(2020, 3, 19).getTime();
 		const maxDate = minDate + 5 * 60 * 1000;
 
-		const url = `http://192.168.0.9:8081/data?minDate=${minDate}&maxDate=${maxDate}&precisionLevel=0`;
+		const url = `http://192.168.0.9:8080/data?minDate=${minDate}&maxDate=${maxDate}&precisionLevel=0`;
 
 		const requestStart = Date.now();
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
@@ -90,9 +90,9 @@ module.exports = {start};
 function printFinalLog(jobLog) {
 	const totalTime = jobLog.reduce((totalDuration, {requestDuration}) => totalDuration + requestDuration, 0);
 
-	log(`total time: ${totalTime}, average: ${totalTime / jobLog.length}, number of requests: ${jobLog.length}`);
+	log(`total time: ${totalTime}, average: ${totalTime / jobLog.length}, number of requests: ${jobLog.length}`, 'green');
 
-	fs.writeFile(path.join(__dirname, 'log.json'), JSON.stringify([jobLog]));
+	fs.writeFileSync(path.join(__dirname, 'log.json'), JSON.stringify(jobLog));
 }
 
 function printChunk({minDate, maxDate}) {
@@ -100,5 +100,5 @@ function printChunk({minDate, maxDate}) {
 }
 
 function printDate(time) {
-	return moment(time).format('HH:mm:ss').magenta;
+	return moment(time).format('YY-MM-DD HH:mm:ss').magenta;
 }
