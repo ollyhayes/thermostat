@@ -10,16 +10,17 @@ db.open();
 
 const {stopThermometer, newDataEmitter} = thermometer.start(db);
 webInterface.start(db, newDataEmitter);
-grabber.start(db);
+const stopGrabber = grabber.start(db);
 maintenance.start();
 
 process.on('exit', () => {
 	log('process exited');
 	stopThermometer();
+	stopGrabber();
 	db.close();
 	log('database closed');
 });
 
-process.on('SIGUSR1', () => db.backup());
+// process.on('SIGUSR1', () => db.backup());
 process.on('SIGINT', () => process.exit(0));
 process.on('SIGTERM', () => process.exit(0));

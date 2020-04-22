@@ -5,10 +5,11 @@ const {start} = require('./index');
 const db = new Database('../database.db');
 db.open();
 
-start(db);
+const stop = start(db);
 
 process.on('exit', () => {
 	log('process exited');
+	stop();
 	db.close();
 	log('database closed');
 });

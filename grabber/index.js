@@ -1,51 +1,51 @@
 const moment = require('moment');
 const CronJob = require('cron').CronJob;
 const fetch = require('node-fetch');
+const fs = require('fs').promises;
+const path = require('path');
+
 const log = require('../common/log');
 const {deserialiseTemperatures} = require('../web-interface/public/scripts/temperature-serialiser');
 
-let totalRequestTime = 0;
-let numberOfRequests = 0;
+let jobLog = []; // make this per-job
 
 function start(db) {
 	const job = new CronJob(
-		'*/10 * 9-17 * * *',
-		() => tick(db, () => job.stop()),
+		'*/10 * 7-17 * * *',
+		() => tick(db, jobLog, () => {
+			job.stop();
+			printFinalLog(jobLog);
+		}),
 		null,
 		true);
 
 	job.start();
 	log('starting job', 'green');
 
-	// const stopJob = () => job.stop()
+	return () => {
+		job.stop();
+		log('stopping grabber job', 'green');
+		printFinalLog(jobLog);
+	};
 }
 
 // have separate jobs for the other precision levels that run first
 // have another job that kicks off the first one at a certain time
 // record averages
 
-async function tick(db, stopJob) {
+async function tick(db, jobLog, stopJob) {
 	try {
 		const limits = db.getLimits();
 
 		const minDate = limits.maxDate ? limits.maxDate.getTime() : new Date(2020, 3, 19).getTime();
 		const maxDate = minDate + 5 * 60 * 1000;
 
-		if (maxDate > new Date()) {
-			stopJob();
-			log(`stopping job, reached ${printChunk({minDate, maxDate})}`, 'red');
-			log(`total time: ${totalRequestTime}, average: ${totalRequestTime / numberOfRequests}, number of requests: ${numberOfRequests}`);
-		}
-
 		const url = `http://192.168.0.9:8081/data?minDate=${minDate}&maxDate=${maxDate}&precisionLevel=0`;
 
 		const requestStart = Date.now();
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
 		const buffer = await response.buffer();
-
 		const requestDuration = Date.now() - requestStart;
-		totalRequestTime += requestDuration;
-		numberOfRequests++;
 
 		const intArray = new Int32Array(
 			buffer.buffer,
@@ -56,10 +56,27 @@ async function tick(db, stopJob) {
 
 		db.insert(data.temperatures, 0);
 
-		log(`logged ${data.temperatures.length} values. ${printChunk({minDate, maxDate})}, ` + 
-			`request: ${requestDuration}ms, request-size: ${intArray.byteLength} bytes`, 'green');
+		const logItem = {
+			minDate,
+			maxDate,
+			count: data.temperatures.length,
+			requestDuration,
+			requestSize: intArray.byteLength
+		};
+		jobLog.push(logItem);
+		// log(`chunk received: ${logItem}`);
+		log(`logged ${logItem.count} values. ${printChunk(logItem)}, ` + 
+			`request: ${requestDuration}ms, request-size: ${logItem.requestSize} bytes`, 'green');
 
-		// if total time > 1s stop job
+		// if (requestDuration > 1500) {
+		// 	log(`stopping job, single request took over 1500ms: ${requestDuration}ms`, 'red');
+		// 	stopJob();
+		// }
+
+		if (maxDate > new Date()) {
+			log(`stopping job, reached final chunk - ${printChunk({minDate, maxDate})}`, 'red');
+			stopJob();
+		}
 
 	} catch(error) {
 		stopJob();
@@ -69,6 +86,14 @@ async function tick(db, stopJob) {
 }
 
 module.exports = {start};
+
+function printFinalLog(jobLog) {
+	const totalTime = jobLog.reduce((totalDuration, {requestDuration}) => totalDuration + requestDuration, 0);
+
+	log(`total time: ${totalTime}, average: ${totalTime / jobLog.length}, number of requests: ${jobLog.length}`);
+
+	fs.writeFile(path.join(__dirname, 'log.json'), JSON.stringify([jobLog]));
+}
 
 function printChunk({minDate, maxDate}) {
 	return `chunk: [${printDate(minDate)}, ${printDate(maxDate)}]`.yellow;
