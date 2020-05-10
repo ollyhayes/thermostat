@@ -38,7 +38,7 @@ async function tick(db, jobLog, stopJob) {
 		const limits = db.getLimits();
 
 		const minDate = limits.maxDate ? limits.maxDate.getTime() : new Date(2020, 3, 19).getTime();
-		const maxDate = minDate + 5 * 60 * 1000;
+		const maxDate = minDate + 60 * 60 * 1000;
 
 		const url = `http://192.168.0.9:8080/data?minDate=${minDate}&maxDate=${maxDate}&precisionLevel=0`;
 
