@@ -37,7 +37,7 @@ async function tick(db, jobLog, stopJob) {
 	try {
 		const limits = db.getLimits();
 
-		const minDate = limits.maxDate ? limits.maxDate.getTime() : new Date(2020, 3, 19).getTime();
+		const minDate = limits.maxDate ? limits.maxDate.getTime() : (await getFirstRecordFromTarget()).getTime();
 		const maxDate = minDate + 60 * 60 * 1000;
 
 		const url = `http://192.168.0.9:8080/data?minDate=${minDate}&maxDate=${maxDate}&precisionLevel=0`;
@@ -101,4 +101,11 @@ function printChunk({minDate, maxDate}) {
 
 function printDate(time) {
 	return moment(time).format('YY-MM-DD HH:mm:ss').magenta;
+}
+
+async function getFirstRecordFromTarget() {
+	const response = await fetch('http://192.168.0.9:8080/limits');
+	const limits = await response.json();
+
+	return new Date(limits.minDate);
 }
