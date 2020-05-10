@@ -2,8 +2,10 @@ import { nest as d3Nest } from 'd3-collection';
 import { extent } from 'd3-array';
 
 import ajax from '../ajax';
-import {thermometers, dataType} from '../../../../common/config.json';
+import {thermometers, webInterface} from '../../../../common/config.json';
 import {deserialiseTemperatures} from '../temperature-serialiser';
+
+const dataType = webInterface.dataType;
 
 const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
 	...colours,

@@ -8,9 +8,7 @@ const {data} = require('./data');
 const app = new Koa();
 const router = new Router();
 
-const port = 8081;
-
-function start() {
+function start(port) {
 	router.get('/data', data());
 
 	app.use(compress());

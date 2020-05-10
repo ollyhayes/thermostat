@@ -1,11 +1,11 @@
 const fs = require('fs');
-const {thermometers, mockThermometers} = require('../common/config.json');
+const {thermometers, thermometerReader: {mock}} = require('../common/config.json');
 
 const regex = /t=(-?\d*)/;
 
 module.exports = function(serial)
 {
-	return mockThermometers
+	return mock
 		? getFakeTemperature(serial)
 		: new Promise((resolve, reject) =>
 		{

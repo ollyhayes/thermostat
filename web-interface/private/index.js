@@ -10,9 +10,8 @@ const router = new Router();
 const {data, limits} = require('./data');
 const initDataSocket = require('./data-ws');
 const initDataStream = require('./data-stream');
-const port = 8080;
 
-function start(db, newDataEmitter = []) {
+function start(port, db, newDataEmitter = []) {
 	router.get('/data', data(db));
 	router.get('/limits', limits(db));
 

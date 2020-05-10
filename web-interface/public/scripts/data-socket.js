@@ -1,5 +1,7 @@
-import {dataType} from '../../../common/config.json';
+import {webInterface} from '../../../common/config.json';
 import {deserialiseTemperatures} from './temperature-serialiser';
+
+const dataType = webInterface.dataType;
 
 export default function initialise(handleData) {
 	const socket = new WebSocket(`ws://${window.location.host}?content-type=${dataType}`);

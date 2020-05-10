@@ -1,7 +1,19 @@
 {
-	"mockThermometers": true,
-	"enableThermometerReading": true,
-	"dataType": "binary",
+	"thermometerReader": {
+		"enabled": true,
+		"mock": true
+	},
+	"maintenance": {
+		"port": 8081
+	},
+	"webInterface": {
+		"port": 8080,
+		"dataType": "binary"
+	},
+	"grabber": {
+		"enabled": false,
+		"grabFromUrl": "http://192.168.0.9/"
+	},
 	"thermometers": [
 		{
 			"name": "chip-1",

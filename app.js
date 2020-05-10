@@ -9,16 +9,17 @@ const config = require('./common/config.json');
 const db = new Database('./database.db');
 db.open();
 
-const {stopThermometer, newDataEmitter} = config.enableThermometerReading
+const {stopThermometer, newDataEmitter} = config.thermometerReader.enabled
 	? thermometer.start(db)
 	: {stopThermometer: () => {}, newDataEmitter: null};
 
-webInterface.start(db, newDataEmitter);
+webInterface.start(config.webInterface.port, db, newDataEmitter);
 
-const stopGrabber = config.grabber
+const stopGrabber = config.grabber.enabled
 	? grabber.start(db)
 	: () => {};
-maintenance.start();
+
+maintenance.start(config.maintenance.port);
 
 process.on('exit', () => {
 	log('process exited');
