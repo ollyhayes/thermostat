@@ -11,7 +11,7 @@ db.open();
 
 const {stopThermometer, newDataEmitter} = config.thermometerReader.enabled
 	? thermometer.start(db)
-	: {stopThermometer: () => {}, newDataEmitter: null};
+	: {stopThermometer: () => {}, newDataEmitter: undefined};
 
 webInterface.start(config.webInterface.port, db, newDataEmitter);
 
