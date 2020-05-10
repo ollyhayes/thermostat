@@ -6,7 +6,7 @@ const Database = require('./common/database');
 const log = require('./common/log');
 const config = require('./common/config.json');
 
-const db = new Database('./database.db');
+const db = new Database(config.database.location);
 db.open();
 
 const {stopThermometer, newDataEmitter} = config.thermometerReader.enabled

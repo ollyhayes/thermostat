@@ -1,11 +1,16 @@
+const path = require('path');
+const config = require('../../common/config.json');
 const Database = require('../../common/database');
 const log = require('../../common/log');
 const {start} = require('./index');
 
-const db = new Database('../database.db');
+const db = new Database(
+	path.isAbsolute(config.database.location)
+		? config.database.location
+		: path.resolve('..', config.database.location));
 db.open();
 
-start(db);
+start(config.webInterface.port, db);
 
 process.on('exit', () => {
 	log('process exited');

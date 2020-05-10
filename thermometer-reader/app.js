@@ -1,9 +1,14 @@
+const path = require('path');
+const config = require('../common/config.json');
 const Database = require('../common/database');
 const process = require('process');	
 const log = require('../common/log');
 const {start} = require('./index');
 
-const database = new Database('../database.db');
+const database = new Database(
+	path.isAbsolute(config.database.location)
+		? config.database.location
+		: path.resolve('..', config.database.location));
 database.open();
 
 const end = start(database);

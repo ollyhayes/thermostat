@@ -1,3 +1,4 @@
 const {start} = require('./index');
+const config = require('../../common/config.json');
 
-start();
+start(config.maintenance.port);

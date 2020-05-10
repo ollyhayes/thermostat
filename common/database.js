@@ -22,6 +22,7 @@ class Database
 {
 	constructor(filename)
 	{
+		console.log('opening: ', filename)
 		this.filename = filename || './database.db';
 	}
 
