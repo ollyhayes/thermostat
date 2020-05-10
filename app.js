@@ -9,8 +9,12 @@ const config = require('./common/config.json');
 const db = new Database('./database.db');
 db.open();
 
-const {stopThermometer, newDataEmitter} = thermometer.start(db);
+const {stopThermometer, newDataEmitter} = config.enableThermometerReading
+	? thermometer.start(db)
+	: {stopThermometer: () => {}, newDataEmitter: null};
+
 webInterface.start(db, newDataEmitter);
+
 const stopGrabber = config.grabber
 	? grabber.start(db)
 	: () => {};
