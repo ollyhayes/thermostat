@@ -11,7 +11,7 @@ function serialiseTemperatures({temperatures, chunk}) {
 		intArray[3] = chunk.special;
 	}
 
-	console.log(intArray[1]);
+	// console.log(intArray[1]);
 
 	for (let i = 0; i < temperatures.length; i++) {
 		const bufferInder = i * tempSize + chunkInfoSize;
