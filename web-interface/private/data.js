@@ -6,9 +6,12 @@ function data(db) {
 		const query = context.request.query;
 
 		const minDate = new Date(Number(query.minDate));
-		const maxDate = new Date(Number(query.maxDate));
+		const maxDate = query.maxDate && new Date(Number(query.maxDate));
+		const limit = query.limit && Number(query.limit);
 
-		const data = db.read(minDate, maxDate, query.precisionLevel);
+		const data = maxDate
+			? db.read(minDate, maxDate, query.precisionLevel)
+			: db.read(minDate, limit, query.precisionLevel);
 
 		if (context.request.headers.accept === 'application/octet-stream'
 			|| query.binary) {

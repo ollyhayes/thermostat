@@ -66,8 +66,23 @@ class Database
 		log(`logging temp - ${temperatures.length > 10 ? '-' : temperatures.map(t => t.temperature)} in ${duration}ms`, 'green');
 	}
 
-	read(minDate, maxDate, precisionLevel)
-	{
+	readLimit(minDate, limit, precisionLevel) {
+		if (!this.readLimitCommand)
+			this.readLimitCommand = this.db.prepare(
+				`select date, temperature, thermometerId
+				from temperatures
+				where date >= @minDate and precisionLevel = @precisionLevel
+				order by date
+				limit @limit;`);
+
+		return this._read(this.readLimitCommand, {
+			minDate: toUnix(minDate),
+			limit,
+			precisionLevel
+		});
+	}
+
+	read(minDate, maxDate, precisionLevel) {
 		if (!this.readCommand)
 			this.readCommand = this.db.prepare(
 				`select date, temperature, thermometerId
@@ -75,13 +90,17 @@ class Database
 				where date between @minDate and @maxDate and precisionLevel = @precisionLevel
 				order by date;`);
 
-		const time = Date.now();
-
-		const data = this.readCommand.all({
+		return this._read(this.readCommand, {
 			minDate: toUnix(minDate),
 			maxDate: toUnix(maxDate),
 			precisionLevel
 		});
+	}
+
+	_read(command, parameters) {
+		const time = Date.now();
+
+		const data = command.all(parameters);
 
 		log(`reading temp - ${data.length} values in ${Date.now() - time}ms`, 'cyan');
 

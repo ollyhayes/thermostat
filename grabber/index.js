@@ -38,9 +38,10 @@ async function tick(db, jobLog, stopJob) {
 		const limits = db.getLimits();
 
 		const minDate = limits.maxDate ? limits.maxDate.getTime() : (await getFirstRecordFromTarget()).getTime();
-		const maxDate = minDate + 60 * 60 * 1000;
+		const maxDate = undefined;//minDate + 60 * 60 * 1000;
+		const limit = 1500;
 
-		const url = `http://192.168.0.9:8080/data?minDate=${minDate}&maxDate=${maxDate}&precisionLevel=0`;
+		const url = `http://192.168.0.9:8080/data?minDate=${minDate}&limit=${limit}&precisionLevel=0`;
 
 		const requestStart = Date.now();
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
@@ -59,6 +60,7 @@ async function tick(db, jobLog, stopJob) {
 		const logItem = {
 			minDate,
 			maxDate,
+			limit,
 			count: data.temperatures.length,
 			requestDuration,
 			requestSize: intArray.byteLength
@@ -73,7 +75,8 @@ async function tick(db, jobLog, stopJob) {
 		// 	stopJob();
 		// }
 
-		if (maxDate > new Date()) {
+		// if (maxDate > new Date()) {
+		if (minDate + 20 * 60 * 10000 > new Date()) {
 			log(`stopping job, reached final chunk - ${printChunk({minDate, maxDate})}`, 'red');
 			stopJob();
 		}
@@ -96,7 +99,7 @@ function printFinalLog(jobLog) {
 }
 
 function printChunk({minDate, maxDate}) {
-	return `chunk: [${printDate(minDate)}, ${printDate(maxDate)}]`.yellow;
+	return `chunk: [${printDate(minDate)}, ${maxDate ? printDate(maxDate) : 'limited'}]`.yellow;
 }
 
 function printDate(time) {
