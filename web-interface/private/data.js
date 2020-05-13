@@ -11,7 +11,7 @@ function data(db) {
 
 		const data = maxDate
 			? db.read(minDate, maxDate, query.precisionLevel)
-			: db.read(minDate, limit, query.precisionLevel);
+			: db.readLimit(minDate, limit, query.precisionLevel);
 
 		if (context.request.headers.accept === 'application/octet-stream'
 			|| query.binary) {
