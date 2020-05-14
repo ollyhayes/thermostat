@@ -11,7 +11,8 @@ let jobLog = []; // make this per-job
 
 function start(db) {
 	const job = new CronJob(
-		'*/10 * 7-17 * * *',
+		'*/10 * * * * *',
+		// '*/10 * 7-17 * * *',
 		() => tick(db, jobLog, () => {
 			job.stop();
 			printFinalLog(jobLog);
@@ -45,6 +46,11 @@ async function tick(db, jobLog, stopJob) {
 
 		const requestStart = Date.now();
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
+
+		if (response.status !== 200) {
+			throw new Error(`Error fetching ${printChunk({minDate})} - ${await response.text().catch(() => '')}`);
+		}
+
 		const buffer = await response.buffer();
 		const requestDuration = Date.now() - requestStart;
 
