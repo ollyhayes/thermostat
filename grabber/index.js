@@ -8,12 +8,14 @@ const log = require('../common/log');
 const {deserialiseTemperatures} = require('../web-interface/public/scripts/temperature-serialiser');
 
 let jobLog = []; // make this per-job
+let precisionLevelsInProgress = [];
 
 function start(db) {
+	precisionLevelsInProgress = [0, 1, 2];
 	const job = new CronJob(
 		'*/10 * * * * *',
 		// '*/10 * 7-17 * * *',
-		() => tick(db, jobLog, () => {
+		() => tick(db, jobLog, precisionLevelsInProgress, () => {
 			job.stop();
 			printFinalLog(jobLog);
 		}),
@@ -30,13 +32,9 @@ function start(db) {
 	};
 }
 
-// have separate jobs for the other precision levels that run first
-// have another job that kicks off the first one at a certain time
-// record averages
-
-async function tick(db, jobLog, stopJob) {
+async function tick(db, jobLog, precisionLevelsInProgress, stopJob) {
 	try {
-		const jobDetails = await getJobDetails(db, jobLog[jobLog.length - 1]);
+		const jobDetails = await getJobDetails(db, jobLog[jobLog.length - 1], precisionLevelsInProgress);
 
 		const {data, responseDetails} = await getData(jobDetails);
 
@@ -52,8 +50,15 @@ async function tick(db, jobLog, stopJob) {
 		// }
 
 		if (jobDetails.minDate + 20 * 60 * 10000 > new Date()) {
-			log(`will stop job, reached final chunk - ${printChunk(jobDetails)}`, 'red');
-			stopJob();
+
+			log(`reached final chunk for precisionLevel - ${printChunk(jobDetails)}`, 'red');
+			precisionLevelsInProgress.splice(precisionLevelsInProgress.indexOf(responseDetails.precisionLevel));
+			
+			if (precisionLevelsInProgress.length === 0) {
+				log(`will stop job, reached final chunk - ${printChunk(jobDetails)}`, 'red');
+				stopJob();
+				return;
+			}
 		}
 
 	} catch(error) {
@@ -63,12 +68,17 @@ async function tick(db, jobLog, stopJob) {
 	}
 }
 
-async function getJobDetails(db, previousJob) {
+async function getJobDetails(db, previousJob, precisionLevelsInProgress) {
 	const wasError = previousJob && previousJob.error;
 
 	const precisionLevel = wasError
 		? previousJob.precisionLevel
-		: (previousJob && (previousJob.precisionLevel + 1) % 3) || 0;
+		// : (previousJob && (previousJob.precisionLevel + 1) % 3) || 0;
+		: previousJob && (
+				precisionLevelsInProgress[
+					(precisionLevelsInProgress.indexOf(previousJob.precisionLevel) + 1) % precisionLevelsInProgress.length
+
+				]) || 0;
 	const limits = db.getLimits(precisionLevel);
 
 	const minDate = wasError
