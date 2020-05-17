@@ -37,7 +37,6 @@ function start(db) {
 async function tick(db, jobLog, stopJob) {
 	try {
 		const limits = db.getLimits();
-		const precisionLevel = 0;
 
 		const lastJob = jobLog[jobLog.length - 1];
 		const wasError = lastJob && lastJob.error;
@@ -48,26 +47,26 @@ async function tick(db, jobLog, stopJob) {
 				? limits.maxDate.getTime()
 				: (await getFirstRecordFromTarget()).getTime();
 
-		const maxDate = undefined;//minDate + 60 * 60 * 1000;
-		const limit = 1500;
+		const jobDetails = {
+			minDate,
+			limit: 1500,
+			precisionLevel: 0,
+		};
 
-		const url = `http://192.168.0.9:8080/data?minDate=${minDate}&limit=${limit}&precisionLevel=${precisionLevel}`;
+		const url = `http://192.168.0.9:8080/data?minDate=${jobDetails.minDate}&limit=${jobDetails.limit}&precisionLevel=${jobDetails.precisionLevel}`;
 
 		const requestStart = Date.now();
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
 
 		if (response.status !== 200) {
-			const logItem = {
-				minDate,
-				maxDate,
-				limit,
-				precisionLevel,
-				error: true
+			const errorDetails = {
+				...jobDetails,
+				error: await response.text().catch(() => '')
 			};
 
-			jobLog.push(logItem);
+			jobLog.push(errorDetails);
 
-			log(`error fetching! ${printChunk(logItem)} - ${await response.text().catch(() => '')}`, 'red');
+			log(`error fetching! ${printChunk(errorDetails)} - ${errorDetails.error}`, 'red');
 
 			return;
 		}
@@ -84,26 +83,21 @@ async function tick(db, jobLog, stopJob) {
 
 		db.insert(data.temperatures, 0);
 
-		const logItem = {
-			minDate,
-			maxDate,
-			limit,
-			precisionLevel,
+		const responseDetails = {
+			...jobDetails,
 			count: data.temperatures.length,
 			requestDuration,
 			requestSize: intArray.byteLength
 		};
-		jobLog.push(logItem);
-		// log(`chunk received: ${logItem}`);
-		log(`logged ${logItem.count} values. ${printChunk(logItem)}, ` + 
-			`request: ${requestDuration}ms, request-size: ${logItem.requestSize} bytes`, 'green');
+		jobLog.push(responseDetails);
+		log(`logged ${responseDetails.count} values. ${printChunk(responseDetails)}, ` + 
+			`request: ${requestDuration}ms, request-size: ${responseDetails.requestSize} bytes`, 'green');
 
 		// if (requestDuration > 1500) {
 		// 	log(`stopping job, single request took over 1500ms: ${requestDuration}ms`, 'red');
 		// 	stopJob();
 		// }
 
-		// if (maxDate > new Date()) {
 		if (minDate + 20 * 60 * 10000 > new Date()) {
 			log(`stopping job, reached final chunk - ${printChunk({minDate, maxDate})}`, 'red');
 			stopJob();
