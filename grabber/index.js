@@ -64,20 +64,21 @@ async function tick(db, jobLog, stopJob) {
 }
 
 async function getJobDetails(db, previousJob) {
-	const limits = db.getLimits();
+	const precisionLevel = 0;
+	const limits = db.getLimits(precisionLevel);
 
 	const wasError = previousJob && previousJob.error;
 
 	const minDate = wasError
-		? previousJob.minDate + 60 * 1000
+		? previousJob.minDate + 60 * 1000 // should use different jumps for precisionLevel > 0
 		: limits.maxDate
 			? limits.maxDate.getTime()
-			: (await getFirstRecordFromTarget()).getTime();
+			: (await getFirstRecordFromTarget(precisionLevel)).getTime();
 
 	return {
 		minDate,
 		limit: 1500,
-		precisionLevel: 0,
+		precisionLevel,
 	};
 }
 
@@ -160,8 +161,8 @@ function printPrecisionLevel(precisionLevel) {
 	return ('level: ' + precisionLevel)[colour];
 }
 
-async function getFirstRecordFromTarget() {
-	const response = await fetch('http://192.168.0.9:8080/limits');
+async function getFirstRecordFromTarget(precisionLevel) {
+	const response = await fetch(`http://192.168.0.9:8080/limits?precisionLevel=${precisionLevel}`);
 	const limits = await response.json();
 
 	return new Date(limits.minDate);

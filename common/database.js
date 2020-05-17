@@ -119,8 +119,8 @@ class Database
 					union select max(date) as date from temperatures
 					order by date`),
 				constrained: this.db.prepare(
-					`select min(date) as date from temperatures from temperatures where precisionLevel = @precisionLevel
-					union select max(date) as date from temperatures from temperatures where precisionLevel = @precisionLevel
+					`select min(date) as date from temperatures where precisionLevel = @precisionLevel
+					union select max(date) as date from temperatures where precisionLevel = @precisionLevel
 					order by date`),
 			};
 		}
