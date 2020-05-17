@@ -73,19 +73,17 @@ async function getJobDetails(db, previousJob, precisionLevelsInProgress) {
 
 	const precisionLevel = wasError
 		? previousJob.precisionLevel
-		// : (previousJob && (previousJob.precisionLevel + 1) % 3) || 0;
 		: previousJob && (
 				precisionLevelsInProgress[
 					(precisionLevelsInProgress.indexOf(previousJob.precisionLevel) + 1) % precisionLevelsInProgress.length
-
 				]) || 0;
 	const limits = db.getLimits(precisionLevel);
 
 	const minDate = wasError
 		? previousJob.minDate + 60 * 1000 // should use different jumps for precisionLevel > 0
 		: limits.maxDate
-			? limits.maxDate.getTime()
-			: (await getFirstRecordFromTarget(precisionLevel)).getTime();
+			? limits.maxDate.getTime() + 1000
+			: (await getFirstRecordFromTarget(precisionLevel)).getTime() + 1000;
 
 	return {
 		minDate,
