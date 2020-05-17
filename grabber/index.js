@@ -36,70 +36,23 @@ function start(db) {
 
 async function tick(db, jobLog, stopJob) {
 	try {
-		const limits = db.getLimits();
+		const jobDetails = await getJobDetails(db, jobLog[jobLog.length - 1]);
 
-		const lastJob = jobLog[jobLog.length - 1];
-		const wasError = lastJob && lastJob.error;
+		const {data, responseDetails} = await getData(jobDetails);
 
-		const minDate = wasError
-			? lastJob.minDate + 60 * 1000
-			: limits.maxDate
-				? limits.maxDate.getTime()
-				: (await getFirstRecordFromTarget()).getTime();
+		if (!responseDetails.error)
+			db.insert(data.temperatures, 0);
 
-		const jobDetails = {
-			minDate,
-			limit: 1500,
-			precisionLevel: 0,
-		};
-
-		const url = `http://192.168.0.9:8080/data?minDate=${jobDetails.minDate}&limit=${jobDetails.limit}&precisionLevel=${jobDetails.precisionLevel}`;
-
-		const requestStart = Date.now();
-		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
-
-		if (response.status !== 200) {
-			const errorDetails = {
-				...jobDetails,
-				error: await response.text().catch(() => '')
-			};
-
-			jobLog.push(errorDetails);
-
-			log(`error fetching! ${printChunk(errorDetails)} - ${errorDetails.error}`, 'red');
-
-			return;
-		}
-
-		const buffer = await response.buffer();
-		const requestDuration = Date.now() - requestStart;
-
-		const intArray = new Int32Array(
-			buffer.buffer,
-			buffer.byteOffset,
-			buffer.length / Int32Array.BYTES_PER_ELEMENT);
-		
-		const data = deserialiseTemperatures(intArray);
-
-		db.insert(data.temperatures, 0);
-
-		const responseDetails = {
-			...jobDetails,
-			count: data.temperatures.length,
-			requestDuration,
-			requestSize: intArray.byteLength
-		};
 		jobLog.push(responseDetails);
-		log(`logged ${responseDetails.count} values. ${printChunk(responseDetails)}, ` + 
-			`request: ${requestDuration}ms, request-size: ${responseDetails.requestSize} bytes`, 'green');
+		printDetails(responseDetails);
 
 		// if (requestDuration > 1500) {
 		// 	log(`stopping job, single request took over 1500ms: ${requestDuration}ms`, 'red');
 		// 	stopJob();
 		// }
 
-		if (minDate + 20 * 60 * 10000 > new Date()) {
-			log(`stopping job, reached final chunk - ${printChunk({minDate, maxDate})}`, 'red');
+		if (jobDetails.minDate + 20 * 60 * 10000 > new Date()) {
+			log(`will stop job, reached final chunk - ${printChunk(jobDetails)}`, 'red');
 			stopJob();
 		}
 
@@ -107,6 +60,64 @@ async function tick(db, jobLog, stopJob) {
 		stopJob();
 		log(`Error in tick: ${error}`, 'red');
 		throw error;
+	}
+}
+
+async function getJobDetails(db, previousJob) {
+	const limits = db.getLimits();
+
+	const wasError = previousJob && previousJob.error;
+
+	const minDate = wasError
+		? previousJob.minDate + 60 * 1000
+		: limits.maxDate
+			? limits.maxDate.getTime()
+			: (await getFirstRecordFromTarget()).getTime();
+
+	return {
+		minDate,
+		limit: 1500,
+		precisionLevel: 0,
+	};
+}
+
+async function getData(jobDetails) {
+	const {minDate, limit, precisionLevel} = jobDetails;
+	const url = `http://192.168.0.9:8080/data?minDate=${minDate}&limit=${limit}&precisionLevel=${precisionLevel}`;
+
+	const requestStart = Date.now();
+	const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
+
+	if (response.status !== 200)
+		// throw new Error(await response.text());
+		return {
+			...jobDetails,
+			error: await response.text()
+		};
+
+	const buffer = await response.buffer();
+	const requestDuration = Date.now() - requestStart;
+
+	const intArray = new Int32Array(
+		buffer.buffer,
+		buffer.byteOffset,
+		buffer.length / Int32Array.BYTES_PER_ELEMENT);
+
+	const data = deserialiseTemperatures(intArray);
+
+	const responseDetails = {
+		...jobDetails,
+		count: data.temperatures.length,
+		requestDuration,
+		requestSize: intArray.byteLength
+	};
+	
+	return {
+		responseDetails: {
+			...jobDetails,
+			...responseDetails
+		},
+		data
 	}
 }
 
@@ -120,8 +131,19 @@ function printFinalLog(jobLog) {
 	fs.writeFileSync(path.join(__dirname, 'log.json'), JSON.stringify(jobLog));
 }
 
+function printDetails(details) {
+	const {minDate, limit, precisionLevel, count, requestDuration, requestSize, error} = details;
+
+	if (error) {
+		log(`error fetching! ${printChunk(details)} - ${errorDetails.error}`, 'red');
+	} else {
+		log(`logged ${count} values. ${printChunk(details)}, ` + 
+			`request: ${requestDuration}ms, request-size: ${requestSize} bytes`, 'green');
+	}
+}
+
 function printChunk({minDate, precisionLevel}) {
-	return `chunk: [${printDate(minDate)}, ${printPrecisionLevel(precisionLevel)}]`.yellow;
+	return 'chunk'.yellow + `: [${printDate(minDate)}, ${printPrecisionLevel(precisionLevel)}]`.yellow;
 }
 
 function printDate(time) {
