@@ -41,7 +41,7 @@ async function tick(db, jobLog, stopJob) {
 		const {data, responseDetails} = await getData(jobDetails);
 
 		if (!responseDetails.error)
-			db.insert(data.temperatures, 0);
+			db.insert(data.temperatures, responseDetails.precisionLevel);
 
 		jobLog.push(responseDetails);
 		printDetails(responseDetails);
@@ -64,10 +64,12 @@ async function tick(db, jobLog, stopJob) {
 }
 
 async function getJobDetails(db, previousJob) {
-	const precisionLevel = 0;
-	const limits = db.getLimits(precisionLevel);
-
 	const wasError = previousJob && previousJob.error;
+
+	const precisionLevel = wasError
+		? previousJob.precisionLevel
+		: (previousJob && (previousJob.precisionLevel + 1) % 3) || 0;
+	const limits = db.getLimits(precisionLevel);
 
 	const minDate = wasError
 		? previousJob.minDate + 60 * 1000 // should use different jumps for precisionLevel > 0
