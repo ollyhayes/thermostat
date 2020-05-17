@@ -71,10 +71,11 @@ next up:
 		* upgrade pi
 		* test grabber on pc getting from pi (saving log hasn't been tested yet
 		* run on bob grabbing from pi
-		* run on bob grabbing from darron
-	* other precision levels
-	* merge logs instead of overwriting
+	* run on bob grabbing from darron
+		* other precision levels
+		* merge logs instead of overwriting
 	* bring back the thing where it stops if there's a really slow request going on?
+	* get backup of current database with rsync & aaron's help
 
 backups
 	* sql backups
