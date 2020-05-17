@@ -38,7 +38,15 @@ async function tick(db, jobLog, stopJob) {
 	try {
 		const limits = db.getLimits();
 
-		const minDate = limits.maxDate ? limits.maxDate.getTime() : (await getFirstRecordFromTarget()).getTime();
+		const lastJob = jobLog[jobLog.length - 1];
+		const wasError = lastJob && lastJob.error;
+
+		const minDate = wasError
+			? lastJob.minDate + 60 * 1000
+			: limits.maxDate
+				? limits.maxDate.getTime()
+				: (await getFirstRecordFromTarget()).getTime();
+
 		const maxDate = undefined;//minDate + 60 * 60 * 1000;
 		const limit = 1500;
 
@@ -48,7 +56,18 @@ async function tick(db, jobLog, stopJob) {
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
 
 		if (response.status !== 200) {
-			throw new Error(`Error fetching ${printChunk({minDate})} - ${await response.text().catch(() => '')}`);
+			const logItem = {
+				minDate,
+				maxDate,
+				limit,
+				error: true
+			};
+
+			jobLog.push(logItem);
+
+			log(`error fetching! ${printChunk(logItem)} - ${await response.text().catch(() => '')}`, 'red');
+
+			return;
 		}
 
 		const buffer = await response.buffer();
