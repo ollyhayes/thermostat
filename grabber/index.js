@@ -141,7 +141,7 @@ function printFinalLog(jobLog) {
 
 	log(`total time: ${totalTime}, average: ${totalTime / jobLog.length}, number of requests: ${jobLog.length}`, 'green');
 
-	fs.writeFileSync(path.join(__dirname, 'log.json'), JSON.stringify(jobLog));
+	fs.writeFileSync(path.join(__dirname, `log-${printDate()}.json`), JSON.stringify(jobLog));
 }
 
 function printDetails(details) {
@@ -160,7 +160,7 @@ function printChunk({minDate, precisionLevel}) {
 }
 
 function printDate(time) {
-	return moment(time).format('YY-MM-DD HH:mm:ss').magenta;
+	return moment(time).format('YY-MM-DD_HH:mm:ss').magenta;
 }
 
 function printPrecisionLevel(precisionLevel) {
