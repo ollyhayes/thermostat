@@ -37,6 +37,7 @@ function start(db) {
 async function tick(db, jobLog, stopJob) {
 	try {
 		const limits = db.getLimits();
+		const precisionLevel = 0;
 
 		const lastJob = jobLog[jobLog.length - 1];
 		const wasError = lastJob && lastJob.error;
@@ -50,7 +51,7 @@ async function tick(db, jobLog, stopJob) {
 		const maxDate = undefined;//minDate + 60 * 60 * 1000;
 		const limit = 1500;
 
-		const url = `http://192.168.0.9:8080/data?minDate=${minDate}&limit=${limit}&precisionLevel=0`;
+		const url = `http://192.168.0.9:8080/data?minDate=${minDate}&limit=${limit}&precisionLevel=${precisionLevel}`;
 
 		const requestStart = Date.now();
 		const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
@@ -60,6 +61,7 @@ async function tick(db, jobLog, stopJob) {
 				minDate,
 				maxDate,
 				limit,
+				precisionLevel,
 				error: true
 			};
 
@@ -86,6 +88,7 @@ async function tick(db, jobLog, stopJob) {
 			minDate,
 			maxDate,
 			limit,
+			precisionLevel,
 			count: data.temperatures.length,
 			requestDuration,
 			requestSize: intArray.byteLength
@@ -123,12 +126,22 @@ function printFinalLog(jobLog) {
 	fs.writeFileSync(path.join(__dirname, 'log.json'), JSON.stringify(jobLog));
 }
 
-function printChunk({minDate, maxDate}) {
-	return `chunk: [${printDate(minDate)}, ${maxDate ? printDate(maxDate) : 'limited'}]`.yellow;
+function printChunk({minDate, precisionLevel}) {
+	return `chunk: [${printDate(minDate)}, ${printPrecisionLevel(precisionLevel)}]`.yellow;
 }
 
 function printDate(time) {
 	return moment(time).format('YY-MM-DD HH:mm:ss').magenta;
+}
+
+function printPrecisionLevel(precisionLevel) {
+	const colour = precisionLevel == 0
+		? 'green'
+		: precisionLevel == 1
+			? 'yellow'
+			: 'red';
+
+	return ('level: ' + precisionLevel)[colour];
 }
 
 async function getFirstRecordFromTarget() {

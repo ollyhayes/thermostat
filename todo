@@ -71,7 +71,8 @@ next up:
 		* upgrade pi
 		* test grabber on pc getting from pi (saving log hasn't been tested yet
 		* run on bob grabbing from pi
-	* run on bob grabbing from darron
+		* run on bob grabbing from darron
+	* other precision levels
 	* merge logs instead of overwriting
 
 backups
