@@ -27,7 +27,9 @@ function data(db) {
 function limits(db) {
 	return async function(context)
 	{
-		const data = db.getLimits();
+		const query = context.request.query;
+		const data = db.getLimits(query.precisionLevel);
+
 		context.body = data;
 	};
 }

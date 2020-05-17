@@ -111,14 +111,22 @@ class Database
 		}));
 	}
 
-	getLimits() {
-		if (!this.limitCommand)
-			this.limitCommand = this.db.prepare(
-				`select min(date) as date from temperatures
-				union select max(date) as date from temperatures
-				order by date`);
+	getLimits(precisionLevel) {
+		if (!this.limitCommand) {
+			this.limitCommand = {
+				unconstrained: this.db.prepare(
+					`select min(date) as date from temperatures
+					union select max(date) as date from temperatures
+					order by date`),
+				constrained: this.db.prepare(
+					`select min(date) as date from temperatures from temperatures where precisionLevel = @precisionLevel
+					union select max(date) as date from temperatures from temperatures where precisionLevel = @precisionLevel
+					order by date`),
+			};
+		}
 
-		const results = this.limitCommand.all();
+		const limitCommand = this.limitCommand[precisionLevel === undefined ? 'unconstrained' : 'constrained'] 
+		const results = limitCommand.all({precisionLevel});
 
 		if (results.length !== 2)
 			return {minDate: undefined, maxDate: undefined};
