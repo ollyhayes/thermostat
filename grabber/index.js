@@ -151,11 +151,11 @@ function printDetails(details) {
 }
 
 function printChunk({minDate, precisionLevel}) {
-	return 'chunk'.yellow + `: [${printDate(minDate)}, ${printPrecisionLevel(precisionLevel)}]`.yellow;
+	return 'chunk'.yellow + `: [${printDate(minDate).magenta}, ${printPrecisionLevel(precisionLevel)}]`.yellow;
 }
 
 function printDate(time) {
-	return moment(time).format('YY-MM-DD_HH:mm:ss').magenta;
+	return moment(time).format('YY-MM-DD_HH:mm:ss');
 }
 
 function printPrecisionLevel(precisionLevel) {
