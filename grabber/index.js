@@ -102,8 +102,10 @@ async function getData(jobDetails) {
 	if (response.status !== 200)
 		// throw new Error(await response.text());
 		return {
-			...jobDetails,
-			error: await response.text()
+			responseDetails: {
+				...jobDetails,
+				error: await response.text()
+			}
 		};
 
 	const buffer = await response.buffer();
@@ -115,18 +117,13 @@ async function getData(jobDetails) {
 		buffer.length / Int32Array.BYTES_PER_ELEMENT);
 
 	const data = deserialiseTemperatures(intArray);
-
-	const responseDetails = {
-		...jobDetails,
-		count: data.temperatures.length,
-		requestDuration,
-		requestSize: intArray.byteLength
-	};
 	
 	return {
 		responseDetails: {
 			...jobDetails,
-			...responseDetails
+			count: data.temperatures.length,
+			requestDuration,
+			requestSize: intArray.byteLength
 		},
 		data
 	}
@@ -146,7 +143,7 @@ function printDetails(details) {
 	const {minDate, limit, precisionLevel, count, requestDuration, requestSize, error} = details;
 
 	if (error) {
-		log(`error fetching! ${printChunk(details)} - ${errorDetails.error}`, 'red');
+		log(`error fetching! ${printChunk(details)} - ${error}`, 'red');
 	} else {
 		log(`logged ${count} values. ${printChunk(details)}, ` + 
 			`request: ${requestDuration}ms, request-size: ${requestSize} bytes`, 'green');
