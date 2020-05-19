@@ -75,6 +75,7 @@ next up:
 		* other precision levels
 		* merge logs instead of overwriting
 	* bring back the thing where it stops if there's a really slow request going on?
+	* also timeout if the request is going on too long
 	* get backup of current database with rsync & aaron's help
 
 backups
