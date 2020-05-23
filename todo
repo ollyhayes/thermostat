@@ -1,11 +1,11 @@
-* fix the kink on page load - is it that we're not using the date from the database? maybe create the date in index.js
-* the merging logic doesn't really belong in the chunk-store
-make the legend show grey when it hasn't received an update
-make the legend in a better position
+	* fix the kink on page load - is it that we're not using the date from the database? maybe create the date in index.js
+	* the merging logic doesn't really belong in the chunk-store
+	make the legend show grey when it hasn't received an update
+	make the legend in a better position
 
-zoom in url
-	better names for saver
-	get rid of those mutations
+	zoom in url
+		better names for saver
+		get rid of those mutations
 
 wierd stuff where we're getting two results per second, see: 22:18 on Sat 17th August, when I switched out the Rpi
 have websocket reconnect
@@ -54,6 +54,9 @@ live updates
 1399.08
 
 
+web-interface
+	don't join up the lines
+
 maintenance
 	thermometers
 		cross/tick
@@ -71,6 +74,7 @@ next up:
 		* upgrade pi
 		* test grabber on pc getting from pi (saving log hasn't been tested yet
 		* run on bob grabbing from pi
+	* grab the other precision levels
 	* run on bob grabbing from darron
 		* other precision levels
 		* merge logs instead of overwriting
