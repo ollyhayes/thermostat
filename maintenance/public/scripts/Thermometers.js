@@ -43,12 +43,12 @@ export default function Thermometers() {
 			<tbody>
 				{thermometers.map(thermometer => 
 					<tr key={thermometer.id} style={{color: thermometer.colour}}>
-						<td>{thermometer.id}</td>
+						<td className="numeric">{thermometer.id}</td>
 						<td>{thermometer.name}</td>
 						<td>{thermometer.serial}</td>
 						<td>{thermometer.type}</td>
 						<td>{thermometer.disabled ? 'true' : 'false'}</td>
-						<td>{`${formatTemperature(thermometer.temperature)}`}</td>
+						<td className="numeric">{`${formatTemperature(thermometer.temperature)}`}</td>
 					</tr>
 				)}
 			</tbody>

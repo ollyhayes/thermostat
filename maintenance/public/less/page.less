@@ -54,7 +54,16 @@ div.thermometers {
 		border: @border 1px solid;
 		min-width: 10px;
 		padding: 3px 5px;
+
+		&:last-child {
+			min-width: 70px;
+		}
+
+		&.numeric {
+			text-align: right;
+		}
 	}
+
 }
 
 // .legend {

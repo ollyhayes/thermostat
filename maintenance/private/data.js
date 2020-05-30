@@ -22,7 +22,6 @@ function data() {
 		try {
 			const [directoryContents, config] = await Promise.all([
 				getConnectedThermometers,
-				// (async () => JSON.parse(await fs.readFile(configFile)))(),
 				fs.readFile(configFile, {encoding: 'utf8'}).then(JSON.parse)
 			]);
 
