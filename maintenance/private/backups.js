@@ -14,18 +14,22 @@ function backups() {
 			context.body = logs
 				.filter(log => log.length > 0)
 				.map(log => ({
-					startTime: log[0].minDate,
-					numberOfRequests: log.length,
+					startTime: getRequestTime(log[0]),
+					endTime: getRequestTime(log[log.length - 1]),
 					maxRequestTime: log.reduce((max, next) => Math.max(max, next.requestDuration || 0), 0),
-					requestsOverX: log.filter(request => request.requestDuration > 4000).length
+					requestsOverX: log.filter(request => request.requestDuration > 4000).length,
+					requests: log.map(({minDate, requestDuration}) => ({minDate, requestDuration}))
 				}));
-
-
 		} catch (error) {
 			console.log(`Error: ${error}`);
 			context.status = 500;
 		}
 	};
+}
+
+function getRequestTime(request) {
+	// Some old log files don't have requestTime
+	return request.requestTime || request.minDate;
 }
 
 

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState as useStateReact } from 'react';
 import { useState } from './store';
 import {timeFormat} from 'd3-time-format';
+import { line } from 'd3-shape';
+import { scaleTime } from 'd3';
 
 const specifier = '%Y-%m-%d %H-%M-%S';
 const formatTime = timeFormat(specifier);
@@ -29,17 +31,39 @@ export default function Backups() {
 				</tr>
 			</thead>
 			<tbody>
-				{backups.map(log => 
-					<tr key={log.startTime}>
+				{backups.map((log, index) =>
+					<tr key={index}>
 						<td>{formatTime(log.startTime)}</td>
-						<td className="numeric">{log.numberOfRequests}</td>
+						<td className="numeric">{log.requests.length}</td>
 						<td></td>
 						<td className="numeric">{log.maxRequestTime}ms</td>
 						<td className="numeric">{log.requestsOverX}</td>
-						<td></td>
+						<td><Chart log={log}/></td>
 					</tr>
 				)}
 			</tbody>
 		</table>
 	</div>;
+}
+
+function Chart({log}) {
+	const [data, setData] = useStateReact();
+	useEffect(() => {
+		const xScale = scaleTime()
+			.domain([log.startTime, log.endTime])
+			.range([0, 500]);
+		const yScale = scaleTime()
+			.domain([0, log.maxRequestTime])
+			.range([0, 200]);
+
+		const lineGenerator = line()
+			.x(d => xScale(d.minDate))
+			.y(d => yScale(d.requestDuration));
+
+		setData(lineGenerator(log.requests));
+	});
+
+	return <svg viewBox="0 0 500 200">
+		<path d={data}/>
+	</svg>;
 }
