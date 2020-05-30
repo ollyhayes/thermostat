@@ -66,6 +66,23 @@ maintenance
 	timeout on temperature reading
 	rpi off/restart button
 	reset server button? not unless we need it
+	statistics
+		number of rows in the database
+		max temperatur detected + date
+		min temperature detected + date
+	backup logs
+		backups in a table, for each row:
+			number of requests
+			total data transfered
+			max request time
+			graph?
+
+	***
+	bug with fully zooming out keeps forgetting and loading in a loop!
+	***
+
+
+		
 
 
 
@@ -81,6 +98,11 @@ next up:
 	* bring back the thing where it stops if there's a really slow request going on?
 	* also timeout if the request is going on too long
 	* get backup of current database with rsync & aaron's help
+	* save the log sometimes?
+	* write log on ctrl-c
+
+	* fix the config disabled/type flag, make them independent
+	* fix the precision levels on the pump version
 
 backups
 	* sql backups

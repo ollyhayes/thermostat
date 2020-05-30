@@ -123,7 +123,8 @@ async function getData(jobDetails) {
 			...jobDetails,
 			count: data.temperatures.length,
 			requestDuration,
-			requestSize: intArray.byteLength
+			requestSize: intArray.byteLength,
+			requestTime: requestStart
 		},
 		data
 	}
@@ -155,7 +156,7 @@ function printChunk({minDate, precisionLevel}) {
 }
 
 function printDate(time) {
-	return moment(time).format('YY-MM-DD_HH:mm:ss');
+	return moment(time).format('YYYY-MM-DD_HH:mm:ss');
 }
 
 function printPrecisionLevel(precisionLevel) {
