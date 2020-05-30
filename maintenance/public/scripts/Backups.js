@@ -59,7 +59,7 @@ function Chart({log}) {
 			.domain([log.startTime, log.endTime])
 			.range([0, 500]);
 		const yScale = scaleTime()
-			.domain([0, log.maxRequestTime])
+			.domain([0, log.requests.reduce((max, next) => Math.max(max, next.requestDuration), 0)])
 			.range([0, 200]);
 
 		const lineGenerator = line()
