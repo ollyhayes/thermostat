@@ -1,12 +1,25 @@
 const fs = require('fs').promises;
 const path = require('path');
+const logsDirectory = '../grabber/logs/'
 
 function backups() {
 	return async function(context) {
 		try {
-			const logFiles = await fs.readdir('../grabber/logs/');
+			const logFiles = await fs.readdir(logsDirectory);
 
-			context.body = logFiles;
+			const logs = await Promise.all(logFiles.map(file =>
+				fs.readFile(path.join(logsDirectory, file), {encoding: 'utf8'}).then(JSON.parse))
+			);
+
+			context.body = logs
+				.filter(log => log.length > 0)
+				.map(log => ({
+					startTime: log[0].minDate,
+					numberOfRequests: log.length,
+					maxRequestTime: log.reduce((max, next) => Math.max(max, next.requestDuration || 0), 0),
+					requestsOverX: log.filter(request => request.requestDuration > 4000).length
+				}));
+
 
 		} catch (error) {
 			console.log(`Error: ${error}`);

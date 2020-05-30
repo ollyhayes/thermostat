@@ -2,7 +2,15 @@ import React from 'react';
 import { useState } from './store';
 
 export default function Backups() {
-	const {backups} = useState();
+	const {backups: {backups, error}} = useState();
+
+	if (!backups) {
+		return <div>
+			{error
+				? <span>Error loading data: {error}</span>
+				: <span>Loading</span>}
+		</div>
+	}
 
 	return <div className='backups'>
 		<table>
@@ -17,31 +25,17 @@ export default function Backups() {
 				</tr>
 			</thead>
 			<tbody>
-				{/* {thermometers.map(thermometer => 
-					<tr key={thermometer.id} style={{color: thermometer.colour}}>
-						<td className="numeric">{thermometer.id}</td>
-						<td>{thermometer.name}</td>
-						<td>{thermometer.serial}</td>
-						<td>{thermometer.type}</td>
-						<td>{thermometer.disabled ? 'true' : 'false'}</td>
-						<td className="numeric">{`${formatTemperature(thermometer.temperature)}`}</td>
-					</tr>
-				)} */}
-			</tbody>
-		</table>
-		{/* <table>
-			<tbody>
-				{data.map(thermometer =>
-					<tr key={thermometer.id} onClick={() => {
-						const inner = thermometers.find(inner => inner.id === thermometer.id);
-						inner.hidden = !inner.hidden;
-						forceUpdate();
-					}}>
-						<td style={{color: thermometer.colour}}>{thermometer.name}</td>
-						<td className="numeric" style={{color: isCurrent ? thermometer.colour : 'grey' }}>{formatTemperature(thermometer.temperature)}</td>
+				{backups.map(log => 
+					<tr key={log.startTime}>
+						<td>{log.startTime}</td>
+						<td>{log.numberOfRequests}</td>
+						<td></td>
+						<td>{log.maxRequestTime}</td>
+						<td>{log.requestsOverX}</td>
+						<td></td>
 					</tr>
 				)}
 			</tbody>
-		</table> */}
+		</table>
 	</div>;
 }

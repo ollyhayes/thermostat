@@ -3,13 +3,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import { Provider, createStore } from './store.js';
-import { fetchData } from './actions';
+import { fetchData, fetchBackups } from './actions';
 
 const store = createStore({
 	connectedThermometers: {
 		config: undefined,
 		fetchingData: false,
 		error: false
+	},
+	backups: {
+		error: false,
+		backups: undefined
 	}
 });
 
@@ -24,4 +28,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		await fetchData(store);
 		setTimeout(fetchLoop, 1000);
 	})();
+
+	await fetchBackups(store);
 });

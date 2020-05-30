@@ -34,6 +34,28 @@ export async function fetchData(store) {
 	}
 }
 
+export async function fetchBackups(store) {
+	try {
+		const backups = await (await fetch('/backups')).json();
+
+		store.updateValue(state => ({
+			...state,
+			backups: {
+				backups: backups,
+				error: false
+			}
+		}));
+	} catch (error) {
+		store.updateValue(state => ({
+			...state,
+			backups: {
+				data: undefined,
+				error
+			}
+		}));
+	}
+}
+
 // export async function createNote(store, newNote) {
 // 	newNote = {
 // 		...newNote,
