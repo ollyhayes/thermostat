@@ -1,10 +1,24 @@
 import React from 'react';
-import { useState } from './store';
-
 import {format} from 'd3-format';
 
+import { useState } from './store';
+import Icon from './Icon';
+
 export default function Thermometers() {
-	const {config} = useState();
+	const {connectedThermometers: {fetchingData, error}} = useState();
+
+	return error
+		? <span>{error.toString()}</span>
+		: <>
+			<div className="icon-wrapper">
+				<Icon iconName="sync" spinning={true} paused={!fetchingData}/>
+			</div>
+			<ThermometersTable/>
+		</>;
+}
+
+function ThermometersTable() {
+	const {connectedThermometers: {config}} = useState();
 	const thermometers = config && config.thermometers || [];
 
 	// const [currentTime, setCurrentTime] = useState(new Date());

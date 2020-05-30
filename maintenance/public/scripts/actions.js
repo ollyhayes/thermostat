@@ -5,7 +5,10 @@
 export async function fetchData(store) {
 	store.updateValue(state => ({
 		...state,
-		fetchingData: true
+		connectedThermometers: {
+			...state.connectedThermometers,
+			fetchingData: true
+		}
 	}));
 
 	try {
@@ -13,16 +16,20 @@ export async function fetchData(store) {
 
 		store.updateValue(state => ({
 			...state,
-			config: config,
-			fetchingData: false,
-			error: false
+			connectedThermometers: {
+				config: config,
+				fetchingData: false,
+				error: false
+			}
 		}));
 	} catch (error) {
 		store.updateValue(state => ({
 			...state,
-			config: undefined,
-			fetchingData: false,
-			error
+			connectedThermometers: {
+				config: undefined,
+				fetchingData: false,
+				error
+			}
 		}));
 	}
 }

@@ -6,9 +6,11 @@ import { Provider, createStore } from './store.js';
 import { fetchData } from './actions';
 
 const store = createStore({
-	config: undefined,
-	fetchingData: false,
-	error: false
+	connectedThermometers: {
+		config: undefined,
+		fetchingData: false,
+		error: false
+	}
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
