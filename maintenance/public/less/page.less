@@ -4,39 +4,14 @@
 @foreground: #cccccc;
 
 html,body {
-	margin: 0;
-	background: #18181A;
-}
-
-body {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
+	background: @background;
 }
 
 div.react-root {
-
-	background: @background;
 	font-size: 20px;
 	font-family: monospace;
-	border: 1px solid @border;
-}
-
-div.icon-wrapper {
-	margin: 20px;
 	display: flex;
-	justify-content: flex-end;
-
-	svg {
-		padding: 5px;
-		transition: fill 0.1s;
-		fill: lime;
-
-		&:not(.paused) {
-			fill: red;
-		}
-	}
+	flex-wrap: wrap;
 }
 
 table {
@@ -54,7 +29,24 @@ table {
 }
 
 div.thermometers {
+	div.icon-wrapper {
+		margin: 20px;
+		display: flex;
+		justify-content: flex-end;
+
+		svg {
+			padding: 5px;
+			transition: fill 0.1s;
+			fill: lime;
+
+			&:not(.paused) {
+				fill: red;
+			}
+		}
+	}
+
 	margin: 20px;
+	border: 1px solid @border;
 
 	td,th:last-child {
 		min-width: 70px;
@@ -63,6 +55,7 @@ div.thermometers {
 
 div.backups {
 	margin: 20px;
+	border: 1px solid @border;
 }
 
 // .legend {
