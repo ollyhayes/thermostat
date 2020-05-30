@@ -5,11 +5,13 @@ const Router = require('koa-router');
 const serve = require('koa-static');
 const path = require('path');
 const {data} = require('./data');
+const {backups} = require('./backups');
 const app = new Koa();
 const router = new Router();
 
 function start(port) {
 	router.get('/data', data());
+	router.get('/backups', backups());
 
 	app.use(compress());
 	app.use(serve(path.join(__dirname, '../public')));

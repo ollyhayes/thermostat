@@ -2,7 +2,7 @@
 bundles
 /package-lock.json
 /common/config.json
-/grabber/log*
+/grabber/logs/
 
 /*.db
 /*-wal

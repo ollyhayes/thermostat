@@ -137,7 +137,7 @@ function printFinalLog(jobLog) {
 
 	log(`total time: ${totalTime}, average: ${totalTime / jobLog.length}, number of requests: ${jobLog.length}`, 'green');
 
-	fs.writeFileSync(path.join(__dirname, `log-${printDate()}.json`), JSON.stringify(jobLog));
+	fs.writeFileSync(path.join(__dirname, 'logs', `log-${printDate()}.json`), JSON.stringify(jobLog));
 }
 
 function printDetails(details) {
