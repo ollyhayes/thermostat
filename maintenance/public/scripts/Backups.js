@@ -3,6 +3,7 @@ import { useState } from './store';
 import {timeFormat} from 'd3-time-format';
 import { line } from 'd3-shape';
 import { scaleTime } from 'd3';
+import moment from 'moment';
 import Panel from './Panel';
 
 const specifier = '%Y-%m-%d %H-%M-%S';
@@ -24,11 +25,9 @@ export default function Backups() {
 			<table>
 				<thead>
 					<tr>
-						<th>Date</th>
-						<th>Num Requests</th>
-						<th>Total Data</th>
-						<th>Max request time</th>
-						<th>Requests over x</th>
+						<th>Start</th>
+						<th>Duration</th>
+						<th>Transferred</th>
 						<th>Graph</th>
 					</tr>
 				</thead>
@@ -36,10 +35,8 @@ export default function Backups() {
 					{backups.map((log, index) =>
 						<tr key={index}>
 							<td>{formatTime(log.startTime)}</td>
-							<td className="numeric">{log.requests.length}</td>
-							<td></td>
-							<td className="numeric">{log.maxRequestTime}ms</td>
-							<td className="numeric">{log.requestsOverX}</td>
+							<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
+							<td className="numeric">{formatSize(log.transferred)}</td>
 							<td><Chart log={log}/></td>
 						</tr>
 					)}
@@ -76,3 +73,38 @@ function Chart({log}) {
 		<path d={data}/>
 	</svg>;
 }
+
+function formatSize(value){
+	if (!value)
+		return 0 + " B";
+
+	if (value < 1000)
+		return value + " B";
+
+	value = divide(value);
+
+	if (value < 1000)
+		return value + " KB";
+
+	value = divide(value);
+
+	if (value < 1000)
+		return value + " MB";
+
+	value = divide(value);
+
+	if (value < 1000)
+		return value + " GB";
+
+	value = divide(value);
+
+	if (value < 1000)
+		return value + " TB";
+
+	function divide(number)
+	{
+		number /= 1000;
+
+		return Math.round(number * 10) / 10;
+	}
+};

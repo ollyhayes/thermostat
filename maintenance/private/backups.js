@@ -16,8 +16,7 @@ function backups() {
 				.map(log => ({
 					startTime: getRequestTime(log[0]),
 					endTime: getRequestTime(log[log.length - 1]),
-					maxRequestTime: log.reduce((max, next) => Math.max(max, next.requestDuration || 0), 0),
-					requestsOverX: log.filter(request => request.requestDuration > 4000).length,
+					transferred: log.reduce((total, next) => total + next.requestSize, 0),
 					requests: log.map(({minDate, requestDuration}) => ({minDate, requestDuration}))
 				}));
 		} catch (error) {
