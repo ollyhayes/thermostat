@@ -74,9 +74,9 @@ async function getJobDetails(db, previousJob, precisionLevelsInProgress) {
 	const precisionLevel = wasError
 		? previousJob.precisionLevel
 		: previousJob && (
-				precisionLevelsInProgress[
-					(precisionLevelsInProgress.indexOf(previousJob.precisionLevel) + 1) % precisionLevelsInProgress.length
-				]) || 0;
+			precisionLevelsInProgress[
+				(precisionLevelsInProgress.indexOf(previousJob.precisionLevel) + 1) % precisionLevelsInProgress.length
+			]) || 0;
 	const limits = db.getLimits(precisionLevel);
 
 	const minDate = wasError
@@ -127,7 +127,7 @@ async function getData(jobDetails) {
 			requestTime: requestStart
 		},
 		data
-	}
+	};
 }
 
 module.exports = {start};
@@ -141,7 +141,7 @@ function printFinalLog(jobLog) {
 }
 
 function printDetails(details) {
-	const {minDate, limit, precisionLevel, count, requestDuration, requestSize, error} = details;
+	const {count, requestDuration, requestSize, error} = details;
 
 	if (error) {
 		log(`error fetching! ${printChunk(details)} - ${error}`, 'red');

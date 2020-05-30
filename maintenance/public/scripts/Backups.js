@@ -17,7 +17,7 @@ export default function Backups() {
 			{error
 				? <span>Error loading data: {error}</span>
 				: <span>Loading</span>}
-		</div>
+		</div>;
 	}
 
 	function renderBackups() {
@@ -51,7 +51,7 @@ export default function Backups() {
 		{backups
 			? renderBackups()
 			: renderError()}
-		</Panel>;
+	</Panel>;
 }
 
 function Chart({log}) {
@@ -78,30 +78,30 @@ function Chart({log}) {
 
 function formatSize(value){
 	if (!value)
-		return 0 + "B";
+		return 0 + 'B';
 
 	if (value < 1000)
-		return value + "B";
+		return value + 'B';
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + "KB";
+		return value + 'KB';
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + "MB";
+		return value + 'MB';
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + "GB";
+		return value + 'GB';
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + "TB";
+		return value + 'TB';
 
 	function divide(number)
 	{
@@ -109,4 +109,4 @@ function formatSize(value){
 
 		return Math.round(number * 10) / 10;
 	}
-};
+}

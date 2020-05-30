@@ -1,6 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
-const logsDirectory = '../grabber/logs/'
+const logsDirectory = '../grabber/logs/';
 
 function backups() {
 	return async function(context) {
@@ -50,7 +50,7 @@ function processOldStyleData(logs) {
 		return array;
 	}
 
-	return logs
+	return logs;
 }
 
 module.exports = {
