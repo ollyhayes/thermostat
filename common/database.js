@@ -63,7 +63,7 @@ class Database
 
 		const duration = Date.now() - date.getTime();
 
-		log(`logging temp - ${temperatures.length > 10 ? '-' : temperatures.map(t => t.temperature)} in ${duration}ms`, 'green');
+		log(`logging temp - ${temperatures.length > 10 ? 'many' : temperatures.map(t => t.temperature)} in ${duration}ms`, 'green');
 	}
 
 	readLimit(minDate, limit, precisionLevel) {
