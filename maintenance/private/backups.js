@@ -11,14 +11,21 @@ function backups() {
 				fs.readFile(path.join(logsDirectory, file), {encoding: 'utf8'}).then(JSON.parse))
 			);
 
-			context.body = logs
+			const backups = processOldStyleData(logs)
 				.filter(log => log.length > 0)
 				.map(log => ({
-					startTime: getRequestTime(log[0]),
-					endTime: getRequestTime(log[log.length - 1]),
+					startTime: log[0].requestTime,
+					endTime: log[log.length - 1].requestTime,
 					transferred: log.reduce((total, next) => total + next.requestSize, 0),
-					requests: log.map(({minDate, requestDuration}) => ({minDate, requestDuration}))
+					maxDuration: log.reduce((max, next) => Math.max(max, next.requestDuration), 0),
+					requests: log
+						.filter(({requestDuration}) => requestDuration)
+						.map(({minDate, requestDuration}) => ({minDate, requestDuration}))
 				}));
+
+			backups.sort((a, b) => a.startTime - b.startTime);
+
+			context.body = backups;
 		} catch (error) {
 			console.log(`Error: ${error}`);
 			context.status = 500;
@@ -26,9 +33,24 @@ function backups() {
 	};
 }
 
-function getRequestTime(request) {
-	// Some old log files don't have requestTime
-	return request.requestTime || request.minDate;
+function processOldStyleData(logs) {
+	// Some old log files don't have requestTime and aren't sorted right
+	logs = logs.map(log =>
+		sort(log
+			.filter(request => request.minDate && request.requestDuration)
+			.map(request => ({
+				requestTime: request.minDate,
+				...request
+			})))
+	);
+
+	function sort(array) {
+		array.sort((a, b) => a.requestTime - b.requestTime);
+
+		return array;
+	}
+
+	return logs
 }
 
 module.exports = {

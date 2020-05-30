@@ -2,11 +2,11 @@ import React, { useEffect, useState as useStateReact } from 'react';
 import { useState } from './store';
 import {timeFormat} from 'd3-time-format';
 import { line } from 'd3-shape';
-import { scaleTime } from 'd3';
+import { scaleTime, scaleLinear } from 'd3';
 import moment from 'moment';
 import Panel from './Panel';
 
-const specifier = '%Y-%m-%d %H-%M-%S';
+const specifier = '%Y-%m-%d %H:%M:%S';
 const formatTime = timeFormat(specifier);
 
 export default function Backups() {
@@ -28,6 +28,7 @@ export default function Backups() {
 						<th>Start</th>
 						<th>Duration</th>
 						<th>Transferred</th>
+						<th>Max size</th>
 						<th>Graph</th>
 					</tr>
 				</thead>
@@ -36,6 +37,7 @@ export default function Backups() {
 						<tr key={index}>
 							<td>{formatTime(log.startTime)}</td>
 							<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
+							<td className="numeric">{log.maxDuration / 1000 + 's'}</td>
 							<td className="numeric">{formatSize(log.transferred)}</td>
 							<td><Chart log={log}/></td>
 						</tr>
@@ -57,10 +59,10 @@ function Chart({log}) {
 	useEffect(() => {
 		const xScale = scaleTime()
 			.domain([log.startTime, log.endTime])
-			.range([0, 500]);
-		const yScale = scaleTime()
+			.range([0, 1000]);
+		const yScale = scaleLinear()
 			.domain([0, log.requests.reduce((max, next) => Math.max(max, next.requestDuration), 0)])
-			.range([0, 200]);
+			.range([200, 0]);
 
 		const lineGenerator = line()
 			.x(d => xScale(d.minDate))
@@ -69,37 +71,37 @@ function Chart({log}) {
 		setData(lineGenerator(log.requests));
 	});
 
-	return <svg viewBox="0 0 500 200">
+	return <svg className="backup-graph" viewBox="0 0 1000 200" width="500">
 		<path d={data}/>
 	</svg>;
 }
 
 function formatSize(value){
 	if (!value)
-		return 0 + " B";
+		return 0 + "B";
 
 	if (value < 1000)
-		return value + " B";
+		return value + "B";
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + " KB";
+		return value + "KB";
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + " MB";
+		return value + "MB";
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + " GB";
+		return value + "GB";
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + " TB";
+		return value + "TB";
 
 	function divide(number)
 	{
