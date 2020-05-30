@@ -4,16 +4,24 @@ const path = require('path');
 const readThermometer = require('../../thermometer-reader/thermometer');
 
 const configFile = path.join(__dirname, '../../common/config.json');
-// const thermometersDirectory = '/home/olly/tools/thermometers';
 const thermometersDirectory = '/sys/bus/w1/devices/';
 
-function data() {
-	return async function(context)
-	{
+const getConnectedThermometers = (function() {
+	const initialConfig = require(configFile);
+	const initialConfiguredThermometers = initialConfig.thermometers
+		.filter(({type}) => type === 'thermometer')
+		.map(({serial}) => serial);
 
+	return initialConfig.thermometerReader.mock
+		? initialConfiguredThermometers
+		: fs.readdir(thermometersDirectory);
+})();
+
+function data() {
+	return async function(context) {
 		try {
-			const [directoryContents,config] = await Promise.all([
-				fs.readdir(thermometersDirectory),
+			const [directoryContents, config] = await Promise.all([
+				getConnectedThermometers,
 				// (async () => JSON.parse(await fs.readFile(configFile)))(),
 				fs.readFile(configFile, {encoding: 'utf8'}).then(JSON.parse)
 			]);
