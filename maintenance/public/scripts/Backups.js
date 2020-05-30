@@ -28,8 +28,8 @@ export default function Backups() {
 						<th>Start</th>
 						<th>Duration</th>
 						<th>Requests</th>
+						<th>Max duration</th>
 						<th>Transferred</th>
-						<th>Max size</th>
 						<th>Graph</th>
 					</tr>
 				</thead>
