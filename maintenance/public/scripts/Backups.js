@@ -1,5 +1,9 @@
 import React from 'react';
 import { useState } from './store';
+import {timeFormat} from 'd3-time-format';
+
+const specifier = '%Y-%m-%d %H-%M-%S';
+const formatTime = timeFormat(specifier);
 
 export default function Backups() {
 	const {backups: {backups, error}} = useState();
@@ -27,11 +31,11 @@ export default function Backups() {
 			<tbody>
 				{backups.map(log => 
 					<tr key={log.startTime}>
-						<td>{log.startTime}</td>
-						<td>{log.numberOfRequests}</td>
+						<td>{formatTime(log.startTime)}</td>
+						<td className="numeric">{log.numberOfRequests}</td>
 						<td></td>
-						<td>{log.maxRequestTime}</td>
-						<td>{log.requestsOverX}</td>
+						<td className="numeric">{log.maxRequestTime}ms</td>
+						<td className="numeric">{log.requestsOverX}</td>
 						<td></td>
 					</tr>
 				)}
