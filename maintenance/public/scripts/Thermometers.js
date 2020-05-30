@@ -3,18 +3,21 @@ import {format} from 'd3-format';
 
 import { useState } from './store';
 import Icon from './Icon';
+import Panel from './Panel';
 
 export default function Thermometers() {
 	const {connectedThermometers: {fetchingData, error}} = useState();
 
-	return error
-		? <span>{error.toString()}</span>
-		: <>
-			<div className="icon-wrapper">
-				<Icon iconName="sync" spinning={true} paused={!fetchingData}/>
-			</div>
-			<ThermometersTable/>
-		</>;
+	return <Panel name="Connected Thermometers">
+		{error
+			? <span>{error.toString()}</span>
+			: <>
+				<div className="icon-wrapper">
+					<Icon iconName="sync" spinning={true} paused={!fetchingData}/>
+				</div>
+				<ThermometersTable/>
+			</>}
+		</Panel>;
 }
 
 function ThermometersTable() {

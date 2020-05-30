@@ -10,17 +10,22 @@ html,body {
 div.react-root {
 	font-size: 20px;
 	font-family: monospace;
+	color: @foreground;
 	display: flex;
 	flex-wrap: wrap;
+
+	tr {
+		color: @foreground;
+	}
 }
 
 table {
 	border-collapse: collapse;
-	color: @foreground;
 
 	th,td {
 		border: @border 1px solid;
 		padding: 3px 5px;
+		// color: @foreground;
 
 		&.numeric {
 			text-align: right;
@@ -28,26 +33,35 @@ table {
 	}
 }
 
-div.thermometers {
-	div.icon-wrapper {
-		margin: 20px;
-		display: flex;
-		justify-content: flex-end;
-
-		svg {
-			padding: 5px;
-			transition: fill 0.1s;
-			fill: lime;
-
-			&:not(.paused) {
-				fill: red;
-			}
-		}
-	}
-
+div.panel {
 	margin: 20px;
 	border: 1px solid @border;
+	padding: 20px;
+	position: relative;
 
+	header {
+		text-decoration: underline;
+		margin-bottom: 20px;
+	}
+}
+
+div.icon-wrapper {
+	position: absolute;
+	right: 20px;
+	transform: translate(0, -48px);
+
+	svg {
+		padding: 5px;
+		transition: fill 0.1s;
+		fill: lime;
+
+		&:not(.paused) {
+			fill: red;
+		}
+	}
+}
+
+div.thermometers {
 	td,th:last-child {
 		min-width: 70px;
 	}
