@@ -62,7 +62,7 @@ function Chart({log}) {
 			.range([0, 1000]);
 		const yScale = scaleLinear()
 			.domain([0, log.requests.reduce((max, next) => Math.max(max, next.requestDuration), 0)])
-			.range([200, 0]);
+			.range([100, 0]);
 
 		const lineGenerator = line()
 			.x(d => xScale(d.minDate))
@@ -71,9 +71,11 @@ function Chart({log}) {
 		setData(lineGenerator(log.requests));
 	});
 
-	return <svg className="backup-graph" viewBox="0 0 1000 200" width="500">
-		<path d={data}/>
-	</svg>;
+	return <div className="backup-graph">
+		<svg viewBox="0 0 1000 100" width="500">
+			<path d={data}/>
+		</svg>
+	</div>;
 }
 
 function formatSize(value){

@@ -1,4 +1,4 @@
-@background: #252525;
+@background: black;
 @border: #525252;
 @major-border: #999999;
 @foreground: #cccccc;
@@ -23,8 +23,8 @@ table {
 	border-collapse: collapse;
 
 	th,td {
-		border: @border 1px solid;
-		padding: 3px 5px;
+		// border: @border 1px solid;
+		padding: 3px 10px;
 		// color: @foreground;
 
 		&.numeric {
@@ -62,16 +62,21 @@ div.icon-wrapper {
 }
 
 div.thermometers {
-	td,th:last-child {
+	td:last-child,
+	th:last-child {
 		min-width: 70px;
 	}
 }
 
 div.backups {
-	svg.backup-graph {
-		fill: none;
-		stroke: lime;
-		stroke-width: 1px;
+	div.backup-graph {
+		border: 1px solid @border;
+
+		svg {
+			fill: none;
+			stroke: lime;
+			stroke-width: 1px;
+		}
 	}
 }
 

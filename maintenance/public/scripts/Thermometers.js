@@ -60,7 +60,7 @@ function ThermometersTable() {
 			<tbody>
 				{thermometers.map(thermometer => 
 					<tr key={thermometer.id} style={{color: thermometer.colour}}>
-						<td className="numeric">{thermometer.id}</td>
+						<td>{thermometer.id}</td>
 						<td>{thermometer.name}</td>
 						<td>{thermometer.serial}</td>
 						<td>{thermometer.type}</td>
