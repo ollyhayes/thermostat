@@ -1,6 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
-const logsDirectory = '../grabber/logs/';
+const logsDirectory = './grabber/logs/';
 
 function backups() {
 	return async function(context) {
@@ -20,7 +20,7 @@ function backups() {
 					maxDuration: log.reduce((max, next) => Math.max(max, next.requestDuration), 0),
 					requests: log
 						.filter(({requestDuration}) => requestDuration)
-						.map(({minDate, requestDuration}) => ({minDate, requestDuration}))
+						.map(({requestTime, requestDuration}) => ({requestTime, requestDuration}))
 				}));
 
 			backups.sort((a, b) => b.startTime - a.startTime);

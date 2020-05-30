@@ -27,6 +27,7 @@ export default function Backups() {
 					<tr>
 						<th>Start</th>
 						<th>Duration</th>
+						<th>Requests</th>
 						<th>Transferred</th>
 						<th>Max size</th>
 						<th>Graph</th>
@@ -37,6 +38,7 @@ export default function Backups() {
 						<tr key={index}>
 							<td>{formatTime(log.startTime)}</td>
 							<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
+							<td className="numeric">{log.requests.length}</td>
 							<td className="numeric">{log.maxDuration / 1000 + 's'}</td>
 							<td className="numeric">{formatSize(log.transferred)}</td>
 							<td><Chart log={log}/></td>
@@ -65,7 +67,7 @@ function Chart({log}) {
 			.range([100, 0]);
 
 		const lineGenerator = line()
-			.x(d => xScale(d.minDate))
+			.x(d => xScale(d.requestTime))
 			.y(d => yScale(d.requestDuration));
 
 		setData(lineGenerator(log.requests));
