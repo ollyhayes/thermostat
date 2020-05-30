@@ -23,7 +23,7 @@ function backups() {
 						.map(({minDate, requestDuration}) => ({minDate, requestDuration}))
 				}));
 
-			backups.sort((a, b) => a.startTime - b.startTime);
+			backups.sort((a, b) => b.startTime - a.startTime);
 
 			context.body = backups;
 		} catch (error) {
