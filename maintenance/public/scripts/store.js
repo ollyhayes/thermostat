@@ -17,7 +17,10 @@ export function useState() {
 		return () => store.unsubscribe(subscription);
 	}, []);
 
-	return store.getValue();
+	return {
+		...store.getValue(),
+		store
+	};
 }
 
 export function useStore() {

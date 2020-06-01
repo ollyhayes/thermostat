@@ -52,3 +52,10 @@ export async function fetchBackups(store) {
 		}));
 	}
 }
+
+export async function selectPanel(store, selectedPanel) {
+	store.updateValue(state => ({
+		...state,
+		selectedPanel
+	}));
+}

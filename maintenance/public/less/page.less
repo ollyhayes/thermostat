@@ -5,6 +5,7 @@
 
 * {
 	font-size: 20px;
+	font-family: monospace;
 
 	@media (max-width: 880px) {
 		font-size: 10px;
@@ -13,13 +14,12 @@
 
 html,body {
 	background: @background;
+	color: white;
 }
 
 div.react-root {
 	max-width: 1300px;
 	margin: auto;
-	font-family: monospace;
-	color: @foreground;
 	display: flex;
 	align-items: stretch;
 	flex-direction: column;
@@ -39,6 +39,29 @@ table {
 
 		&.numeric {
 			text-align: right;
+		}
+	}
+}
+
+div.menu {
+	margin: 1em;
+
+	button {
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0 1em;
+		color: @foreground;
+		border-left: 1px white solid;
+		border-right: 1px white solid;
+
+		&.selected {
+			color: red;
+			text-decoration: underline;
+		}
+
+		&:hover {
+			color: red;
 		}
 	}
 }

@@ -17,7 +17,8 @@ const store = createStore({
 	backups: {
 		error: false,
 		backups: undefined
-	}
+	},
+	selectedPanel: 'thermometers'
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
