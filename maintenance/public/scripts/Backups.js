@@ -22,7 +22,7 @@ export default function Backups() {
 	}
 
 	function renderBackups() {
-		return <div className='backups'>
+		return <>
 			<table>
 				<thead>
 					<tr>
@@ -36,29 +36,28 @@ export default function Backups() {
 				</thead>
 				<tbody>
 					{backups.map((log, index) =>
-						<tr key={index} onClick={() => setLogToPreview(log)}>
-							{/* <td>{formatTime(log.requests[0].requestTime)}</td> */}
+						<tr key={index} className={log == logToPreview ? 'selected' : ''} onClick={() => setLogToPreview(log)}>
 							<td>{formatTime(log.startTime)}</td>
 							<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
 							<td className="numeric">{log.requests.length}</td>
 							<td className="numeric">{log.maxDuration / 1000 + 's'}</td>
 							<td className="numeric">{formatSize(log.transferred)}</td>
-							<td><Chart log={log} aspectRatio={10}/></td>
+							<td className="graph"><Chart log={log} aspectRatio={12}/></td>
 						</tr>
 					)}
 				</tbody>
 			</table>
 			{logToPreview && renderGraphPreview(logToPreview)}
-		</div>;
+		</>;
 	}
 
 	function renderGraphPreview(log) {
 		return <div className="chart-preview">
-			<Chart log={log} aspectRatio={1.777}/>
+			<Chart log={log} aspectRatio={3}/>
 		</div>;
 	}
 
-	return <Panel name="Backups">
+	return <Panel name="Backups" className="backups">
 		{backups
 			? renderBackups()
 			: renderError()}
@@ -87,7 +86,7 @@ function Chart({log, aspectRatio}) {
 	}, [log]);
 
 	return <div className="backup-graph">
-		<svg viewBox="0 0 1000 100" width="500">
+		<svg viewBox={`0 0 ${100 * aspectRatio} 100`}>
 			<path d={data}/>
 		</svg>
 	</div>;

@@ -1,7 +1,6 @@
 @background: black;
-@border: #525252;
-@major-border: #999999;
-@foreground: #cccccc;
+@border: cyan;
+@foreground: white;
 
 html,body {
 	background: @background;
@@ -21,11 +20,13 @@ div.react-root {
 
 table {
 	border-collapse: collapse;
+	width: 100%;
 
 	th,td {
 		// border: @border 1px solid;
 		padding: 3px 10px;
 		// color: @foreground;
+		white-space: nowrap;
 
 		&.numeric {
 			text-align: right;
@@ -73,6 +74,27 @@ div.thermometers {
 }
 
 div.backups {
+	width: 100%;
+
+	table {
+		tbody tr {
+			cursor: pointer;
+
+			&:hover {
+				background: #2d0000;
+			}
+
+			&.selected {
+				background: #5f0101;
+			}
+		}
+
+		td.graph {
+			width: 100%;
+			padding: 5px 0;
+		}
+	}
+
 	div.backup-graph {
 		border: 1px solid @border;
 
@@ -80,6 +102,12 @@ div.backups {
 			fill: none;
 			stroke: lime;
 			stroke-width: 1px;
+		}
+	}
+
+	div.chart-preview {
+		svg {
+			stroke-width: 0.1px;
 		}
 	}
 }
