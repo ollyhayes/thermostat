@@ -1,17 +1,28 @@
 @background: black;
 @border: cyan;
+@inner-border: lime;
 @foreground: white;
+
+* {
+	font-size: 20px;
+
+	@media (max-width: 880px) {
+		font-size: 10px;
+	}
+}
 
 html,body {
 	background: @background;
 }
 
 div.react-root {
-	font-size: 20px;
+	max-width: 1300px;
+	margin: auto;
 	font-family: monospace;
 	color: @foreground;
 	display: flex;
-	flex-wrap: wrap;
+	align-items: stretch;
+	flex-direction: column;
 
 	tr {
 		color: @foreground;
@@ -19,13 +30,11 @@ div.react-root {
 }
 
 table {
-	border-collapse: collapse;
 	width: 100%;
+	border-collapse: collapse;
 
 	th,td {
-		// border: @border 1px solid;
 		padding: 3px 10px;
-		// color: @foreground;
 		white-space: nowrap;
 
 		&.numeric {
@@ -35,47 +44,59 @@ table {
 }
 
 div.header {
-	margin: -20px 20px;
+	display: block;
+	margin: auto;
+	margin-bottom: 1em;
+
+	pre {
+		margin: 0;
+		// font-size: 0.7em;
+	}
 }
 
 div.panel {
-	margin: 20px;
+	margin: 1em;
 	border: 1px solid @border;
-	padding: 20px;
+	padding: 1em;
 	position: relative;
 
 	header {
 		text-decoration: underline;
-		margin-bottom: 20px;
-	}
-}
-
-div.icon-wrapper {
-	position: absolute;
-	right: 20px;
-	transform: translate(0, -48px);
-
-	svg {
-		padding: 5px;
-		transition: fill 0.1s;
-		fill: lime;
-
-		&:not(.paused) {
-			fill: red;
-		}
+		margin-bottom: 1em;
 	}
 }
 
 div.thermometers {
+	div.icon-wrapper {
+		position: absolute;
+		right: 1em;
+		transform: translate(0, -2.5em);
+
+		svg {
+			padding: 0.5em;
+			transition: fill 0.1s;
+			fill: lime;
+
+			&:not(.paused) {
+				fill: red;
+			}
+		}
+	}
+
 	td:last-child,
 	th:last-child {
 		min-width: 70px;
 	}
+
+	td.unimportant,
+	th.unimportant {
+		@media (max-width: 540px) {
+			display: none;
+		}
+	}
 }
 
 div.backups {
-	width: 100%;
-
 	table {
 		tbody tr {
 			cursor: pointer;
@@ -89,14 +110,18 @@ div.backups {
 			}
 		}
 
-		td.graph {
+		th.graph, td.graph {
 			width: 100%;
-			padding: 5px 0;
+			padding: 0.5em 0;
+
+			@media (max-width: 800px) {
+				display: none;
+			}
 		}
 	}
 
 	div.backup-graph {
-		border: 1px solid @border;
+		border: 1px solid @inner-border;
 
 		svg {
 			fill: none;
@@ -107,55 +132,14 @@ div.backups {
 
 	div.chart-preview {
 		svg {
-			stroke-width: 0.1px;
+			stroke-width: 0.25px;
 		}
 	}
 }
 
-// .legend {
-// 	border: 1px @border solid;
-// 	background: fade(@background, 80%);
-// 	padding: 8px;
-// 	position: absolute;
-// 	top: 20px;
-// 	left: 45px;
-
-// 	table {
-// 		border-collapse: collapse;
-// 	}
-
-// 	tr {
-// 		cursor: pointer;
-// 		&:hover {
-// 			background: #5d5c5c;
-// 		}
-
-// 		td {
-// 			font-size: 15px;
-// 			font-family: sans-serif;
-// 			padding: 3px 6px;
-// 		}
-
-// 		td.numeric {
-// 			text-align: right;
-// 		}
-// 	}
-// }
-
-// @media (max-width: 800px) {
-// 	.legend {
-// 		padding: 4px;
-
-// 		tr td {
-// 			font-size: 10px;
-// 			padding: 2px 3px;
-// 		}
-// 	}
-// }
-
 svg.icon {
-	height: 16px;
-	width: 16px;
+	height: 0.8em;
+	width: 0.8em;
 	display: block;
 
 	&.spinning {

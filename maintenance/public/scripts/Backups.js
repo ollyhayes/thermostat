@@ -31,7 +31,7 @@ export default function Backups() {
 						<th>n</th>
 						<th>r<sub>max</sub></th>
 						<th>s</th>
-						<th>Graph</th>
+						<th className="graph">Graph</th>
 					</tr>
 				</thead>
 				<tbody>
