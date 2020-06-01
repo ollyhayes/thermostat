@@ -1,11 +1,30 @@
+maintenance
+	thermometers
+		cross/tick
+		download config
+	rpi control
+		turn off
+		uptime / last restart
+		linux version stuff?
+		download config
+		trigger backup now?
+
+web-interface
+	don't join up the lines
+	bug with fully zooming out keeps forgetting and loading in a loop! ********
+
+
+
+****old stuf****
+
 	* fix the kink on page load - is it that we're not using the date from the database? maybe create the date in index.js
 	* the merging logic doesn't really belong in the chunk-store
-	make the legend show grey when it hasn't received an update
-	make the legend in a better position
+	* make the legend show grey when it hasn't received an update
+	* make the legend in a better position
 
-	zoom in url
-		better names for saver
-		get rid of those mutations
+	* zoom in url
+		* better names for saver
+		* get rid of those mutations
 
 wierd stuff where we're getting two results per second, see: 22:18 on Sat 17th August, when I switched out the Rpi
 have websocket reconnect
@@ -52,56 +71,6 @@ live updates
 	client tags chunks with 'joined' when they're joined
 	only join unjoined chunks
 1399.08
-
-
-web-interface
-	don't join up the lines
-
-maintenance
-	thermometers
-		cross/tick
-		download config
-		*live updates indicator
-		*temperature reading
-	timeout on temperature reading
-	rpi off/restart button
-	reset server button? not unless we need it
-	statistics
-		*number of rows in the database
-		*max temperatur detected + date
-		*min temperature detected + date
-	rpi control
-		turn off
-		uptime
-		linux version stuff?
-		download config
-		trigger backup now?
-	backup logs
-		backups in a table, for each row:
-			number of requests
-			total data transfered
-			max request time
-			graph?
-
-	***
-	bug with fully zooming out keeps forgetting and loading in a loop!
-	***
-
-
-	backup time
-		start
-		end
-		duration
-	data time
-		start
-		end
-		duration
-	max-request
-	transferred
-
-		
-
-
 
 next up:
 		* start grabber only if enabled in config

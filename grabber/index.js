@@ -19,6 +19,8 @@ function start(db) {
 	job.start();
 	log('starting cron', 'green');
 
+	// stopJobs.push(startJob(db));
+
 	return () => {
 		job.stop();
 		log('stopping grabber job', 'green');
@@ -31,22 +33,28 @@ function startJob(db) {
 	const precisionLevelsInProgress = [0, 1, 2];
 	const startTime = Date.now();
 	const timeoutHours = 5;
+	let timeoutId = null;
+	let isStopped = false;
 	log('starting job', 'green');
 	nextTick();
 
-	function nextTick() {
+	async function nextTick() {
 		if (Date.now() - startTime > timeoutHours * 60 * 60 * 1000) {
 			log(`Job timed out after ${timeoutHours} hours`, 'red');
 			stop();
-		} else if (tick(db, jobLog, precisionLevelsInProgress))
-			setTimeout(nextTick, 10000);
-		else {
+		} else if (await tick(db, jobLog, precisionLevelsInProgress)) {
+			timeoutId = setTimeout(nextTick, 10000);
+		} else {
 			stop();
 		}
 	}
 
 	function stop() {
-		printFinalLog(jobLog);
+		if (!isStopped) {
+			isStopped = true;
+			clearTimeout(timeoutId);
+			printFinalLog(jobLog);
+		}
 	}
 
 	return stop;
