@@ -1,13 +1,13 @@
 import React, { useEffect, useState as useStateReact } from 'react';
 import { useState } from './store';
-import {timeFormat} from 'd3-time-format';
 import { line } from 'd3-shape';
 import { scaleTime, scaleLinear } from 'd3';
 import moment from 'moment';
 import Panel from './Panel';
 
-const specifier = '%Y-%m-%d %H:%M:%S';
-const formatTime = timeFormat(specifier);
+// const specifier = '%Y-%m-%d %H:%M:%S';
+const formatTime = time => time && moment(time).format('Do MMM HH:mm');
+// const formatTime = time => moment(time).format('Mo MMM YYYY HH:mm');
 
 export default function Backups() {
 	const {backups: {backups, error}} = useState();
@@ -25,17 +25,18 @@ export default function Backups() {
 			<table>
 				<thead>
 					<tr>
-						<th>Start</th>
-						<th>Duration</th>
-						<th>Requests</th>
-						<th>Max duration</th>
-						<th>Transferred</th>
+						<th>t<sub>0</sub></th>
+						<th>t<sub>n</sub> - t<sub>0</sub></th>
+						<th>n</th>
+						<th>r<sub>max</sub></th>
+						<th>s</th>
 						<th>Graph</th>
 					</tr>
 				</thead>
 				<tbody>
 					{backups.map((log, index) =>
 						<tr key={index}>
+							{/* <td>{formatTime(log.requests[0].requestTime)}</td> */}
 							<td>{formatTime(log.startTime)}</td>
 							<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
 							<td className="numeric">{log.requests.length}</td>
@@ -63,15 +64,17 @@ function Chart({log}) {
 			.domain([log.startTime, log.endTime])
 			.range([0, 1000]);
 		const yScale = scaleLinear()
-			.domain([0, log.requests.reduce((max, next) => Math.max(max, next.requestDuration), 0)])
+			.domain([0, log.maxDuration])
 			.range([100, 0]);
 
 		const lineGenerator = line()
 			.x(d => xScale(d.requestTime))
 			.y(d => yScale(d.requestDuration));
 
-		setData(lineGenerator(log.requests));
-	});
+		const requests = stepifyArray(log.requests);
+
+		setData(lineGenerator(requests));
+	}, []);
 
 	return <div className="backup-graph">
 		<svg viewBox="0 0 1000 100" width="500">
@@ -80,32 +83,46 @@ function Chart({log}) {
 	</div>;
 }
 
+function stepifyArray(input) {
+	const output = [];
+	for (let i = 0; i < input.length; i++) {
+		output[i * 2] = input[i];
+
+		if (input[i + 1])
+			output[i * 2 + 1] = {
+				requestTime: input[i + 1].requestTime,
+				requestDuration: input[i].requestDuration
+			};
+	}
+	return output;
+}
+
 function formatSize(value){
 	if (!value)
-		return 0 + 'B';
+		return 0 + 'b';
 
 	if (value < 1000)
-		return value + 'B';
+		return value + 'b';
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + 'KB';
+		return value + 'kb';
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + 'MB';
+		return value + 'mb';
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + 'GB';
+		return value + 'gb';
 
 	value = divide(value);
 
 	if (value < 1000)
-		return value + 'TB';
+		return value + 'tb';
 
 	function divide(number)
 	{

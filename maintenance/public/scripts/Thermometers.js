@@ -17,7 +17,7 @@ export default function Thermometers() {
 				</div>
 				<ThermometersTable/>
 			</>}
-		</Panel>;
+	</Panel>;
 }
 
 function ThermometersTable() {

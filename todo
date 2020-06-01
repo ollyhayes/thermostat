@@ -67,9 +67,15 @@ maintenance
 	rpi off/restart button
 	reset server button? not unless we need it
 	statistics
-		number of rows in the database
-		max temperatur detected + date
-		min temperature detected + date
+		*number of rows in the database
+		*max temperatur detected + date
+		*min temperature detected + date
+	rpi control
+		turn off
+		uptime
+		linux version stuff?
+		download config
+		trigger backup now?
 	backup logs
 		backups in a table, for each row:
 			number of requests
@@ -81,6 +87,17 @@ maintenance
 	bug with fully zooming out keeps forgetting and loading in a loop!
 	***
 
+
+	backup time
+		start
+		end
+		duration
+	data time
+		start
+		end
+		duration
+	max-request
+	transferred
 
 		
 

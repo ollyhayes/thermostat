@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import { Provider, createStore } from './store.js';
 import { fetchData, fetchBackups } from './actions';
+import moment from 'moment';
+
+moment.locale('gb');
 
 const store = createStore({
 	connectedThermometers: {
