@@ -11,6 +11,7 @@ const formatTime = time => time && moment(time).format('Do MMM HH:mm');
 
 export default function Backups() {
 	const {backups: {backups, error}} = useState();
+	const [logToPreview, setLogToPreview] = useStateReact(false);
 
 	function renderError() {
 		return <div>
@@ -35,18 +36,25 @@ export default function Backups() {
 				</thead>
 				<tbody>
 					{backups.map((log, index) =>
-						<tr key={index}>
+						<tr key={index} onClick={() => setLogToPreview(log)}>
 							{/* <td>{formatTime(log.requests[0].requestTime)}</td> */}
 							<td>{formatTime(log.startTime)}</td>
 							<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
 							<td className="numeric">{log.requests.length}</td>
 							<td className="numeric">{log.maxDuration / 1000 + 's'}</td>
 							<td className="numeric">{formatSize(log.transferred)}</td>
-							<td><Chart log={log}/></td>
+							<td><Chart log={log} aspectRatio={10}/></td>
 						</tr>
 					)}
 				</tbody>
 			</table>
+			{logToPreview && renderGraphPreview(logToPreview)}
+		</div>;
+	}
+
+	function renderGraphPreview(log) {
+		return <div className="chart-preview">
+			<Chart log={log} aspectRatio={1.777}/>
 		</div>;
 	}
 
@@ -57,12 +65,14 @@ export default function Backups() {
 	</Panel>;
 }
 
-function Chart({log}) {
+function Chart({log, aspectRatio}) {
+	// eg 1920x1080, aR = 1.777
+	// 1000x100, aR = 10
 	const [data, setData] = useStateReact();
 	useEffect(() => {
 		const xScale = scaleTime()
 			.domain([log.startTime, log.endTime])
-			.range([0, 1000]);
+			.range([0, 100 * aspectRatio]);
 		const yScale = scaleLinear()
 			.domain([0, log.maxDuration])
 			.range([100, 0]);
@@ -74,7 +84,7 @@ function Chart({log}) {
 		const requests = stepifyArray(log.requests);
 
 		setData(lineGenerator(requests));
-	}, []);
+	}, [log]);
 
 	return <div className="backup-graph">
 		<svg viewBox="0 0 1000 100" width="500">
