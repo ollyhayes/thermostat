@@ -11,7 +11,7 @@ const formatTime = time => time && moment(time).format('Do MMM HH:mm');
 
 export default function Backups() {
 	const {backups: {backups, error}} = useState();
-	const [logToPreview, setLogToPreview] = useStateReact(false);
+	const [logToPreview, setLogToPreview] = useStateReact(null);
 
 	function renderError() {
 		return <div>
@@ -36,7 +36,10 @@ export default function Backups() {
 				</thead>
 				<tbody>
 					{backups.map((log, index) =>
-						<tr key={index} className={log == logToPreview ? 'selected' : ''} onClick={() => setLogToPreview(log)}>
+						<tr
+							key={index}
+							className={log === logToPreview ? 'selected' : ''}
+							onClick={() => setLogToPreview(log === logToPreview ? null : log)}>
 							<td>{formatTime(log.startTime)}</td>
 							<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
 							<td className="numeric">{log.requests.length}</td>
