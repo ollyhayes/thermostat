@@ -91,6 +91,8 @@ function Chart({log, aspectRatio}) {
 	return <div className="backup-graph">
 		<svg viewBox={`0 0 ${100 * aspectRatio} 100`}>
 			<path d={data}/>
+			<g className="x-axis"></g>
+			<g className="y-axis"></g>
 		</svg>
 	</div>;
 }

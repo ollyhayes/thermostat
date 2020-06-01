@@ -7,32 +7,52 @@ const path = require('path');
 const log = require('../common/log');
 const {deserialiseTemperatures} = require('../web-interface/public/scripts/temperature-serialiser');
 
-let jobLog = []; // make this per-job
-let precisionLevelsInProgress = [];
-
 function start(db) {
-	precisionLevelsInProgress = [0, 1, 2];
+	const stopJobs = [];
 	const job = new CronJob(
-		'*/10 * * * * *',
-		// '*/10 * 7-17 * * *',
-		() => tick(db, jobLog, precisionLevelsInProgress, () => {
-			job.stop();
-			printFinalLog(jobLog);
-		}),
+		'0 0 23 * * *',
+		// '*/10 * 7-17 * * *', // every ten seconds in the day, doesn't work like that anymore
+		() => stopJobs.push(startJob(db)),
 		null,
 		true);
 
 	job.start();
-	log('starting job', 'green');
+	log('starting cron', 'green');
 
 	return () => {
 		job.stop();
 		log('stopping grabber job', 'green');
-		printFinalLog(jobLog);
+		stopJobs.forEach(j => j());
 	};
 }
 
-async function tick(db, jobLog, precisionLevelsInProgress, stopJob) {
+function startJob(db) {
+	const jobLog = [];
+	const precisionLevelsInProgress = [0, 1, 2];
+	const startTime = Date.now();
+	const timeoutHours = 5;
+	log('starting job', 'green');
+	nextTick();
+
+	function nextTick() {
+		if (Date.now() - startTime > timeoutHours * 60 * 60 * 1000) {
+			log(`Job timed out after ${timeoutHours} hours`, 'red');
+			stop();
+		} else if (tick(db, jobLog, precisionLevelsInProgress))
+			setTimeout(nextTick, 10000);
+		else {
+			stop();
+		}
+	}
+
+	function stop() {
+		printFinalLog(jobLog);
+	}
+
+	return stop;
+}
+
+async function tick(db, jobLog, precisionLevelsInProgress) {
 	try {
 		const jobDetails = await getJobDetails(db, jobLog[jobLog.length - 1], precisionLevelsInProgress);
 
@@ -49,22 +69,19 @@ async function tick(db, jobLog, precisionLevelsInProgress, stopJob) {
 		// 	stopJob();
 		// }
 
-		if (jobDetails.minDate + 20 * 60 * 10000 > new Date()) {
-
+		if (jobDetails.minDate + 20 * 60 * 1000 > new Date()) {
 			log(`reached final chunk for precisionLevel - ${printChunk(jobDetails)}`, 'red');
 			precisionLevelsInProgress.splice(precisionLevelsInProgress.indexOf(responseDetails.precisionLevel));
 			
 			if (precisionLevelsInProgress.length === 0) {
 				log(`will stop job, reached final chunk - ${printChunk(jobDetails)}`, 'red');
-				stopJob();
-				return;
+				return false;
 			}
 		}
 
 	} catch(error) {
-		stopJob();
 		log(`Error in tick: ${error}`, 'red');
-		throw error;
+		return false;
 	}
 }
 
