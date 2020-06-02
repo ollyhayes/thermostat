@@ -91,6 +91,8 @@ async function tick(db, jobLog, precisionLevelsInProgress) {
 		log(`Error in tick: ${error}`, 'red');
 		return false;
 	}
+
+	return true;
 }
 
 async function getJobDetails(db, previousJob, precisionLevelsInProgress) {

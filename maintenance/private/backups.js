@@ -36,7 +36,7 @@ function backups() {
 
 			context.body = backups;
 		} catch (error) {
-			console.log(`Error: ${error}`);
+			console.log(`Backups error: ${error}`);
 			context.status = 500;
 		}
 	};

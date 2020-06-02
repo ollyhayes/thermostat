@@ -56,7 +56,7 @@ function data() {
 			};
 
 		} catch (error) {
-			console.log(`Error: ${error}`);
+			console.log(`Thermometers Error: ${error}`);
 			context.status = 500;
 		}
 	};
