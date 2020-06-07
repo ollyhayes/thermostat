@@ -10,7 +10,7 @@ const {deserialiseTemperatures} = require('../web-interface/public/scripts/tempe
 function start(db) {
 	const stopJobs = [];
 	const job = new CronJob(
-		'0 0 23 * * *',
+		'0 0 22 * * *',
 		// '*/10 * 7-17 * * *', // every ten seconds in the day, doesn't work like that anymore
 		() => stopJobs.push(startJob(db)),
 		null,

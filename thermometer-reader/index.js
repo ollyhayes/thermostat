@@ -20,15 +20,14 @@ const thermometers = allThermometers.filter(thermometer => !thermometer.disabled
 
 function start(database) {
 	const temperatures = looper(1000, () =>
-		Promise.all(
-			thermometers
-				.map(async thermometer => ({
-					...thermometer,
-					temperature: await getTemperature(thermometer.serial),
-				})))).pipe(
-		map(thermometers => thermometers.filter(thermometer => thermometer.temperature !== null)),
-		publishReplay(1),
-		refCount());
+		Promise.all(thermometers.map(async thermometer => ({
+			...thermometer,
+			temperature: await getTemperature(thermometer.serial),
+		}))))
+		.pipe(
+			map(thermometers => thermometers.filter(thermometer => thermometer.temperature !== null)),
+			publishReplay(1),
+			refCount());
 	const minutelyTemperatures = temperatures.pipe(
 		performAveraging(60 * 1000),
 		publishReplay(1),
@@ -65,6 +64,8 @@ function start(database) {
 
 module.exports = {start};
 
+// error in here somewhere, something like if a thermometers goes missing half way through a window or something?
+// then the thermometerId is null
 function performAveraging(time) {
 	return observable =>
 		observable.pipe(
