@@ -1,7 +1,10 @@
-import React, { useEffect, useState as useStateReact } from 'react';
+import React, { useEffect, useState as useStateReact, useCallback } from 'react';
 import { useState } from './store';
 import { line } from 'd3-shape';
-import { scaleTime, scaleLinear } from 'd3';
+import { select } from 'd3-selection';
+import { axisLeft, axisBottom } from 'd3-axis';
+import { scaleTime, scaleLinear } from 'd3-scale';
+import multiFormat from '../../../web-interface/public/scripts/time-format';
 import moment from 'moment';
 import Panel from './Panel';
 
@@ -36,9 +39,8 @@ export default function Backups() {
 				</thead>
 				<tbody>
 					{backups.map((log, index) =>
-						<>
+						<React.Fragment key={index}>
 							<tr
-								key={index}
 								className={log === logToPreview ? 'selected' : ''}
 								onClick={() => setLogToPreview(log === logToPreview ? null : log)}>
 								<td>{formatTime(log.startTime)}</td>
@@ -50,14 +52,14 @@ export default function Backups() {
 							</tr>
 							{
 								logToPreview === log
-									? <tr className="chart-preview">
+									? <tr key={-index} className="chart-preview">
 										<td colSpan="999">
-											<Chart log={log} aspectRatio={3}/>
+											<Chart log={log} aspectRatio={3} showAxes={true}/>
 										</td>
 									</tr>
 									: null
 							}
-						</>
+						</React.Fragment>
 					)}
 				</tbody>
 			</table>
@@ -71,32 +73,64 @@ export default function Backups() {
 	</Panel>;
 }
 
-function Chart({log, aspectRatio}) {
+function Chart({log, aspectRatio, showAxes}) {
 	// eg 1920x1080, aR = 1.777
 	// 1000x100, aR = 10
-	const [data, setData] = useStateReact();
+
+	const [{path, xAxis, yAxis}, setData] = useStateReact({path: null, xAxis: null, yAxis: null});
+	const xAxisRef = useCallback(node => node && xAxis && select(node).call(xAxis), [xAxis]);
+	const yAxisRef = useCallback(node => node && yAxis && select(node).call(yAxis), [yAxis]);
+
+	const height = 250;
+	const width = height * aspectRatio;
+
+	const margin = showAxes 
+		? {
+			left: 35,
+			right: 4,
+			top: 4,
+			bottom: 18
+		}
+		: {
+			left: 4,
+			right: 4,
+			top: 4,
+			bottom: 4
+		};
+	margin.height = height + margin.top + margin.bottom;
+	margin.width = width + margin.left + margin.right;
+
 	useEffect(() => {
 		const xScale = scaleTime()
 			.domain([log.startTime, log.endTime])
-			.range([0, 100 * aspectRatio]);
+			.range([0, width]);
 		const yScale = scaleLinear()
 			.domain([0, log.maxDuration])
-			.range([100, 0]);
+			.range([height, 0]);
 
 		const lineGenerator = line()
 			.x(d => xScale(d.requestTime))
 			.y(d => yScale(d.requestDuration));
-
 		const requests = stepifyArray(log.requests);
+		const path = lineGenerator(requests)
 
-		setData(lineGenerator(requests));
+		if (showAxes) {
+			const xAxis = axisBottom(xScale)
+				.tickFormat(multiFormat);
+			const yAxis = axisLeft(yScale)
+				.tickFormat(ms => `${ms / 1000}s`);
+
+			setData({path, xAxis, yAxis});
+		} else {
+			setData({path});
+		}
 	}, [log]);
 
 	return <div className="backup-graph">
-		<svg viewBox={`0 0 ${100 * aspectRatio} 100`}>
-			<path d={data}/>
-			<g className="x-axis"></g>
-			<g className="y-axis"></g>
+		<svg viewBox={`${-margin.left} ${-margin.top} ${margin.width} ${margin.height}`}>
+			<path className="graph-path" d={path}/>
+			<g ref={xAxisRef} className="x-axis" transform={`translate(0, ${height})`}></g>
+			<g ref={yAxisRef} className="y-axis"></g>
 		</svg>
 	</div>;
 }

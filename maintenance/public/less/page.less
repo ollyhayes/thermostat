@@ -147,13 +147,25 @@ div.backups {
 		border: 1px solid @inner-border;
 
 		svg {
-			fill: none;
-			stroke: lime;
-			stroke-width: 1px;
+			path.graph-path {
+				fill: none;
+				stroke: lime;
+				stroke-width: 5px;
+			}
+
+			.x-axis,.y-axis {
+				color: #ff6c00;
+				text {
+					@media (min-width: 880px) {
+						font-size: 0.35em;
+					}
+				}
+			}
 		}
 	}
 
 	tr.chart-preview {
+		cursor: inherit;
 		&:hover {
 			background-color: inherit;
 		}
@@ -165,8 +177,8 @@ div.backups {
 		div.backup-graph {
 			margin: 0.5em;
 
-			svg {
-				stroke-width: 0.25px;
+			svg path.graph-path {
+				stroke-width: 1px;
 			}
 		}
 	}
