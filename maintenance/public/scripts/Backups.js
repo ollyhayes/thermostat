@@ -112,7 +112,7 @@ function Chart({log, aspectRatio, showAxes}) {
 			.x(d => xScale(d.requestTime))
 			.y(d => yScale(d.requestDuration));
 		const requests = stepifyArray(log.requests);
-		const path = lineGenerator(requests)
+		const path = lineGenerator(requests);
 
 		if (showAxes) {
 			const xAxis = axisBottom(xScale)

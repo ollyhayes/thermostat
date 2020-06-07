@@ -5,14 +5,17 @@ import classNames from 'classnames';
 import Thermometers from './Thermometers';
 import Backups from './Backups';
 import { selectPanel } from './actions';
+import Panel from './Panel';
 
 export default function App() {
 	const {selectedPanel} = useState();
 
 	const SelectedPanel = {
 		'backups': Backups,
-		'thermometers': Thermometers
-	}[selectedPanel] || (() => <span>Unknown panel</span>);
+		'thermometers': Thermometers,
+	'raspberry-functions'() {return <Panel name="Raspberry-Pi functions" className={selectedPanel}>Coming soon</Panel>;},
+		'flow-valve'() {return <Panel name="Flow valve" className={selectedPanel}>Coming soon</Panel>;},
+	}[selectedPanel] || (() => <span>error</span>);
 
 	return <>
 		<Header/>
@@ -36,7 +39,7 @@ function Menu() {
 		{renderButton('Connected Thermometers', 'thermometers')}
 		{renderButton('Backups', 'backups')}
 		{renderButton('Raspberry-Pi functions', 'raspberry-functions')}
-		{renderButton('pump', 'pump')}
+		{renderButton('Flow valve', 'flow-valve')}
 	</div>;
 }
 
