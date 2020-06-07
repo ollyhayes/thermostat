@@ -36,28 +36,32 @@ export default function Backups() {
 				</thead>
 				<tbody>
 					{backups.map((log, index) =>
-						<tr
-							key={index}
-							className={log === logToPreview ? 'selected' : ''}
-							onClick={() => setLogToPreview(log === logToPreview ? null : log)}>
-							<td>{formatTime(log.startTime)}</td>
-							<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
-							<td className="numeric">{log.requests.length}</td>
-							<td className="numeric">{log.maxDuration / 1000 + 's'}</td>
-							<td className="numeric">{formatSize(log.transferred)}</td>
-							<td className="graph"><Chart log={log} aspectRatio={12}/></td>
-						</tr>
+						<>
+							<tr
+								key={index}
+								className={log === logToPreview ? 'selected' : ''}
+								onClick={() => setLogToPreview(log === logToPreview ? null : log)}>
+								<td>{formatTime(log.startTime)}</td>
+								<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
+								<td className="numeric">{log.requests.length}</td>
+								<td className="numeric">{log.maxDuration / 1000 + 's'}</td>
+								<td className="numeric">{formatSize(log.transferred)}</td>
+								<td className="graph"><Chart log={log} aspectRatio={12}/></td>
+							</tr>
+							{
+								logToPreview === log
+									? <tr className="chart-preview">
+										<td colSpan="999">
+											<Chart log={log} aspectRatio={3}/>
+										</td>
+									</tr>
+									: null
+							}
+						</>
 					)}
 				</tbody>
 			</table>
-			{logToPreview && renderGraphPreview(logToPreview)}
 		</>;
-	}
-
-	function renderGraphPreview(log) {
-		return <div className="chart-preview">
-			<Chart log={log} aspectRatio={3}/>
-		</div>;
 	}
 
 	return <Panel name="Backups" className="backups">

@@ -153,11 +153,21 @@ div.backups {
 		}
 	}
 
-	div.chart-preview {
-		margin-top: 1em;
+	tr.chart-preview {
+		&:hover {
+			background-color: inherit;
+		}
+		&,td {
+			margin: 0;
+			padding: 0;
+		}
 
-		svg {
-			stroke-width: 0.25px;
+		div.backup-graph {
+			margin: 0.5em;
+
+			svg {
+				stroke-width: 0.25px;
+			}
 		}
 	}
 }
