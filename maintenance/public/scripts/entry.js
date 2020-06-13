@@ -18,7 +18,7 @@ const store = createStore({
 		error: false,
 		backups: undefined
 	},
-	selectedPanel: window.location.hash.substring(1)
+	selectedPanel: window.location.hash.substring(1) || 'thermometers'
 });
 
 store.subscribe(state => {
