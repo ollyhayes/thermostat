@@ -29,6 +29,7 @@ export default function Backups() {
 			<table>
 				<thead>
 					<tr>
+						<th>target</th>
 						<th>t<sub>0</sub></th>
 						<th>t<sub>n</sub> - t<sub>0</sub></th>
 						<th>n</th>
@@ -43,6 +44,7 @@ export default function Backups() {
 							<tr
 								className={log === logToPreview ? 'selected' : ''}
 								onClick={() => setLogToPreview(log === logToPreview ? null : log)}>
+								<td>{log.target}</td>
 								<td>{formatTime(log.startTime)}</td>
 								<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
 								<td className="numeric">{log.requests.length}</td>

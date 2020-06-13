@@ -13,16 +13,17 @@ function backups() {
 			);
 
 			const backups = logs
-				.filter(log => log.length > 0)
-				.map(log => {
-					const requests = log.filter(({requestDuration}) => requestDuration);
+				.filter(log => log.requests.length > 0)
+				.map(({requests, target}) => {
+					const successfulRequests = requests.filter(({requestDuration}) => requestDuration);
 
 					return {
-						startTime: log[0].requestTime,
-						endTime: log[log.length - 1].requestTime,
-						transferred: requests.reduce((total, next) => total + next.requestSize, 0),
-						maxDuration: requests.reduce((max, next) => Math.max(max, next.requestDuration), 0),
-						requests: requests
+						target,
+						startTime: successfulRequests[0].requestTime,
+						endTime: successfulRequests[successfulRequests.length - 1].requestTime,
+						transferred: successfulRequests.reduce((total, next) => total + next.requestSize, 0),
+						maxDuration: successfulRequests.reduce((max, next) => Math.max(max, next.requestDuration), 0),
+						requests: successfulRequests
 							.map(({requestTime, requestDuration, minDate, precisionLevel}) => ({
 								dataTime: minDate,
 								requestTime,
