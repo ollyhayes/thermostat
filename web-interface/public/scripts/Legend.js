@@ -2,7 +2,8 @@ import React, {useState, useEffect} from 'react';
 import {thermometers} from '../../../common/config.json';
 import {format} from 'd3-format';
 import {saveHiddenThermometers} from './storage';
-import Icon from '../../../maintenance/public/scripts/Icon';
+import Icon from './Icon';
+import config from '../../../common/config.json';
 
 export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 	const [currentTime, setCurrentTime] = useState(new Date());
@@ -28,7 +29,9 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 
 	return <div className='legend'>
 		<div className="icon-wrapper">
-			<Icon iconName="cog" />
+			<a href={config.webInterface.settingsLink}>
+				<Icon iconName="cog" />
+			</a>
 		</div>
 		<table>
 			<tbody>
