@@ -4,7 +4,9 @@ maintenance
 maint-backups
 		serve thermostat from bob externally ***
 		load backups list always from bob ***
-	show backup target ***
+		show backup target ***
+	color row by target?
+	hide columns on mobile
 maint-thermometers
 	cross/tick
 	download config
@@ -21,8 +23,9 @@ other
 	fix thermometers on pi ***
 
 web-interface
+	are disabled and type orthogonal??***
 		binary protocol not working from pi ***
-	link web interface with maintenance page ***
+		link web interface with maintenance page *** ah bookmarks, maybe?
 	don't join up the lines
 		bug with fully zooming out keeps forgetting and loading in a loop! ********
 	wierd thermometerId null thing, think it's when a thermometer disappears, todo with the averaging stuff (unit tests!)

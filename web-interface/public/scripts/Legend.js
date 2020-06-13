@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {thermometers} from '../../../common/config.json';
 import {format} from 'd3-format';
 import {saveHiddenThermometers} from './storage';
+import Icon from '../../../maintenance/public/scripts/Icon';
 
 export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 	const [currentTime, setCurrentTime] = useState(new Date());
@@ -26,6 +27,9 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 		.sort((l, r) => (r.temperature || -99) - (l.temperature || -99));
 
 	return <div className='legend'>
+		<div className="icon-wrapper">
+			<Icon iconName="cog" />
+		</div>
 		<table>
 			<tbody>
 				{data.map(thermometer =>
