@@ -32,7 +32,7 @@ export async function fetchData(store) {
 
 export async function fetchBackups(store) {
 	try {
-		const backups = await (await fetch('/backups')).json();
+		const backups = await (await fetch('http://olly.fr.to:39414/backups')).json();
 
 		store.updateValue(state => ({
 			...state,

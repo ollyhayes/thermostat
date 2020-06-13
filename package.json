@@ -18,6 +18,7 @@
   "dependencies": {
     "@babel/core": "^7.6.2",
     "@babel/preset-react": "^7.0.0",
+    "@koa/cors": "^3.1.0",
     "babel-loader": "^8.0.6",
     "better-sqlite3": "^5.4.0",
     "classnames": "^2.2.6",

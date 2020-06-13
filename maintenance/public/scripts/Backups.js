@@ -19,7 +19,7 @@ export default function Backups() {
 	function renderError() {
 		return <div>
 			{error
-				? <span>Error loading data: {error}</span>
+				? <span>Error loading data: {error.toString()}</span>
 				: <span>Loading</span>}
 		</div>;
 	}

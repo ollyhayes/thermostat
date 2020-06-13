@@ -1,8 +1,9 @@
 maintenance
 		put the current panel in the url
+	dont error whithout fragment***
 maint-backups
-	serve thermostat from bob externally ***
-	load backups list always from bob ***
+		serve thermostat from bob externally ***
+		load backups list always from bob ***
 	show backup target ***
 maint-thermometers
 	cross/tick
@@ -20,7 +21,7 @@ other
 	fix thermometers on pi ***
 
 web-interface
-	binary protocol not working from pi ***
+		binary protocol not working from pi ***
 	link web interface with maintenance page ***
 	don't join up the lines
 		bug with fully zooming out keeps forgetting and loading in a loop! ********

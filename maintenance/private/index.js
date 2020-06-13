@@ -6,6 +6,7 @@ const serve = require('koa-static');
 const path = require('path');
 const {data} = require('./data');
 const {backups} = require('./backups');
+const cors = require('@koa/cors');
 const app = new Koa();
 const router = new Router();
 
@@ -15,6 +16,7 @@ function start(port) {
 
 	app.use(compress());
 	app.use(serve(path.join(__dirname, '../public')));
+	app.use(cors({allowMethods: ['GET']}));
 	app.use(router.routes());
 
 	const server = http.createServer(app.callback());
