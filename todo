@@ -23,7 +23,7 @@ web-interface
 	binary protocol not working from pi ***
 	link web interface with maintenance page ***
 	don't join up the lines
-	bug with fully zooming out keeps forgetting and loading in a loop! ********
+		bug with fully zooming out keeps forgetting and loading in a loop! ********
 	wierd thermometerId null thing, think it's when a thermometer disappears, todo with the averaging stuff (unit tests!)
 
 

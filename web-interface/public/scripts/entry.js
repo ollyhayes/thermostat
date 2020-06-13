@@ -17,7 +17,7 @@ loadHiddenThermometers();
 document.addEventListener('DOMContentLoaded', async () => {
 	let isReady = false;
 	const requestChunks = initialiseDataSocket(handleNewData);
-	const chunkSet = createChunkSet(50, dropChunk);
+	const chunkSet = createChunkSet(250, dropChunk);
 
 	const root = document.querySelector('.root');
 	const redraw = await drawChart(root, requestData);
