@@ -2,7 +2,7 @@ module.exports = function()
 {
 	const config = {
 		mode: 'development',
-		//devtool: 'eval-source-map',
+		devtool: 'source-map',
 		entry: {
 			streaming: './public/scripts/entry.js',
 			nonStreaming: './public/scripts/non-streaming-version/entry.js'

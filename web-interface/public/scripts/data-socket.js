@@ -22,7 +22,7 @@ export default function initialise(handleData) {
 
 	socket.onmessage = function ({data}) {
 		const {temperatures, chunk} = dataType === 'binary'
-			? deserialiseTemperatures(data)
+			? deserialiseTemperatures(new Int32Array(data))
 			: parseData(data);
 
 		handleData(chunk, temperatures);
