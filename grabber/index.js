@@ -165,7 +165,7 @@ function printFinalLog(jobLog) {
 
 	const finalLog = {
 		requests: jobLog,
-		target: config.grabber.targetName
+		target: config.grabber.targetName || 'changeme'
 	};
 
 	log(`total time: ${totalTime}, average: ${totalTime / jobLog.length}, number of requests: ${jobLog.length}`, 'green');
