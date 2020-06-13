@@ -1,6 +1,6 @@
 maintenance
 		put the current panel in the url
-	dont error whithout fragment***
+		dont error whithout fragment***
 maint-backups
 		serve thermostat from bob externally ***
 		load backups list always from bob ***
