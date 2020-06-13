@@ -1,19 +1,30 @@
 maintenance
-	*put the current panel in the url
-	thermometers
-		cross/tick
-		download config
-	rpi control
-		turn off
-		uptime / last restart
-		linux version stuff?
-		download config
-		trigger backup now?
+		put the current panel in the url
+maint-backups
+	serve thermostat from bob externally ***
+	load backups list always from bob ***
+	show backup target ***
+maint-thermometers
+	cross/tick
+	download config
+maint-rpi control
+	turn off
+	uptime / last restart
+	linux version stuff?
+	download config
+	trigger backup now?
+
+other
+	rsync command to copy database off ***
+	script to load all temperatures from other database ***
+	fix thermometers on pi ***
 
 web-interface
+	binary protocol not working from pi ***
+	link web interface with maintenance page ***
 	don't join up the lines
 	bug with fully zooming out keeps forgetting and loading in a loop! ********
-
+	wierd thermometerId null thing, think it's when a thermometer disappears, todo with the averaging stuff (unit tests!)
 
 
 ****old stuf****

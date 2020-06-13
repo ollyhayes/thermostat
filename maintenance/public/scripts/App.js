@@ -13,7 +13,7 @@ export default function App() {
 	const SelectedPanel = {
 		'backups': Backups,
 		'thermometers': Thermometers,
-	'raspberry-functions'() {return <Panel name="Raspberry-Pi functions" className={selectedPanel}>Coming soon</Panel>;},
+		'raspberry-functions'() {return <Panel name="Raspberry-Pi functions" className={selectedPanel}>Coming soon</Panel>;},
 		'flow-valve'() {return <Panel name="Flow valve" className={selectedPanel}>Coming soon</Panel>;},
 	}[selectedPanel] || (() => <span>error</span>);
 
