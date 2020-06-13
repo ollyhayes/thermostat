@@ -12,7 +12,8 @@
 	},
 	"grabber": {
 		"enabled": false,
-		"grabFromUrl": "http://192.168.0.9/"
+		"grabFromUrl": "http://192.168.0.9/",
+		"targetName": "changeme"
 	},
 	"thermometers": [
 		{

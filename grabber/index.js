@@ -3,6 +3,7 @@ const CronJob = require('cron').CronJob;
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
+const config = require('../common/config.json');
 
 const log = require('../common/log');
 const {deserialiseTemperatures} = require('../web-interface/public/scripts/temperature-serialiser');
@@ -162,9 +163,14 @@ module.exports = {start};
 function printFinalLog(jobLog) {
 	const totalTime = jobLog.reduce((totalDuration, {requestDuration}) => totalDuration + requestDuration, 0);
 
+	const finalLog = {
+		requests: jobLog,
+		target: config.grabber.targetName
+	};
+
 	log(`total time: ${totalTime}, average: ${totalTime / jobLog.length}, number of requests: ${jobLog.length}`, 'green');
 
-	fs.writeFileSync(path.join(__dirname, 'logs', `log-${printDate()}.json`), JSON.stringify(jobLog));
+	fs.writeFileSync(path.join(__dirname, 'logs', `log-${printDate()}.json`), JSON.stringify(finalLog));
 }
 
 function printDetails(details) {
