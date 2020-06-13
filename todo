@@ -8,6 +8,7 @@ maint-backups
 	color row by target?
 	hide columns on mobile
 maint-thermometers
+		dont request thermometers when not on that panel (e.g. minimised also)***
 	cross/tick
 	download config
 maint-rpi control
