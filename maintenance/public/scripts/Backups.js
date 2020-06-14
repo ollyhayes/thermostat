@@ -5,7 +5,7 @@ import { select } from 'd3-selection';
 import { axisLeft, axisBottom } from 'd3-axis';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import multiFormat from '../../../web-interface/public/scripts/time-format';
-import moment, { duration, max } from 'moment';
+import moment from 'moment';
 import Panel from './Panel';
 
 // const specifier = '%Y-%m-%d %H:%M:%S';
@@ -20,17 +20,9 @@ export default function Backups() {
 		return <div>
 			{error
 				? <span>Error loading data: {error.toString()}</span>
-				: <span>Loading</span>}
+				: <span>Loading...</span>}
 		</div>;
 	}
-
-	// target		most-redundant		0
-	// time			useful				2
-	// duration		redundant			1
-	// n				most useful			3
-	// max			useful				2
-	// size			redundant			1
-	// grapnh		most-rdundant		0
 
 	function renderBackups() {
 		return <>
