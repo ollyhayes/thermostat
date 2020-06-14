@@ -1,4 +1,7 @@
 export async function fetchData(store) {
+	if (store.getValue().selectedPanel !== 'thermometers' || document.hidden)
+		return;
+
 	store.updateValue(state => ({
 		...state,
 		connectedThermometers: {
