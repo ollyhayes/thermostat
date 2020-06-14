@@ -6,7 +6,6 @@ import Thermometers from './Thermometers';
 import Backups from './Backups';
 import { selectPanel } from './actions';
 import Panel from './Panel';
-import config from '../../../common/config.json';
 
 export default function App() {
 	const {selectedPanel} = useState();
@@ -41,7 +40,6 @@ function Menu() {
 		{renderButton('Backups', 'backups')}
 		{renderButton('Raspberry-Pi functions', 'raspberry-functions')}
 		{renderButton('Flow valve', 'flow-valve')}
-		<a href={config.maintenance.thermostatLink}>Thermostat</a>
 	</div>;
 }
 

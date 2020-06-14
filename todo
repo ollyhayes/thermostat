@@ -6,7 +6,7 @@ maint-backups
 		load backups list always from bob ***
 		show backup target ***
 		color row by target?
-		hide columns on mobile
+	hide columns on mobile
 maint-thermometers
 	dont request thermometners when not on that panel (e.g. minimised also)***
 	cross/tick
