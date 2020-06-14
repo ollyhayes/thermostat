@@ -42,8 +42,8 @@ export default function Backups() {
 						<th className="redundant">t<sub>n</sub> - t<sub>0</sub></th>
 						<th>n</th>
 						<th>r<sub>max</sub></th>
-						<th>s</th>
-						<th className="importance-1 graph">Graph</th>
+						<th>size</th>
+						<th className="graph">Graph</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -59,7 +59,7 @@ export default function Backups() {
 								<td className="numeric">{log.requests.length}</td>
 								<td className="numeric">{log.maxDuration / 1000 + 's'}</td>
 								<td className="numeric">{formatSize(log.transferred)}</td>
-								<td className="importance-1 graph"><Chart log={log} aspectRatio={12}/></td>
+								<td className="graph"><Chart log={log} aspectRatio={12}/></td>
 							</tr>
 							{
 								logToPreview === log
