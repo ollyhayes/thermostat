@@ -43,6 +43,7 @@ export default function Backups() {
 						<React.Fragment key={index}>
 							<tr
 								className={log === logToPreview ? 'selected' : ''}
+								style={{color: log.target === 'dev' ? 'green' : 'red'}}
 								onClick={() => setLogToPreview(log === logToPreview ? null : log)}>
 								<td>{log.target}</td>
 								<td>{formatTime(log.startTime)}</td>

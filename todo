@@ -5,10 +5,10 @@ maint-backups
 		serve thermostat from bob externally ***
 		load backups list always from bob ***
 		show backup target ***
-	color row by target?
+		color row by target?
 	hide columns on mobile
 maint-thermometers
-		dont request thermometers when not on that panel (e.g. minimised also)***
+	dont request thermometners when not on that panel (e.g. minimised also)***
 	cross/tick
 	download config
 maint-rpi control
