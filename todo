@@ -24,9 +24,8 @@ other
 	fix thermometers on pi ***
 
 web-interface
-	are disabled and type orthogonal??***
 		binary protocol not working from pi ***
-		link web interface with maintenance page *** ah bookmarks, maybe?
+	link web interface with maintenance page ***
 	don't join up the lines
 		bug with fully zooming out keeps forgetting and loading in a loop! ********
 	wierd thermometerId null thing, think it's when a thermometer disappears, todo with the averaging stuff (unit tests!)

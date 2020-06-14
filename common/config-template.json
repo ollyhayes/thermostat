@@ -8,8 +8,7 @@
 	},
 	"webInterface": {
 		"port": 8080,
-		"dataType": "binary",
-		"settingsLink": "http://olly.fr.to:39414/#backups"
+		"dataType": "binary"
 	},
 	"grabber": {
 		"enabled": false,
