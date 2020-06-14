@@ -5,7 +5,7 @@ import { select } from 'd3-selection';
 import { axisLeft, axisBottom } from 'd3-axis';
 import { scaleTime, scaleLinear } from 'd3-scale';
 import multiFormat from '../../../web-interface/public/scripts/time-format';
-import moment from 'moment';
+import moment, { duration, max } from 'moment';
 import Panel from './Panel';
 
 // const specifier = '%Y-%m-%d %H:%M:%S';
@@ -24,18 +24,26 @@ export default function Backups() {
 		</div>;
 	}
 
+	// target		most-redundant		0
+	// time			useful				2
+	// duration		redundant			1
+	// n				most useful			3
+	// max			useful				2
+	// size			redundant			1
+	// grapnh		most-rdundant		0
+
 	function renderBackups() {
 		return <>
 			<table>
 				<thead>
 					<tr>
-						<th>target</th>
+						<th className="redundant">target</th>
 						<th>t<sub>0</sub></th>
-						<th>t<sub>n</sub> - t<sub>0</sub></th>
+						<th className="redundant">t<sub>n</sub> - t<sub>0</sub></th>
 						<th>n</th>
 						<th>r<sub>max</sub></th>
 						<th>s</th>
-						<th className="graph">Graph</th>
+						<th className="importance-1 graph">Graph</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -45,13 +53,13 @@ export default function Backups() {
 								className={log === logToPreview ? 'selected' : ''}
 								style={{color: log.target === 'dev' ? 'green' : 'red'}}
 								onClick={() => setLogToPreview(log === logToPreview ? null : log)}>
-								<td>{log.target}</td>
+								<td className="redundant">{log.target}</td>
 								<td>{formatTime(log.startTime)}</td>
-								<td className="numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
+								<td className="redundant numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
 								<td className="numeric">{log.requests.length}</td>
 								<td className="numeric">{log.maxDuration / 1000 + 's'}</td>
 								<td className="numeric">{formatSize(log.transferred)}</td>
-								<td className="graph"><Chart log={log} aspectRatio={12}/></td>
+								<td className="importance-1 graph"><Chart log={log} aspectRatio={12}/></td>
 							</tr>
 							{
 								logToPreview === log

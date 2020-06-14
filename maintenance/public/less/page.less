@@ -3,11 +3,36 @@
 @inner-border: lime;
 @foreground: white;
 
+// @small-mobile: 320px;
+@medium-mobile: 500px;
+@large-mobile: 680px;
+@small-desktop: 880px;
+@medium-desktop: 1024px;
+@large-desktop: 1200px;
+
+// .redundant {
+// 	// @media (max-width: @large-desktop and min-width: @small-desktop) {
+// }
+
+// @media (880px <= width <= 1200px) {
+// 	display: none;
+// }
+
+@media (400px <= width <= 700px) {
+	body { line-height: 1.4; }
+}
+
+.importance-1 {
+	@media (max-width: @large-desktop) {
+		display: none;
+	}
+}
+
 * {
 	font-size: 20px;
 	font-family: monospace;
 
-	@media (max-width: 880px) {
+	@media (max-width: @small-desktop) {
 		font-size: 10px;
 	}
 }
@@ -137,9 +162,9 @@ div.backups {
 			width: 100%;
 			padding: 0.5em 0;
 
-			@media (max-width: 800px) {
-				display: none;
-			}
+			// @media (max-width: 800px) {
+			// 	display: none;
+			// }
 		}
 	}
 
