@@ -24,14 +24,6 @@ export default function Backups() {
 		</div>;
 	}
 
-	// target		most-redundant		0
-	// time			useful				2
-	// duration		redundant			1
-	// n				most useful			3
-	// max			useful				2
-	// size			redundant			1
-	// grapnh		most-rdundant		0
-
 	function renderBackups() {
 		return <>
 			<table>

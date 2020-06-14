@@ -14,9 +14,9 @@ function start(port) {
 	router.get('/data', data());
 	router.get('/backups', backups());
 
+	app.use(cors({allowMethods: ['GET']}));
 	app.use(compress());
 	app.use(serve(path.join(__dirname, '../public')));
-	app.use(cors({allowMethods: ['GET']}));
 	app.use(router.routes());
 
 	const server = http.createServer(app.callback());
