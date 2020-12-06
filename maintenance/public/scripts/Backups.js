@@ -29,7 +29,7 @@ export default function Backups() {
 			<table>
 				<thead>
 					<tr>
-						<th className="redundant">target</th>
+						{/* <th className="redundant">target</th> */}
 						<th>t<sub>0</sub></th>
 						<th className="redundant">t<sub>n</sub> - t<sub>0</sub></th>
 						<th>n</th>
@@ -43,9 +43,9 @@ export default function Backups() {
 						<React.Fragment key={index}>
 							<tr
 								className={log === logToPreview ? 'selected' : ''}
-								style={{color: log.target === 'dev' ? 'green' : 'red'}}
+								// style={{color: log.target === 'dev' ? 'green' : 'red'}}
 								onClick={() => setLogToPreview(log === logToPreview ? null : log)}>
-								<td className="redundant">{log.target}</td>
+								{/* <td className="redundant">{log.target}</td> */}
 								<td>{formatTime(log.startTime)}</td>
 								<td className="redundant numeric">{moment.duration(moment(log.startTime).diff(log.endTime)).humanize()}</td>
 								<td className="numeric">{log.requests.length}</td>
