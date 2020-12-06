@@ -3,6 +3,9 @@
 		"enabled": true,
 		"mock": true
 	},
+	"database": {
+		"location": "./database.sql"
+	},
 	"maintenance": {
 		"port": 8081
 	},
