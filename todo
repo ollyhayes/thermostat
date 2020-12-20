@@ -129,14 +129,17 @@ backups
 
 copying the database from aaron's pi and saving it to bob
 	* on bob
-		* save it on bob to .../Code/databases/database.db so that the server on bob uses it
-		* copy the config from aarons pi to bob
-		* disable the grabber for now maybe? - or update it to aarons ip and see what happens
-		* back up the grabber logs
+			* save it on bob to .../Code/databases/database.db so that the server on bob uses it
+			* copy the config from aarons pi to bob
+			* disable the grabber for now maybe? - or update it to aarons ip and see what happens
+			* back up the grabber logs
 		* make sure it works with the new db
 	* on daaron
-		* pull and npm install etc, build web and stuff
-		* enable binary mode and update config
+			* pull and npm install etc, build web and stuff
+			* enable binary mode and update config
 		* check maintenance page is as expected
-		* delete the old database
-		* start it running
+			* delete the old database
+			* start it running
+
+
+get rid of the lines joining up when there's gaps in the data
