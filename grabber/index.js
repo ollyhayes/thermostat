@@ -122,7 +122,7 @@ async function getJobDetails(db, previousJob, precisionLevelsInProgress) {
 
 async function getData(jobDetails) {
 	const {minDate, limit, precisionLevel} = jobDetails;
-	const url = `http://192.168.0.9:8080/data?minDate=${minDate}&limit=${limit}&precisionLevel=${precisionLevel}`;
+	const url = `${config.grabber.grabFromUrl}/data?minDate=${minDate}&limit=${limit}&precisionLevel=${precisionLevel}`;
 
 	const requestStart = Date.now();
 	const response = await fetch(url, {headers: {'Accept': 'application/octet-stream'}});
@@ -203,7 +203,7 @@ function printPrecisionLevel(precisionLevel) {
 }
 
 async function getFirstRecordFromTarget(precisionLevel) {
-	const response = await fetch(`http://192.168.0.9:8080/limits?precisionLevel=${precisionLevel}`);
+	const response = await fetch(`${config.grabber.grabFromUrl}/limits?precisionLevel=${precisionLevel}`);
 	const limits = await response.json();
 
 	return new Date(limits.minDate);
