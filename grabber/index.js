@@ -78,7 +78,7 @@ async function tick(db, jobLog, precisionLevelsInProgress) {
 		// 	stopJob();
 		// }
 
-		if (jobDetails.minDate + 20 * 60 * 1000 > new Date()) {
+		if (jobDetails.minDate + 2 * 60 * 60 * 1000 > new Date()) { // always stop when we get to 2 hours, to ensure level 2 ends
 			log(`reached final chunk for precisionLevel - ${printChunk(jobDetails)}`, 'red');
 			precisionLevelsInProgress.splice(precisionLevelsInProgress.indexOf(responseDetails.precisionLevel));
 			
@@ -105,6 +105,7 @@ async function getJobDetails(db, previousJob, precisionLevelsInProgress) {
 			precisionLevelsInProgress[
 				(precisionLevelsInProgress.indexOf(previousJob.precisionLevel) + 1) % precisionLevelsInProgress.length
 			]) || 0;
+
 	const limits = db.getLimits(precisionLevel);
 
 	const minDate = wasError
