@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	// Should probably make a common react root
 	ReactDOM.render(
-		<Legend></Legend>,
+		<Legend triggerRedraw={redraw}></Legend>,
 		document.querySelector('.react-root'));
 
 	function requestData(domain) {
