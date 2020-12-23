@@ -142,4 +142,16 @@ copying the database from aaron's pi and saving it to bob
 			* start it running
 
 
+*backup real config again from daaron and get new thermometers on bob
+prod bundle is massive for some reason - source maps already separate, must be a dependency
+	it's just react & d3, there's prob nothing to be done about it 73kb when gzipped anyway (by koa)
+colours of tank top/bottom etc
+plan manual flow-control interface
 get rid of the lines joining up when there's gaps in the data
+cut off max/min extreme values
+
+
+notes about backup times:
+	seems like some requests can take like 10 seconds, but I looked at the log on the raspberrypi (darron) and during that super long request
+	temperature readings were totally still taken every 2 seconds so no problem ✓
+	it's totally wierd how it manages that, the koa http handler must not be called when that delay is happening
