@@ -1,3 +1,5 @@
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 module.exports = function()
 {
 	const config = {
@@ -14,7 +16,10 @@ module.exports = function()
 				{ test: /\.jsx?$/, exclude: /node_modules/, loader: 'babel-loader' },
 				{ test: /\.less$/, exclude: /node_modules/, loader: 'style-loader!css-loader!less-loader' },
 			]
-		}
+		},
+		plugins: [
+			new BundleAnalyzerPlugin()
+		]
 	};
 
 	return config;
