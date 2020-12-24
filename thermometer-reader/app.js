@@ -11,15 +11,15 @@ const database = new Database(
 		: path.resolve('..', config.database.location));
 database.open();
 
-const end = start(database);
+const {stopThermometer} = start(database);
 
 process.on('exit', () => {
 	log('process exited - unsubscribing');
-	end();
+	stopThermometer();
 	database.close();
 	log('database closed');
 });
 
-process.on('SIGUSR1', () => db.backup());
+// process.on('SIGUSR1', () => db.backup());
 process.on('SIGINT', () => process.exit(0));
 process.on('SIGTERM', () => process.exit(0));
