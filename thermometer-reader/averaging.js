@@ -9,13 +9,13 @@ const {
 	count
 } = require('rxjs/operators');
 
-const {thermometers: allThermometers} = require('../common/config.json');
+// const {thermometers: allThermometers} = require('../common/config.json');
 
-const thermometers = allThermometers.filter(thermometer => !thermometer.disabled);
+// const thermometers = allThermometers.filter(thermometer => !thermometer.disabled);
 
 // error in here somewhere, something like if a thermometers goes missing half way through a window or something?
 // then the thermometerId is null
-function performAveraging(time) {
+function performAveraging(time, thermometers) {
 	return observable =>
 		observable.pipe(
 			windowTime(time),
