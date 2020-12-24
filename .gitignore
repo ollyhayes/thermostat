@@ -2,8 +2,9 @@
 bundles
 /package-lock.json
 /common/config.json
-/grabber/logs/
+/grabber/logs*
 
+*.backup*
 /*.db
 /*-wal
 /*-shm
