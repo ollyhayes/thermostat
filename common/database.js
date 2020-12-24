@@ -47,7 +47,6 @@ class Database
 
 			this.insertCommand = this.db.transaction((temperatures, unixDate, precisionLevel) =>
 				temperatures
-					.filter(({id}) => id) // temp hack to take account of preform averaging being broken
 					.forEach(({temperature, id, date: individualDate}) =>
 						singleInsert.run({
 							date: individualDate !== undefined

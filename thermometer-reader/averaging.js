@@ -4,14 +4,9 @@ const {
 	filter,
 	windowTime,
 	switchMap,
-	withLatestFrom,
 	reduce,
 	count
 } = require('rxjs/operators');
-
-// const {thermometers: allThermometers} = require('../common/config.json');
-
-// const thermometers = allThermometers.filter(thermometer => !thermometer.disabled);
 
 // error in here somewhere, something like if a thermometers goes missing half way through a window or something?
 // then the thermometerId is null
@@ -27,13 +22,13 @@ function performAveraging(time, thermometers) {
 							filter(thermometer => thermometer !== undefined),
 							map(thermometer => thermometer.temperature), // dud thermometer. I think we should iterate over values and find the the matchin one in the config after
 							averageOver(),
-							withLatestFrom(window.pipe(ofThermometer(thermometer.serial))),
-							map(([average, latest]) =>
-								({
-									...latest,
-									temperature: average
-								}))))).pipe(
-					map(averagedThemometers => averagedThemometers.filter(thermometer => !isNaN(thermometer.temperature))) // filter out the dud thermometers
+							map(average => ({
+								...thermometer,
+								temperature: average
+							}))))
+				).pipe(
+					map(averagedThemometers =>
+						averagedThemometers.filter(thermometer => !isNaN(thermometer.temperature))) // filter out the dud thermometers
 				)));
 
 	function ofThermometer(serial) {
