@@ -1,0 +1,58 @@
+add pump sensor - is this useful on it's own?
+
+a limit on max values on the db reads? could be like 5000 or something unrealistic, just to make it safer
+	currently a single url could totally kill the rpi
+why is there an index on temp???
+
+manual interface
+	add a control to set it as a percentage or something, with a slider maybe?
+		with throttling if it's a slider
+	merge in that branch
+		(decide whether this is actually the best way to go, probably just go for it)
+	fix averaging
+	tie web control into the actual mixing-valve gpio
+		we should already have the gpio pins ready
+		would just set it to a percentage value
+	security because it's now controllable?
+
+	big potential saving in not recording the turning time of the mixing valve, just immediatelly write to the db the new value
+		this would be huge if we stored them in a different way, could even be json or something
+		that would also give us a log of the values, though I guess the graph is the log really
+	
+	precision levels will screw up the mixing valve graph anyway?!
+		or not, it would just go through a different type of averaging, or maybe even the same?
+
+	at some point it'll need to be treated as continus time-indexed data, not gappy log-data, need to decide when that is
+	also it's showing 0-100% not a temperature, should it have a different y-scale or just choose arbitrary temperatures??
+	should it even be on the same graph?
+
+	maybe I need to go through each alternative (save as thermometer or custom type) and think about each part of the system:
+		- database (new table I guess) - how does this affect backups
+		- data-stream - could just read from this new table at the same time
+		- live updates - I guess just another emitter
+		- chunk-store
+		- drawGraphs(
+	
+pros & cons:
+	store values as if it's another thermometer
+		- database table/column names are all wrong as we're not looking at temperature data anymor
+		- we're storing _loads_ of redundant data (but this shouldn't affect the decision)
+		- for the binary sensor it doesn't entirely sound right, we know the exact time it changed, but we're only storing to the nearest second (wouldn't be true if we had to poll the gpio pin, we don't but anyway)
+		- quick to implement, and it can always be changed later
+	create new store
+		- it would just end up looking the same as the temperatures table anyway right?
+		- question about whether to store data at every second or just when it's changing
+			- could store each "change" as two values, to give the graph a step
+			- or do this stepping on the frontend
+			- the mixingvalve shouldn't look steppy (actually it will because we're actuating 5s every 30s)
+		proposal:
+			binary sensor stores (timestamp, on/off)
+			mixing-valve stores (timestamp, new value) (this would show as immediate despite the valve still turning) but if we only turn 5s at at time maybe that's fine)
+			wouldn't store any averages I think, would just turn off at higher precision levels
+				- ah maybe we'd want them for the mixing valve though could check where it's mostly set each week (***this is key)
+			maybe even for the pump it does make sense? tells you the average on time :)
+
+		final decision - store it as another thermometer
+
+
+
