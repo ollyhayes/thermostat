@@ -24,6 +24,8 @@ test('normal averaging', async () => {
 
 	const result = await toArray(temperatures);
 
+	expect(result.length).toBe(2);
+
 	expect(result).toStrictEqual([
 		[{ temperature: 6, serial: '1' }, { temperature: 16, serial: '2' },],
 		[{ temperature: 9, serial: '1' }, { temperature: 19, serial: '2' },],

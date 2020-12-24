@@ -1,49 +1,27 @@
-const {combineLatest} = require('rxjs');
-const {
-	map,
-	filter,
-	windowTime,
-	switchMap,
-	reduce,
-	count
-} = require('rxjs/operators');
+const { map, bufferTime, } = require('rxjs/operators');
+const {groupBy, flatten, mapObjIndexed, values, sum} = require('ramda');
 
-// error in here somewhere, something like if a thermometers goes missing half way through a window or something?
-// then the thermometerId is null
 function performAveraging(time, thermometers) {
 	return observable =>
 		observable.pipe(
-			windowTime(time),
-			switchMap(window => 
-				combineLatest(
-					thermometers.map(thermometer =>
-						window.pipe(
-							ofThermometer(thermometer.serial),
-							filter(thermometer => thermometer !== undefined),
-							map(thermometer => thermometer.temperature), // dud thermometer. I think we should iterate over values and find the the matchin one in the config after
-							averageOver(),
-							map(average => ({
-								...thermometer,
-								temperature: average
-							}))))
-				).pipe(
-					map(averagedThemometers =>
-						averagedThemometers.filter(thermometer => !isNaN(thermometer.temperature))) // filter out the dud thermometers
-				)));
+			bufferTime(time),
+			map(readingsPerTime => {
+				const readings = flatten(readingsPerTime);
+				const readingsPerThermometer = groupBy(reading => reading.serial, readings);
 
-	function ofThermometer(serial) {
-		return observable => observable.pipe(
-			map(windowArray => windowArray.find(({serial: innerSerial}) => innerSerial === serial))
-		);
-	}
+				const averages = mapObjIndexed((readings, serial) => {
+					const temperatures = readings.map(reading => reading.temperature);
+					return {
+						serial,
+						temperature: sum(temperatures) / temperatures.length
+					};
+				}, readingsPerThermometer);
 
-	function averageOver() {
-		return ovseravable => combineLatest([
-			ovseravable.pipe(reduce((sum, next) => sum + next, 0)),
-			ovseravable.pipe(count())
-		]).pipe(
-			map(([sum, count]) => sum / count));
-	}
+				return values(averages);
+			}));
 }
 
 module.exports = {performAveraging};
+
+// do we really need the config in here, could just average everything by serial and spit it back out, and combine each with their config later
+// can we create a custom partition instead of using ofThermometer/filter?
