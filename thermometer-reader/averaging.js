@@ -1,27 +1,25 @@
 const { map, bufferTime, } = require('rxjs/operators');
 const {groupBy, flatten, mapObjIndexed, values, sum} = require('ramda');
 
-function performAveraging(time, thermometers) {
+function performAveraging(time) {
 	return observable =>
 		observable.pipe(
 			bufferTime(time),
-			map(readingsPerTime => {
-				const readings = flatten(readingsPerTime);
-				const readingsPerThermometer = groupBy(reading => reading.serial, readings);
+			map(readingsPerSecond => {
+				const readings = flatten(readingsPerSecond);
+				const readingsByThermometer = groupBy(reading => reading.serial, readings);
 
 				const averages = mapObjIndexed((readings, serial) => {
 					const temperatures = readings.map(reading => reading.temperature);
 					return {
+						...readings[0],
 						serial,
-						temperature: sum(temperatures) / temperatures.length
+						temperature: sum(temperatures) / temperatures.length,
 					};
-				}, readingsPerThermometer);
+				}, readingsByThermometer);
 
 				return values(averages);
 			}));
 }
 
 module.exports = {performAveraging};
-
-// do we really need the config in here, could just average everything by serial and spit it back out, and combine each with their config later
-// can we create a custom partition instead of using ofThermometer/filter?

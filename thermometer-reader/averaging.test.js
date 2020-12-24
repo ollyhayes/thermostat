@@ -1,5 +1,5 @@
-const {from, interval, of} = require('rxjs');
-const { delayWhen, tap } = require('rxjs/operators');
+const {from, interval} = require('rxjs');
+const { delayWhen } = require('rxjs/operators');
 const { performAveraging } = require('./averaging');
 
 test('normal averaging', async () => {
@@ -112,6 +112,36 @@ test('with missing thermometer that reappears', async () => {
 	expect(result).toStrictEqual([
 		[{ temperature: 6, serial: '1' }, { temperature: 17, serial: '2' },],
 		[{ temperature: 9, serial: '1' }, { temperature: 19, serial: '2' },],
+	]);
+});
+
+test('keeps other fields on the readings', async () => {
+	const thermometers = [
+		{ serial: '1' }, { serial: '2' }
+	];
+
+	const thermometerReadings = [
+		[{ temperature: 5, serial: '1', id: 1 }, { temperature: 15, serial: '2', id: 2 },],
+		[{ temperature: 6, serial: '1', id: 1 }, { temperature: 16, serial: '2', id: 2 },],
+		[{ temperature: 7, serial: '1', id: 1 }, { temperature: 17, serial: '2', id: 2 },],
+
+		[{ temperature: 8, serial: '1', id: 1 }, { temperature: 18, serial: '2', id: 2 },],
+		[{ temperature: 9, serial: '1', id: 1 }, { temperature: 19, serial: '2', id: 2 },],
+		[{ temperature: 10, serial: '1', id: 1 }, { temperature: 20, serial: '2', id: 2 },],
+	];
+
+	const temperatures = from(thermometerReadings).pipe(
+		pauseAfterEveryThreeValues(),
+		performAveraging(500, thermometers)
+	);
+
+	const result = await toArray(temperatures);
+
+	expect(result.length).toBe(2);
+
+	expect(result).toStrictEqual([
+		[{ temperature: 6, serial: '1', id: 1 }, { temperature: 16, serial: '2', id: 2 },],
+		[{ temperature: 9, serial: '1', id: 1 }, { temperature: 19, serial: '2', id: 2 },],
 	]);
 });
 
