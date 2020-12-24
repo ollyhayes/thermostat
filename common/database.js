@@ -49,14 +49,14 @@ class Database
 				temperatures
 					.filter(({id}) => id) // temp hack to take account of preform averaging being broken
 					.forEach(({temperature, id, date: individualDate}) =>
-					singleInsert.run({
-						date: individualDate !== undefined
-							? toUnix(individualDate)
-							: unixDate,
-						temperature: toDbTemp(temperature),
-						precisionLevel,
-						thermometerId: id
-					})));
+						singleInsert.run({
+							date: individualDate !== undefined
+								? toUnix(individualDate)
+								: unixDate,
+							temperature: toDbTemp(temperature),
+							precisionLevel,
+							thermometerId: id
+						})));
 		}
 
 		const date = new Date();

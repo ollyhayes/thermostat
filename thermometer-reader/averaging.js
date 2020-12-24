@@ -21,7 +21,7 @@ function performAveraging(time, thermometers) {
 			windowTime(time),
 			switchMap(window => 
 				combineLatest(
-					...thermometers.map(thermometer =>
+					thermometers.map(thermometer =>
 						window.pipe(
 							ofThermometer(thermometer.serial),
 							filter(thermometer => thermometer !== undefined),
@@ -43,10 +43,10 @@ function performAveraging(time, thermometers) {
 	}
 
 	function averageOver() {
-		return ovseravable => combineLatest(
+		return ovseravable => combineLatest([
 			ovseravable.pipe(reduce((sum, next) => sum + next, 0)),
 			ovseravable.pipe(count())
-		).pipe(
+		]).pipe(
 			map(([sum, count]) => sum / count));
 	}
 }

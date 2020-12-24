@@ -23,11 +23,11 @@ function start(database) {
 			publishReplay(1),
 			refCount());
 	const minutelyTemperatures = temperatures.pipe(
-		performAveraging(60 * 1000),
+		performAveraging(60 * 1000, thermometers),
 		publishReplay(1),
 		refCount());
 	const hourlyTemperatures = temperatures.pipe(
-		performAveraging(3600 * 1000),
+		performAveraging(3600 * 1000, thermometers),
 		publishReplay(1),
 		refCount());
 
