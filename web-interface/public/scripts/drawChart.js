@@ -49,6 +49,12 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		.rangeRound([height, 0]);
 
 	const lineGenerator = line()
+		.defined((d, i, data) => {
+			if (i >= data.length - 1)
+				return true;
+			else
+				return (data[i + 1].date - d.date) < 3600000 * 1.5
+		})
 		.x(d => xScale(d.date))
 		.y(d => yScale(d.temperature));
 
