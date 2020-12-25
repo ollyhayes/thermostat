@@ -312,5 +312,11 @@ function getTemperatureExtent(data, minDate, maxDate) {
 		return [midPoint - minWidth / 2, midPoint + minWidth / 2];
 	}
 
-	return [minTemperature - 3, maxTemperature + 3];
+	const absoluteMinTemperature = -50;
+	const absoluteMaxTemperature = 250;
+
+	return [
+		Math.max(minTemperature - 3, absoluteMinTemperature),
+		Math.min(maxTemperature + 3, absoluteMaxTemperature)
+	];
 }
