@@ -53,7 +53,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 			if (i >= data.length - 1)
 				return true;
 			else
-				return (data[i + 1].date - d.date) < 3600000 * 1.5
+				return (data[i + 1].date - d.date) < 65 * 60 * 1000; // break gaps of more than an hour, probably raspberrypi went down
 		})
 		.x(d => xScale(d.date))
 		.y(d => yScale(d.temperature));

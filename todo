@@ -1,6 +1,6 @@
 bugs:
-	have websocket reconnect
-	cut off max/min extreme values
+	*have websocket reconnect
+	*cut off max/min extreme values
 improvements:
 	auto-resize graph when changing window size (or rotating phone)
 	navigation buttons - jump to today, previous/next day etc
