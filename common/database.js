@@ -22,7 +22,7 @@ class Database
 {
 	constructor(filename)
 	{
-		console.log('opening: ', filename)
+		console.log('opening: ', filename);
 		this.filename = filename || './database.db';
 	}
 
@@ -126,7 +126,7 @@ class Database
 			};
 		}
 
-		const limitCommand = this.limitCommand[precisionLevel === undefined ? 'unconstrained' : 'constrained'] 
+		const limitCommand = this.limitCommand[precisionLevel === undefined ? 'unconstrained' : 'constrained'] ;
 		const results = limitCommand.all({precisionLevel});
 
 		if (results.length !== 2)
@@ -141,7 +141,7 @@ class Database
 	}
 
 	async backup() {
-		const backupFile = path.join(path.dirname(this.filename), 'backup.db')
+		const backupFile = path.join(path.dirname(this.filename), 'backup.db');
 
 		if (fs.existsSync(backupFile)) {
 			log(`Cannot backup database - file already present: ${backupFile}`, 'red');
@@ -153,7 +153,7 @@ class Database
 			backupFile,
 			{
 				progress({totalPages, remainingPages}) {
-					log(`Backup progress: ${((totalPages - remainingPages) / totalPages * 100).toFixed(1)}%`, 'yellow')
+					log(`Backup progress: ${((totalPages - remainingPages) / totalPages * 100).toFixed(1)}%`, 'yellow');
 				}
 			});
 
