@@ -65,7 +65,8 @@ function createDataStreamCreator(database, dataEmitters) {
 			return temperatures => {
 				log(`emitting at precision level: ${precisionLevel}`);
 				sendUpdate({
-					temperatures,
+					temperatures: temperatures.map(({id, temperature, date}) =>
+						({ id, temperature, date })),
 					chunk: {
 						special: true,
 						precisionLevel

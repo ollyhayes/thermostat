@@ -13,7 +13,7 @@ exports.startBinarySensor = function() {
 			observer.next(state);
 			log(`sensor update: ${state}`);
 
-			timeoutId = setTimeout(handleSensorChange, (Math.random() * 3 + 3.5) * 1000); // every 3.5-6.5s
+			timeoutId = setTimeout(handleSensorChange, (Math.random() * 5 + 2.5) * 60 * 1000); // every 3.5-6.5m
 		}
 
 		handleSensorChange();

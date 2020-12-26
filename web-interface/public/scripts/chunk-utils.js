@@ -34,7 +34,17 @@ export function getChunkContaining(date, precisionLevel) {
 }
 
 export function getChunksForDateRange(minDate, maxDate) {
-	const precisionLevel = getPrecisionLevelForDateRange(minDate, maxDate);
+	const precisionLevels = getPrecisionLevelsForDateRange(minDate, maxDate);
+
+	return {
+		chunks: precisionLevels
+			.map(precisionLevel => getChunksForPrecisionLevel(precisionLevel, minDate, maxDate))
+			.reduce((acc, next) => [...acc, ...next], []),
+		precisionLevels
+	};
+}
+
+function getChunksForPrecisionLevel(precisionLevel, minDate, maxDate) {
 	const {interval, step} = getChunkInterval(precisionLevel);
 
 	return interval
@@ -49,22 +59,28 @@ export function getChunksForDateRange(minDate, maxDate) {
 			...chunk,
 			chunkCode: chunkToCode(chunk)
 		}));
+}
 
-	function getPrecisionLevelForDateRange(minDate, maxDate) {
-		const minuteLimit = (maxDate.getTime() - minDate.getTime()) / (1000 * 60); // how many minutes are we looking at
-		const hourLimit = minuteLimit / 60;
-		return hourLimit > 50
-			? 2
-			: minuteLimit > 75
-				? 1
-				: 0;
-	}
+function getPrecisionLevelsForDateRange(minDate, maxDate) {
+	const minuteLimit = (maxDate.getTime() - minDate.getTime()) / (1000 * 60); // how many minutes are we looking at
+	const hourLimit = minuteLimit / 60;
+	const zoomLevel = hourLimit > 50
+		? 2
+		: minuteLimit > 75
+			? 1
+			: 0;
+		
+	return zoomLevel === 2
+		? [zoomLevel]
+		: [zoomLevel, 3];
 }
 
 function getChunkInterval(precisionLevel) {
 	switch (precisionLevel) {
 	case 0: return {interval: timeMinute, step: 5};
-	case 1: return {interval: timeHour, step: 6};
+	case 1:
+	case 3:
+		return {interval: timeHour, step: 6};
 	case 2: return {interval: timeWeek, step: 1};
 	}
 }

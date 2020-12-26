@@ -29,11 +29,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 		document.querySelector('.react-root'));
 
 	function requestData(domain) {
-		const chunks = getChunksForDateRange(...domain);
+		const {chunks, precisionLevels} = getChunksForDateRange(...domain);
 
 		requestChunks(chunks.filter(chunk => !chunkSet.has(chunk)));
 
-		return getData(...domain, chunks[0].precisionLevel);
+		return precisionLevels.reduce((acc, next) => 
+			[...acc, ...getData(...domain, next)], []);
 	}
 
 	function handleNewData(chunk, temperatures) {

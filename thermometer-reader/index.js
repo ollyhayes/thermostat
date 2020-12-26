@@ -6,7 +6,7 @@ const {
 	publishReplay,
 	refCount,
 } = require('rxjs/operators');
-const {merge, EMPTY} = require('rxjs');
+const {EMPTY} = require('rxjs');
 const {performAveraging} = require('./averaging');
 
 const {thermometers: allThermometers} = require('../common/config.json');
@@ -16,14 +16,16 @@ const thermometers = allThermometers.filter(thermometer => !thermometer.disabled
 const pumpSensor = {pin: 1, id: 15}; // get from config
 
 function start(database) {
-	const temperatures = looper(1000, () =>
-		Promise.all(thermometers
+	const temperatures = looper(1000, () => {
+		const date = new Date();
+		return Promise.all(thermometers
 			.filter(thermometer => thermometer.type === 'thermometer')
 			.map(async thermometer => ({
 				...thermometer,
 				temperature: await getTemperature(thermometer.serial),
-				date: new Date()
-			}))))
+				date
+			})));
+	})
 		.pipe(
 			map(thermometers => thermometers.filter(thermometer => thermometer.temperature !== null)),
 			publishReplay(1),
@@ -41,20 +43,17 @@ function start(database) {
 		? startBinarySensor(pumpSensor.pin).pipe(
 			map(state => [{
 				...pumpSensor,
+				date: new Date(),
 				temperature: state ? 20 : 15
 			}]),
 			publishReplay(1),
 			refCount())
 		: EMPTY;
 
-	const updates = merge(temperatures, pumpSensorState).pipe(
-		publishReplay(1),
-		refCount());
-
 	const subscriptions = [];
 
 	subscriptions.push(
-		updates
+		temperatures
 			.subscribe(
 				temperatures => database.insert(temperatures),
 				error => log('temperature error: ' + error)));
@@ -67,12 +66,19 @@ function start(database) {
 		hourlyTemperatures
 			.subscribe(temperatures => database.insert(temperatures, 2)));
 
+	subscriptions.push(
+		pumpSensorState
+			.subscribe(
+				values => database.insert(values, 3)));
+
 	return {
 		stopThermometer: () => subscriptions.forEach(subscription => subscription.unsubscribe()),
 		newDataEmitter: [
-			updates,
+			temperatures,
 			minutelyTemperatures,
-			hourlyTemperatures]
+			hourlyTemperatures,
+			pumpSensorState
+		]
 	};
 }
 
