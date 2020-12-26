@@ -1,6 +1,46 @@
 bugs:
 	*have websocket reconnect
 	*cut off max/min extreme values
+	loads of errors on firefox about saving history state too often
+	limit on old server api
 improvements:
+	all on/all off function on the legend
 	auto-resize graph when changing window size (or rotating phone)
 	navigation buttons - jump to today, previous/next day etc
+
+binary-sensor:
+	what if the sensor doesn't change state for the whole graph window? we don't get anything
+		* could also store the state every minute, as well as when it changes
+		* othewise would have to search the database to find the last known state - different query
+	fix legend
+	show at all precisionLevels
+		we want to show raw data at zoom levels 0 & 1, later maybe averaged data at 2
+		insert binary-raw at precisionLevel 4
+		front end could request at zoom level 0, chunks with precisionLevels 0 & 4 etc
+		the get stored in a totally different chunk store
+		draw chart needs to know which precision levels to request
+
+		hmm, chunk-store is very specific at storing data in the intervals for that precision level
+			I could store all precisionLevel 3 data secondly, mostly it would be empty
+			or use something different than the chunk-store though, but I guess it handles other stuff
+			
+	extrapolate current value in live updates (and maybe previous if off screen)
+
+
+next up:
+	duplicate the chunk-store and create a descrete-chunk-store
+	it should return data in the same format as the normal one
+	it doesn't care whether we're precisionLevel 0 or 1, returns the same
+	it should use a linked-list style set, with a scan to find the first value (up to a minute to find the first value)
+		(to do this without storing a value every minute:
+			get the data with the look-back feature
+			store in the map a value on each minute/second like with the normal chunk-store (non-linked here)
+			this would mean we wouldn't get super accurate start/stop times at minutely zoom level
+		or we'd need a proper time-index, but that's kinda tricky on the frontend
+		or! fake it on the front end, and extrapolate values every minute
+		or! make a shitty custom index inside discrete-chunk-store
+			list or entries, each with a timestamp, do a binary search to find the first entry
+				or even just go down the list till it's found, there shouldn't be that many
+			follow the linked list to get the full data
+			return to the drawChart
+			needs to support deleting old chunks

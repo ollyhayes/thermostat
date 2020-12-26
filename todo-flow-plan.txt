@@ -50,7 +50,7 @@ pros & cons:
 			mixing-valve stores (timestamp, new value) (this would show as immediate despite the valve still turning) but if we only turn 5s at at time maybe that's fine)
 			wouldn't store any averages I think, would just turn off at higher precision levels
 				- ah maybe we'd want them for the mixing valve though could check where it's mostly set each week (***this is key)
-			maybe even for the pump it does make sense? tells you the average on time :)
+			maybe even for the pump it does make sense? tells you the average on-time :)
 
 		final decision - store it as another thermometer
 
