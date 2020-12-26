@@ -25,7 +25,6 @@ export default function createChunkStoreArray() {
 					return {
 						thermometerId: id,
 						temperatures: getValues(store, startTime, endTime),
-						curveType: 'continuous'
 					};
 				});
 		},

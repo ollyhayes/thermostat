@@ -1,7 +1,7 @@
 import { select, event as d3Event} from 'd3-selection';
 import 'd3-transition';
 import { scaleTime, scaleLinear } from 'd3-scale';
-import { line } from 'd3-shape';
+import { line, curveStepAfter } from 'd3-shape';
 import { axisBottom, axisLeft, axisRight } from 'd3-axis';
 import { zoom as d3Zoom, zoomIdentity, zoomTransform } from 'd3-zoom';
 import { timeDay } from 'd3-time';
@@ -16,9 +16,14 @@ import ticker from './ticker';
 import {thermometers} from '../../../common/config.json';
 import {createSaver, parseHash} from './domain-save';
 
-const thermometerColours = thermometers.reduce((colours, {colour, id}) => ({
-	...colours,
-	[id]: colour
+const thermometerOptions = thermometers.reduce((options, {colour, id, type}) => ({
+	...options,
+	[id]: {
+		colour,
+		curveType: type === 'binary-sensor'
+			? 'discrete'
+			: 'continuous'
+	}
 }),{});
 
 function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
@@ -57,6 +62,16 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		})
 		.x(d => xScale(d.date))
 		.y(d => yScale(d.temperature));
+	const steppedLineGenerator = line()
+		.defined((d, i, data) => {
+			if (i >= data.length - 1)
+				return true;
+			else
+				return (data[i + 1].date - d.date) < 65 * 60 * 1000; // break gaps of more than an hour, probably raspberrypi went down
+		})
+		.x(d => xScale(d.date))
+		.y(d => yScale(d.temperature))
+		.curve(curveStepAfter);
 
 	const svg = select(element)
 		.append('svg');
@@ -124,7 +139,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 	svg.call(zoom);
 
 	return {
-		lineGenerator,
+		lineGenerator, steppedLineGenerator,
 		xScale, yScale,
 		redrawXAxis(scale = xScale) {
 			gXAxis.call(xAxis.scale(scale));
@@ -151,7 +166,7 @@ export default async function drawChart(element, requestData) {
 	const [initialMinDate, initialMaxDate] = initialDomain || [defaultMinDate, defaultMaxDate];
 
 	const {
-		lineGenerator,
+		lineGenerator, steppedLineGenerator,
 		xScale, yScale,
 		redrawXAxis, redrawYAxis,
 		chartArea,
@@ -282,8 +297,10 @@ export default async function drawChart(element, requestData) {
 				enter => enter
 					.append('path')
 					.attr('fill', 'none')
-					.attr('stroke', d => thermometerColours[d.thermometerId]))
-			.attr('d', d => lineGenerator(d.temperatures));
+					.attr('stroke', d => thermometerOptions[d.thermometerId].colour))
+			.attr('d', d => thermometerOptions[d.thermometerId].curveType === 'continuous'
+				? lineGenerator(d.temperatures)
+				: steppedLineGenerator(d.temperatures));
 	}
 }
 
