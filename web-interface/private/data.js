@@ -1,4 +1,4 @@
-const {serialiseTemperatures} = require('../public/scripts/temperature-serialiser');
+const {serialiseTemperatures} = require('../public/scripts/temperature-serialiser.cjs');
 
 function data(db) {
 	return async function(context)

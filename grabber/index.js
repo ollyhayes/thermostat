@@ -6,7 +6,7 @@ const path = require('path');
 const config = require('../common/config.json');
 
 const log = require('../common/log');
-const {deserialiseTemperatures} = require('../web-interface/public/scripts/temperature-serialiser');
+const {deserialiseTemperatures} = require('../web-interface/public/scripts/temperature-serialiser.cjs');
 
 function start(db) {
 	const stopJobs = [];

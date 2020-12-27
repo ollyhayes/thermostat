@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const {serialiseTemperatures} = require('../public/scripts/temperature-serialiser');
+const {serialiseTemperatures} = require('../public/scripts/temperature-serialiser.cjs');
 
 function init(server, createDataStream) {
 	const wss = new WebSocket.Server({server});

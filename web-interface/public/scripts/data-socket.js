@@ -1,5 +1,5 @@
 import {webInterface} from '../../../common/config.json';
-import {deserialiseTemperatures} from './temperature-serialiser';
+import {deserialiseTemperatures} from './temperature-serialiser.cjs';
 
 const dataType = webInterface.dataType;
 
