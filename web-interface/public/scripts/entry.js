@@ -5,7 +5,7 @@ import drawChart from './drawChart';
 import Legend from './Legend';
 
 import initialiseDataSocket from './data-socket';
-import createChunkStore from './chunk-store';
+import createChunkStore from './chunk-stores';
 import { getChunkContaining, getChunksForDateRange } from './chunk-utils';
 import createChunkSet from '../../private/chunk-set';
 import { loadHiddenThermometers } from './storage';
@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	function handleNewData(chunk, temperatures) {
+		console.log(`new chunk: ${chunk.special}, received ${temperatures.length} values`);
 		if (chunk.special) {
 			chunk = {
 				...chunk,

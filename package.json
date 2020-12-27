@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watchAll",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --watchAll",
     "postinstall": "cpy common/config-template.json common/ --rename=config.json --no-overwrite",
     "start": "node app.js",
     "watch": "cd web-interface && webpack --watch",
