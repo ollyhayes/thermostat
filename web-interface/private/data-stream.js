@@ -63,16 +63,9 @@ function createDataStreamCreator(database, dataEmitters) {
 
 		function handleNewEmission(precisionLevel) {
 			return temperatures => {
-				const currentDate = new Date();
-
 				log(`emitting at precision level: ${precisionLevel}`);
 				sendUpdate({
-					temperatures: temperatures.map(
-						({temperature, id}) => ({
-							temperature,
-							id,
-							date: currentDate // prob best to use same date as in db
-						})),
+					temperatures,
 					chunk: {
 						special: true,
 						precisionLevel

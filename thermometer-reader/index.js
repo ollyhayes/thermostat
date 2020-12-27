@@ -17,6 +17,7 @@ function start(database) {
 		Promise.all(thermometers.map(async thermometer => ({
 			...thermometer,
 			temperature: await getTemperature(thermometer.serial),
+			date: new Date()
 		}))))
 		.pipe(
 			map(thermometers => thermometers.filter(thermometer => thermometer.temperature !== null)),
@@ -41,11 +42,11 @@ function start(database) {
 
 	subscriptions.push(
 		minutelyTemperatures
-			.subscribe(temperature => database.insert(temperature, 1)));
+			.subscribe(temperatures => database.insert(temperatures, 1)));
 
 	subscriptions.push(
 		hourlyTemperatures
-			.subscribe(temperature => database.insert(temperature, 2)));
+			.subscribe(temperatures => database.insert(temperatures, 2)));
 
 	return {
 		stopThermometer: () => subscriptions.forEach(subscription => subscription.unsubscribe()),

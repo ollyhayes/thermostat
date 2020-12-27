@@ -7,6 +7,7 @@ improvements:
 	all on/all off function on the legend
 	auto-resize graph when changing window size (or rotating phone)
 	navigation buttons - jump to today, previous/next day etc
+	follow button for phones? like pressing "f" on keyboard
 
 binary-sensor:
 	what if the sensor doesn't change state for the whole graph window? we don't get anything
