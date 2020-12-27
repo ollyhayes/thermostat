@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	function handleNewData(chunk, temperatures) {
-		console.log(`new chunk: ${chunk.special}, received ${temperatures.length} values`);
 		if (chunk.special) {
 			chunk = {
 				...chunk,
