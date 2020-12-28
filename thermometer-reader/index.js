@@ -13,14 +13,13 @@ const {performAveraging} = require('./averaging');
 const {thermometers: allThermometers} = require('../common/config.json');
 const { startBinarySensor } = require('./binary-sensor');
 
-const thermometers = allThermometers.filter(thermometer => !thermometer.disabled);
-const pumpSensor = {pin: 1, id: 15}; // get from config
+const thermometers = allThermometers.filter(thermometer => !thermometer.disabled && thermometer.type === 'thermometer');
+const pumpSensor = allThermometers.find(thermometer => !thermometer.disabled && thermometer.type === 'binary-sensor');
 
 function start(database) {
 	const temperatures = looper(1000, () => {
 		const date = new Date();
 		return Promise.all(thermometers
-			.filter(thermometer => thermometer.type === 'thermometer')
 			.map(async thermometer => ({
 				...thermometer,
 				temperature: await getTemperature(thermometer.serial),
