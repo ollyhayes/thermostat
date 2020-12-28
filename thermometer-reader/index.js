@@ -18,16 +18,19 @@ const pumpSensor = allThermometers.find(thermometer => !thermometer.disabled && 
 
 function start(database) {
 	const temperatures = looper(1000, () => {
-		const date = new Date();
 		return Promise.all(thermometers
 			.map(async thermometer => ({
 				...thermometer,
-				temperature: await getTemperature(thermometer.serial),
-				date
+				temperature: await getTemperature(thermometer.serial)
 			})));
 	})
 		.pipe(
-			map(thermometers => thermometers.filter(thermometer => thermometer.temperature !== null)),
+			map(thermometers => {
+				const date = new Date();
+				return thermometers
+					.filter(thermometer => thermometer.temperature !== null)
+					.map(thermometer => ({...thermometer, date}));
+			}),
 			publishReplay(1),
 			refCount());
 	const minutelyTemperatures = temperatures.pipe(
