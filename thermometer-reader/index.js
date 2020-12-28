@@ -3,10 +3,11 @@ const log = require('../common/log');
 const looper = require('./timeout-looper');
 const {
 	map,
+	filter,
 	publishReplay,
 	refCount,
 } = require('rxjs/operators');
-const {EMPTY} = require('rxjs');
+const {EMPTY, interval, combineLatest} = require('rxjs');
 const {performAveraging} = require('./averaging');
 
 const {thermometers: allThermometers} = require('../common/config.json');
@@ -71,13 +72,23 @@ function start(database) {
 			.subscribe(
 				values => database.insert(values, 3)));
 
+	const pumpSensorEmitter = combineLatest([pumpSensorState, interval(1000)])
+		.pipe(
+			filter(([pump]) => pump),
+			map(([[{id, temperature}]]) => [{
+				id,
+				temperature,
+				date: new Date()
+			}])
+		);
+
 	return {
 		stopThermometer: () => subscriptions.forEach(subscription => subscription.unsubscribe()),
 		newDataEmitter: [
 			temperatures,
 			minutelyTemperatures,
 			hourlyTemperatures,
-			pumpSensorState
+			pumpSensorEmitter
 		]
 	};
 }
