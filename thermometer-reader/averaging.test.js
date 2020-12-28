@@ -2,6 +2,19 @@ const {from, interval} = require('rxjs');
 const { delayWhen } = require('rxjs/operators');
 const { performAveraging } = require('./averaging');
 
+function assertResults(result, expected) {
+	// couldn't be bothered to do this properly when I added the averaged date field
+	const resultsWithoutDate = result.map(reading =>
+		reading.map(thermometer => {
+			const {date, ...otherFields} = thermometer;
+			expect(date).toBeDefined();
+
+			return otherFields;
+		}));
+	
+	expect(resultsWithoutDate).toStrictEqual(expected);
+}
+
 test('normal averaging', async () => {
 	const thermometers = [
 		{ serial: '1' }, { serial: '2' }
@@ -26,7 +39,7 @@ test('normal averaging', async () => {
 
 	expect(result.length).toBe(2);
 
-	expect(result).toStrictEqual([
+	assertResults(result, [
 		[{ temperature: 6, serial: '1' }, { temperature: 16, serial: '2' },],
 		[{ temperature: 9, serial: '1' }, { temperature: 19, serial: '2' },],
 	]);
@@ -53,7 +66,7 @@ test('with missing thermometer', async () => {
 
 	const result = await toArray(temperatures);
 
-	expect(result).toStrictEqual([
+	assertResults(result, [
 		[{ temperature: 6, serial: '1' }],
 		[{ temperature: 9, serial: '1' }],
 	]);
@@ -81,7 +94,7 @@ test('with missing thermometer half way through', async () => {
 
 	const result = await toArray(temperatures);
 
-	expect(result).toStrictEqual([
+	assertResults(result, [
 		[{ temperature: 6, serial: '1' }, { temperature: 15.5, serial: '2' },],
 		[{ temperature: 9, serial: '1' }]
 	]);
@@ -109,7 +122,7 @@ test('with missing thermometer that reappears', async () => {
 
 	const result = await toArray(temperatures);
 
-	expect(result).toStrictEqual([
+	assertResults(result, [
 		[{ temperature: 6, serial: '1' }, { temperature: 17, serial: '2' },],
 		[{ temperature: 9, serial: '1' }, { temperature: 19, serial: '2' },],
 	]);
@@ -139,7 +152,7 @@ test('keeps other fields on the readings', async () => {
 
 	expect(result.length).toBe(2);
 
-	expect(result).toStrictEqual([
+	assertResults(result, [
 		[{ temperature: 6, serial: '1', id: 1 }, { temperature: 16, serial: '2', id: 2 },],
 		[{ temperature: 9, serial: '1', id: 1 }, { temperature: 19, serial: '2', id: 2 },],
 	]);

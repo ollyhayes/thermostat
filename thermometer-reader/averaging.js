@@ -13,7 +13,7 @@ function performAveraging(time) {
 					const temperatures = readings.map(reading => reading.temperature);
 					return {
 						...readings[0],
-						serial,
+						date: new Date(Date.now() - time / 2),
 						temperature: sum(temperatures) / temperatures.length,
 					};
 				}, readingsByThermometer);
