@@ -14,5 +14,5 @@ improvements:
 	allow specifying json encoding with query parameter
 
 binary-sensor:
-	extrapolate current value in live updates (and maybe previous if off screen)
+	*extrapolate current value in live updates (and maybe previous if off screen)
 	fix legend

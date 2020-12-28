@@ -95,6 +95,7 @@ describe('exact matches', () => {
 
 	test('get values in the middle', () => {
 		const store = [
+			{ date: 7 },
 			{ date: 8 },
 			{ date: 9 },
 			{ date: 10 },
@@ -105,8 +106,10 @@ describe('exact matches', () => {
 		const values = getValues(store, 9, 10);
 
 		expect(values).toStrictEqual([
+			{ date: 8 },
 			{ date: 9 },
 			{ date: 10 },
+			{ date: 11 },
 		]);
 	});
 
@@ -122,6 +125,7 @@ describe('exact matches', () => {
 		const values = getValues(store, 11, 15);
 
 		expect(values).toStrictEqual([
+			{ date: 10 },
 			{ date: 11 },
 			{ date: 12 },
 		]);
@@ -141,6 +145,7 @@ describe('exact matches', () => {
 		expect(values).toStrictEqual([
 			{ date: 8 },
 			{ date: 9 },
+			{ date: 10 },
 		]);
 	});
 
@@ -258,6 +263,7 @@ describe('inexact', () => {
 
 	test('get values in the middle', () => {
 		const store = [
+			{ date: 7 },
 			{ date: 8 },
 			{ date: 9 },
 			{ date: 10 },
@@ -268,8 +274,10 @@ describe('inexact', () => {
 		const values = getValues(store, 8.9, 10.9);
 
 		expect(values).toStrictEqual([
+			{ date: 8 },
 			{ date: 9 },
 			{ date: 10 },
+			{ date: 11 },
 		]);
 	});
 
@@ -285,6 +293,7 @@ describe('inexact', () => {
 		const values = getValues(store, 10.9, 15);
 
 		expect(values).toStrictEqual([
+			{ date: 10 },
 			{ date: 11 },
 			{ date: 12 },
 		]);
@@ -304,6 +313,7 @@ describe('inexact', () => {
 		expect(values).toStrictEqual([
 			{ date: 8 },
 			{ date: 9 },
+			{ date: 10 },
 		]);
 	});
 

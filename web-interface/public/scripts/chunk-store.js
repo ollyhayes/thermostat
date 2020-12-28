@@ -24,7 +24,7 @@ export function getValues(store, startTime, endTime) {
 	const startIndex = getIndex(store, startTime);
 	const endIndex = getIndexExclusive(store, endTime);
 
-	return store.slice(startIndex, endIndex);
+	return store.slice(Math.max(startIndex - 1, 0), endIndex + 1);
 }
 
 export function storeValues(store, values) {
