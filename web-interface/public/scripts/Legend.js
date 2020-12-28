@@ -1,9 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {thermometers} from '../../../common/config.json';
 import {format} from 'd3-format';
 import {saveHiddenThermometers} from './storage';
 
-export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
+export default function Legend({thermometers, dataTime, triggerRedraw}) {
 	const [currentTime, setCurrentTime] = useState(new Date());
 	const isCurrent = currentTime - dataTime < 2000;
 
@@ -21,7 +20,6 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 		.map(thermometer => ({
 			...thermometer,
 			colour: thermometer.hidden ? 'grey' : thermometer.colour,
-			temperature: getTemperature(currentTemperatures, thermometer.id)
 		}))
 		.sort((l, r) => (r.temperature || -99) - (l.temperature || -99));
 
@@ -37,7 +35,7 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 						saveHiddenThermometers();
 					}}>
 						<td style={{color: thermometer.colour}}>{thermometer.name}</td>
-						<td className="numeric" style={{color: isCurrent ? thermometer.colour : 'grey' }}>{formatTemperature(thermometer.temperature)}</td>
+						<td className="numeric" style={{color: isCurrent ? thermometer.colour : 'grey' }}>{formatValue(thermometer)}</td>
 					</tr>
 				)}
 			</tbody>
@@ -45,15 +43,9 @@ export default function Legend({currentTemperatures, dataTime, triggerRedraw}) {
 	</div>;
 }
 
-function getTemperature(temperatures, id) {
-	const thermometer = temperatures && temperatures.find(thermometer => thermometer.id === id);
-
-	return thermometer && thermometer.temperature;
-}
-
 const temperatureFormatter = format('.1f');
-export function formatTemperature(temperature) {
-	return temperature != null
-		? `${temperatureFormatter(temperature)}°C`
-		: '?';
+export function formatValue(thermometer) {
+	return thermometer.temperature != null
+		? `${temperatureFormatter(thermometer.temperature)}°C`
+		: thermometer.state || '?';
 }

@@ -47,7 +47,7 @@ function start(database) {
 			map(state => [{
 				...pumpSensor,
 				date: new Date(),
-				temperature: state ? 20 : 15
+				temperature: state ? 20 : 15 // update legend when changing this
 			}]),
 			publishReplay(1),
 			refCount())

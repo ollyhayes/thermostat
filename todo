@@ -15,4 +15,4 @@ improvements:
 
 binary-sensor:
 	*extrapolate current value in live updates (and maybe previous if off screen)
-	fix legend
+	*fix legend

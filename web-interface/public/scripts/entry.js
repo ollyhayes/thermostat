@@ -9,6 +9,7 @@ import createChunkStore from './chunk-stores';
 import { getChunkContaining, getChunksForDateRange } from './chunk-utils';
 import createChunkSet from '../../private/chunk-set';
 import { loadHiddenThermometers } from './storage';
+import {thermometers} from '../../../common/config.json';
 
 const {getData, storeData, dropData} = createChunkStore();
 
@@ -25,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	// Should probably make a common react root
 	ReactDOM.render(
-		<Legend triggerRedraw={redraw}></Legend>,
+		<Legend thermometers={thermometers} triggerRedraw={redraw}></Legend>,
 		document.querySelector('.react-root'));
 
 	function requestData(domain) {
@@ -44,10 +45,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 				...getChunkContaining(new Date(), chunk.precisionLevel)
 			};
 
-			if (chunk.precisionLevel === 0) {
+			if (chunk.precisionLevel === 0 || chunk.precisionLevel === 3) {
+				setThermometerState(thermometers, temperatures);
+
 				ReactDOM.render(
 					<Legend 
-						currentTemperatures={temperatures} 
+						thermometers={thermometers}
 						dataTime={new Date()}
 						triggerRedraw={isReady ? redraw : () => {}}
 					></Legend>,
@@ -71,3 +74,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 			+chunkCode.substring(26, 27));
 	}
 });
+
+// not keen on using the config as state, but it was already happening and I just want to get this working for now
+function setThermometerState(thermometers, temperatures) {
+	thermometers.forEach(thermometer => {
+		const newThermometerData = temperatures.find(newThermometerData => newThermometerData.id === thermometer.id);
+
+		const currentTemperature = newThermometerData && newThermometerData.temperature;
+
+		if (!currentTemperature)
+			return;
+
+		if (thermometer.type === 'binary-sensor')
+			thermometer.state = currentTemperature > 17 ? 'On' : 'Off';
+		else
+			thermometer.temperature = currentTemperature;
+	});
+}
