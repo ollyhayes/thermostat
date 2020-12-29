@@ -5,7 +5,7 @@ const log = require('../common/log');
 exports.startBinarySensor = function(pin, mock) {
 	return mock
 		? mockSensor()
-		: realSensor();
+		: realSensor(pin);
 };
 
 function realSensor(pin) {
