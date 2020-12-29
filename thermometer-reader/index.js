@@ -43,7 +43,7 @@ function start(database) {
 		refCount());
 
 	const pumpSensorState = pumpSensor
-		? startBinarySensor(pumpSensor.pin).pipe(
+		? startBinarySensor(pumpSensor.pin, pumpSensor.mock).pipe(
 			map(state => [{
 				...pumpSensor,
 				date: new Date(),

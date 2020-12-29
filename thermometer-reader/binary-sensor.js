@@ -2,26 +2,14 @@ const {Gpio} = require('onoff');
 const {Observable} = require('rxjs');
 const log = require('../common/log');
 
-exports.startBinarySensor = function(pin) {
+exports.startBinarySensor = function(pin, mock) {
+	return mock
+		? mockSensor()
+		: realSensor();
+};
+
+function realSensor(pin) {
 	return new Observable(observer => {
-		// let state = 0;
-		// let timeoutId = 0;
-
-		// function handleSensorChange() {
-		// 	state = !state;
-
-		// 	observer.next(state);
-		// 	log(`sensor update: ${state}`);
-
-		// 	timeoutId = setTimeout(handleSensorChange, (Math.random() * 5 + 2.5) * 60 * 1000); // every 3.5-6.5m
-		// }
-
-		// handleSensorChange();
-
-		// return () => {
-		// 	clearTimeout(timeoutId);
-		// };
-
 		try {
 			const sensor = new Gpio(pin, 'in', 'both', {debounceTimeout: 30});
 			let state = sensor.readSync();
@@ -40,4 +28,26 @@ exports.startBinarySensor = function(pin) {
 			console.log(error);
 		}
 	});
-};
+}
+
+function mockSensor() {
+	return new Observable(observer => {
+		let state = 0;
+		let timeoutId = 0;
+
+		function handleSensorChange() {
+			state = !state;
+
+			observer.next(state);
+			log(`sensor update: ${state}`);
+
+			timeoutId = setTimeout(handleSensorChange, (Math.random() * 5 + 2.5) * 60 * 1000); // every 3.5-6.5m
+		}
+
+		handleSensorChange();
+
+		return () => {
+			clearTimeout(timeoutId);
+		};
+	});
+}
