@@ -15,3 +15,7 @@ where date between 1500118900 and 1500118960
 
 --create table test
 --(test integer not null)
+
+
+
+select count(*) from temperatures where date > 1609215015 and thermometerId = 15;

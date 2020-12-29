@@ -16,9 +16,12 @@ function realSensor(pin) {
 			observer.next(state);
 
 			sensor.watch((error, newState) => {
-				state = !newState; // we're connecting to ground so invert it
-				observer.next(state);
-				log(`sensor update: ${state}`);
+				newState = !newState; // we're connecting to ground so invert it
+				if (state !== newState) {
+					state = newState;
+					observer.next(state);
+					log(`sensor update: ${state}`);
+				}
 			});
 
 			return () => {
