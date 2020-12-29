@@ -2,7 +2,7 @@ const {Gpio} = require('onoff');
 const {Observable} = require('rxjs');
 const log = require('../common/log');
 
-exports.startBinarySensor = function() {
+exports.startBinarySensor = function(pin) {
 	return new Observable(observer => {
 		// let state = 0;
 		// let timeoutId = 0;
@@ -22,18 +22,22 @@ exports.startBinarySensor = function() {
 		// 	clearTimeout(timeoutId);
 		// };
 
-		const sensor = new Gpio(pin, 'in', 'both', {debounceTimeout: 30});
-		let state = sensor.readSync();
-		observer.next(state);
-
-		sensor.watch((error, newState) => {
-			state = !!newState;
+		try {
+			const sensor = new Gpio(pin, 'in', 'both', {debounceTimeout: 30});
+			let state = sensor.readSync();
 			observer.next(state);
-			log(`sensor update: ${state}`);
-		});
 
-		return () => {
-			sensor.unexport();
-		};
+			sensor.watch((error, newState) => {
+				state = !!newState;
+				observer.next(state);
+				log(`sensor update: ${state}`);
+			});
+
+			return () => {
+				sensor.unexport();
+			};
+		} catch (error) {
+			console.log(error);
+		}
 	});
 };
