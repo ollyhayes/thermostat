@@ -82,11 +82,11 @@ function setThermometerState(thermometers, temperatures) {
 
 		const currentTemperature = newThermometerData && newThermometerData.temperature;
 
-		if (!currentTemperature)
+		if (currentTemperature == undefined)
 			return;
 
 		if (thermometer.type === 'binary-sensor')
-			thermometer.state = currentTemperature > 17 ? 'On' : 'Off';
+			thermometer.state = currentTemperature ? 'On' : 'Off';
 		else
 			thermometer.temperature = currentTemperature;
 	});

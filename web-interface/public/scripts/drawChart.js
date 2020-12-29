@@ -70,7 +70,7 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 				return (data[i + 1].date - d.date) < 65 * 60 * 1000; // break gaps of more than an hour, probably raspberrypi went down
 		})
 		.x(d => xScale(d.date))
-		.y(d => yScale(d.temperature))
+		.y(d => yScale(d.temperature ? 2 : -2))
 		.curve(curveStepAfter);
 
 	const svg = select(element)
