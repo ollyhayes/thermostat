@@ -63,12 +63,6 @@ function initialise(element, initialMinDate, initialMaxDate, minDate, maxDate) {
 		.x(d => xScale(d.date))
 		.y(d => yScale(d.temperature));
 	const steppedLineGenerator = line()
-		.defined((d, i, data) => {
-			if (i >= data.length - 1)
-				return true;
-			else
-				return (data[i + 1].date - d.date) < 65 * 60 * 1000; // break gaps of more than an hour, probably raspberrypi went down
-		})
 		.x(d => xScale(d.date))
 		.y(d => yScale(d.temperature ? 75 : 70))
 		.curve(curveStepAfter);
