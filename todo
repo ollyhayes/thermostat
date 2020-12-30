@@ -1,3 +1,7 @@
+don't leave gaps in binary sensor
+update grabber to grap precisionLevel 4
+support the binary-sensor to be enabled but not generating
+
 bugs:
 	fix kink where we switch to live updates
 		this is due to the date being floored when it's converted to unix time, should only be visible in mock thermometers so won't fix
@@ -7,6 +11,9 @@ bugs:
 	loads of errors on firefox about saving history state too often
 	limit on old server api
 improvements:
+	don't build source maps on prod to make compiling quicker on darrron
+		and/or split vendor bundle to make compiling quicker - would this even improve the time?
+	can the pump graph be separate?
 	show last value in legend on olly.fr.to
 	reduce logging on all the chunk stuff
 	all on/all off function on the legend
@@ -14,15 +21,6 @@ improvements:
 	navigation buttons - jump to today, previous/next day etc
 	follow button for phones? like pressing "f" on keyboard
 	allow specifying json encoding with query parameter
-
-binary-sensor:
-	*extrapolate current value in live updates (and maybe previous if off screen)
-	*fix legend
-
-lookup resistors
-change colours
-new requirements
-	can the pump graph be separate?
 
 weird false readings in sensor?
 	no, it was just aaron playing
