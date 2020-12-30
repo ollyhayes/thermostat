@@ -53,12 +53,12 @@
             "colour": "yellow"
         },
         {
-            "name": "Tank bottom",
-            "serial": "28-030897791ed8",
-            "id": 2,
+            "name": "Outside",
+            "serial": "28-0310977951d4",
+            "id": 6,
             "disabled": false,
             "type": "thermometer",
-            "colour": "aqua"
+            "colour": "lime"
         },
         {
             "name": "Tank top",
@@ -69,20 +69,12 @@
             "colour": "pink"
         },
         {
-            "name": "Outside",
-            "serial": "28-0310977951d4",
-            "id": 6,
+            "name": "Tank bottom",
+            "serial": "28-030897791ed8",
+            "id": 2,
             "disabled": false,
             "type": "thermometer",
-            "colour": "lime"
-        },
-        {
-            "name": "Heating flow",
-            "serial": "28-031097795a80",
-            "id": 7,
-            "disabled": false,
-            "type": "thermometer",
-            "colour": "orange"
+            "colour": "aqua"
         },
         {
             "serial": "28-0119355c92d8",
@@ -101,6 +93,14 @@
             "colour": "#515cff"
         },
         {
+            "name": "Heating flow",
+            "serial": "28-031097795a80",
+            "id": 7,
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "orange"
+        },
+        {
             "serial": "28-01202333a9de",
             "id": 12,
             "name": "Heating return",
@@ -108,6 +108,7 @@
             "type": "thermometer",
             "colour": "#b061ff"
         },
+
         {
             "serial": "28-01202378be9e",
             "id": 13,
