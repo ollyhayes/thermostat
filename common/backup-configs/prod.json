@@ -66,7 +66,7 @@
             "id": 3,
             "disabled": false,
             "type": "thermometer",
-            "colour": "pink"
+            "colour": "#51d4ff"
         },
         {
             "name": "Tank bottom",
@@ -74,7 +74,7 @@
             "id": 2,
             "disabled": false,
             "type": "thermometer",
-            "colour": "aqua"
+            "colour": "#0088b4"
         },
         {
             "serial": "28-0119355c92d8",
@@ -82,7 +82,7 @@
             "name": "Boiler flow",
             "disabled": false,
             "type": "thermometer",
-            "colour": "red"
+            "colour": "#f8c15b"
         },
         {
             "serial": "28-0119356b61fa",
@@ -90,7 +90,7 @@
             "name": "Boiler return",
             "disabled": false,
             "type": "thermometer",
-            "colour": "#515cff"
+            "colour": "#9b6400"
         },
         {
             "name": "Heating flow",
@@ -98,7 +98,7 @@
             "id": 7,
             "disabled": false,
             "type": "thermometer",
-            "colour": "orange"
+            "colour": "#ff3f3f"
         },
         {
             "serial": "28-01202333a9de",
@@ -106,13 +106,13 @@
             "name": "Heating return",
             "disabled": false,
             "type": "thermometer",
-            "colour": "#b061ff"
+            "colour": "#a70101"
         },
 
         {
             "serial": "28-01202378be9e",
             "id": 13,
-            "name": "new",
+            "name": "New",
             "disabled": false,
             "type": "thermometer",
             "colour": "white"
