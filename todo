@@ -7,6 +7,8 @@ bugs:
 	loads of errors on firefox about saving history state too often
 	limit on old server api
 improvements:
+	show last value in legend on olly.fr.to
+	reduce logging on all the chunk stuff
 	all on/all off function on the legend
 	auto-resize graph when changing window size (or rotating phone)
 	navigation buttons - jump to today, previous/next day etc
@@ -16,3 +18,16 @@ improvements:
 binary-sensor:
 	*extrapolate current value in live updates (and maybe previous if off screen)
 	*fix legend
+
+lookup resistors
+change colours
+new requirements
+	can the pump graph be separate?
+
+weird false readings in sensor?
+	no, it was just aaron playing
+is it the heating flow we're monitoring?
+	what's making it so unsteady?
+	is it gonna be difficult to define moving towards/away target (in email) when it's constantly moving
+the colours
+better way to represent the binary sensor?

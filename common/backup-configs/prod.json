@@ -1,0 +1,129 @@
+{
+    "thermometerReader": {
+        "enabled": true,
+        "mock": false
+    },
+    "database": {
+        "location": "./database.db"
+    },
+    "maintenance": {
+        "port": 8081
+    },
+    "webInterface": {
+        "port": 8080,
+        "dataType": "binary"
+    },
+    "grabber": {
+        "enabled": false,
+        "grabFromUrl": "http://192.168.0.9/",
+        "targetName": "changeme"
+    },
+    "thermometers": [
+        {
+            "name": "old-orange",
+            "serial": "28-03079779a1b8",
+            "id": 8,
+            "disabled": true,
+            "type": "disabled",
+            "colour": "orange"
+        },
+        {
+            "name": "chip-1",
+            "serial": "28-0000092348ee",
+            "id": 4,
+            "disabled": true,
+            "type": "disabled",
+            "colour": "lime"
+        },
+        {
+            "name": "chip-2",
+            "serial": "28-000007a0024d",
+            "id": 5,
+            "disabled": true,
+            "type": "disabled",
+            "colour": "teal"
+        },
+
+        {
+            "name": "Solar",
+            "serial": "28-030897799788",
+            "id": 1,
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "yellow"
+        },
+        {
+            "name": "Tank bottom",
+            "serial": "28-030897791ed8",
+            "id": 2,
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "aqua"
+        },
+        {
+            "name": "Tank top",
+            "serial": "28-0120234207bc",
+            "id": 3,
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "pink"
+        },
+        {
+            "name": "Outside",
+            "serial": "28-0310977951d4",
+            "id": 6,
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "lime"
+        },
+        {
+            "name": "Heating flow",
+            "serial": "28-031097795a80",
+            "id": 7,
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "orange"
+        },
+        {
+            "serial": "28-0119355c92d8",
+            "id": 10,
+            "name": "Boiler flow",
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "red"
+        },
+        {
+            "serial": "28-0119356b61fa",
+            "id": 11,
+            "name": "Boiler return",
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "#515cff"
+        },
+        {
+            "serial": "28-01202333a9de",
+            "id": 12,
+            "name": "Heating return",
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "#b061ff"
+        },
+        {
+            "serial": "28-01202378be9e",
+            "id": 13,
+            "name": "new",
+            "disabled": false,
+            "type": "thermometer",
+            "colour": "white"
+        },
+        {
+            "serial": "sensor-15",
+            "id": 15,
+			"pin": 22,
+            "name": "Pump",
+            "disabled": false,
+            "type": "binary-sensor",
+            "colour": "white"
+        }
+    ]
+}
