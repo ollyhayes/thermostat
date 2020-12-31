@@ -110,7 +110,7 @@
 		{
 			"serial": "28-01202378be9e",
 			"id": 13,
-			"name": "New",
+			"name": "DHW",
 			"disabled": false,
 			"type": "thermometer",
 			"colour": "gray"
