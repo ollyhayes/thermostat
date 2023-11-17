@@ -7,8 +7,9 @@
     "test": "node --experimental-vm-modules node_modules/.bin/jest --watchAll",
     "postinstall": "cpy common/config-template.json common/ --rename=config.json --no-overwrite",
     "start": "node app.js",
-    "watch": "cd web-interface && webpack --watch",
-    "build": "cd web-interface && webpack --mode production",
+    "watch": "export NODE_OPTIONS=--openssl-legacy-provider && cd web-interface && webpack --watch",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && cd web-interface && webpack --mode production",
+    "comment": "echo see https://github.com/webpack/webpack/issues/14532 for the above",
     "watch-maintenance": "cd maintenance && webpack --watch",
     "build-maintenance": "cd maintenance && webpack --mode production",
     "start-maintenance": "cd maintenance/private && node app.js"
