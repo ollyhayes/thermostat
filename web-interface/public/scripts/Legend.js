@@ -4,7 +4,7 @@ import {saveHiddenThermometers} from './storage';
 
 export default function Legend({thermometers, dataTime, triggerRedraw}) {
 	const [currentTime, setCurrentTime] = useState(new Date());
-	const isCurrent = currentTime - dataTime < 2000;
+	const isCurrent = currentTime - dataTime < 4000;
 
 	useEffect(() => {
 		if (isCurrent) {
