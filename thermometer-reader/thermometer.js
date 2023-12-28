@@ -7,14 +7,14 @@ module.exports = function(serial)
 {
 	return mock
 		? getFakeTemperature(serial)
-		: new Promise((resolve, reject) =>
-		{
+		: new Promise((resolve, reject) => {
 			fs.readFile(`/sys/bus/w1/devices/${serial}/w1_slave`, 'utf8', (error, data) =>
 			{
 				if (error)
 					return reject(error);
 				
 				const result = regex.exec(data);
+
 
 				if (!result)
 					return reject();
@@ -25,8 +25,7 @@ module.exports = function(serial)
 				return resolve(temperature);
 			});
 		}).catch(error => {
-			const thermometer = getThermometer(serial);
-			console.log(`Error reading ${thermometer.name} thermometer: ${error}`);
+			console.log(`Error reading thermometer: ${error}`);
 			return null;
 		});
 };
