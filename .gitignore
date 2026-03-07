@@ -6,5 +6,6 @@ bundles
 
 *.backup*
 /*.db
+/*.sql
 /*-wal
 /*-shm
