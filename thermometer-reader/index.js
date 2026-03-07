@@ -19,9 +19,9 @@ const pumpSensor = allThermometers.find(thermometer => !thermometer.disabled && 
 function start(database) {
 	const temperatures = looper(1000, () => {
 		return Promise.all(thermometers
-			.map(async (thermometer, index) => {
-				await new Promise(resolve => setTimeout(resolve, 300 * index)); // added this when there were issues reading multiple thermometers at once
-				// it would just return empty string for one thermometer 
+			.map(async (thermometer) => {
+				// await new Promise(resolve => setTimeout(resolve, 300 * index)); // added this when there were issues reading multiple thermometers at once
+				// // it would just return empty string for one thermometer 
 				return {
 					...thermometer,
 					temperature: await getTemperature(thermometer.serial)

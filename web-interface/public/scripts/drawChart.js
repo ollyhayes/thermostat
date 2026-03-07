@@ -334,6 +334,6 @@ function getTemperatureExtent(data, minDate, maxDate) {
 
 	return [
 		Math.max(minTemperature - 3, absoluteMinTemperature),
-		Math.min(Math.max(75, maxTemperature) + 3, absoluteMaxTemperature)
+		Math.min(maxTemperature + 3, absoluteMaxTemperature)
 	];
 }
