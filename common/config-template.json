@@ -20,43 +20,35 @@
 	},
 	"thermometers": [
 		{
-			"name": "chip-1",
-			"serial": "28-0000092348ee",
-			"id": 4,
+			"name": "t1",
+			"serial": "28-031097790b30",
+			"id": 1,
 			"disabled": false,
 			"colour": "lime",
 			"type": "thermometer"
 		},
 		{
-			"name": "chip-2",
-			"serial": "28-000007a0024d",
-			"id": 5,
-			"disabled": true,
+			"name": "t2",
+			"serial": "28-031097791c99",
+			"id": 2,
+			"disabled": false,
 			"colour": "teal",
 			"type": "thermometer"
 		},
 		{
-			"name": "yellow",
-			"serial": "28-030897799788",
-			"id": 1,
+			"name": "t3",
+			"serial": "28-03109779265e",
+			"id": 3,
 			"disabled": false,
 			"colour": "yellow",
 			"type": "thermometer"
 		},
 		{
-			"name": "red",
-			"serial": "28-030897791ed8",
-			"id": 2,
+			"name": "t4",
+			"serial": "28-031097799175",
+			"id": 4,
 			"disabled": false,
 			"colour": "red",
-			"type": "thermometer"
-		},
-		{
-			"name": "yellow-red",
-			"serial": "28-03079779a1b8",
-			"id": 3,
-			"disabled": true,
-			"colour": "orange",
 			"type": "thermometer"
 		}
 	]
