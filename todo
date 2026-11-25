@@ -14,7 +14,7 @@ improvements:
 	don't build source maps on prod to make compiling quicker on darrron
 		and/or split vendor bundle to make compiling quicker - would this even improve the time?
 	can the pump graph be separate?
-	show last value in legend on olly.fr.to
+	show last value in legend on the public site
 	reduce logging on all the chunk stuff
 	all on/all off function on the legend
 	auto-resize graph when changing window size (or rotating phone)

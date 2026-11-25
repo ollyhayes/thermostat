@@ -1,3 +1,7 @@
+// Backup logs live on the backup machine (where the grabber runs), not the Pi.
+// Placeholder - point this at your backup machine's maintenance server.
+const BACKUPS_URL = 'http://backup-host.example:8081/backups';
+
 export async function fetchData(store) {
 	if (store.getValue().selectedPanel !== 'thermometers' || document.hidden)
 		return;
@@ -35,7 +39,7 @@ export async function fetchData(store) {
 
 export async function fetchBackups(store) {
 	try {
-		const backups = await (await fetch('http://olly.fr.to:39414/backups')).json();
+		const backups = await (await fetch(BACKUPS_URL)).json();
 
 		store.updateValue(state => ({
 			...state,

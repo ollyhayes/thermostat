@@ -15,7 +15,7 @@
 	},
 	"grabber": {
 		"enabled": false,
-		"grabFromUrl": "http://192.168.0.9/",
+		"grabFromUrl": "http://raspberrypi.local:8080",
 		"targetName": "changeme"
 	},
 	"thermometers": [
